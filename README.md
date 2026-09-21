@@ -97,12 +97,6 @@ Member labels A–F are temporary and will be replaced with the team members' na
 | E | State, scheduling, watches, and action safety | SQLite state, APScheduler jobs, standing watches, confirmation workflow, action logging, and audit records |
 | F | React, UX, demo, and usability | User interface, morning briefing and Q&A views, evidence display, confirmation flow, usability testing, screenshots, and demo video |
 
-Primary review pairs are:
-
-- A ↔ F
-- B ↔ C
-- D ↔ E
-
 Every pull request should be reviewed by at least one other team member.
 
 ## Evaluation
