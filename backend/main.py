@@ -19,19 +19,16 @@ def main():
         print(get_order_status("ORD-120"))
         return
 
-    from storage import MySQLStore
+    from storage import SQLiteStore
     from service import ChatService
     try:
-        try:
-            store = MySQLStore()
-        except ValueError:
-            store = MySQLStore(password=getpass.getpass("MySQL project password (hidden): "))
+        store = SQLiteStore()
         store.setup()
     except Exception:
-        print("Could not initialize MySQL. Check project credentials, service and CREATE permission.")
+        print("Could not initialize SQLite. Check SQLITE_PATH and folder write permission.")
         return
     if args.init_db:
-        print("Project session table is ready.")
+        print(f"Project session table is ready: {store.path}")
         return
 
     while True:
@@ -64,7 +61,7 @@ def main():
     session_id = service.create_session()["id"]
     print(f"Session: {session_id}")
     print("Commands: /new, /sessions, /use SESSION_ID, /history, exit")
-    print(f"Requests use your {config.provider} balance. Completed turns are stored in local MySQL.")
+    print(f"Requests use your {config.provider} balance. Completed turns are stored in local SQLite.")
     while True:
         question = input("You: ").strip()
         if question.lower() in {"exit", "quit"}:
