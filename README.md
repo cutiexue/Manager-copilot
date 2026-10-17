@@ -4,7 +4,55 @@ DSS5105 Capstone Project — **Track 1: The General Manager's Co-Pilot**
 
 Manager Co-Pilot is an AI-assisted decision-support system for factory general managers. It helps users understand current operations, identify risks, estimate feasibility, and take controlled actions based on traceable production data.
 
-> **Current phase:** Planning and repository setup
+> **Current phase:** Sprint 2 — read-only tools, chat API and UI shell are integrated; action, watch and scheduler layers are not built yet (see [Implementation Status](#implementation-status)).
+
+## Quick Start
+
+Requires Python 3.12 and Node.js 18+.
+
+```text
+Manager-copilot/
+├── backend/                 # FastAPI + LangChain agent + deterministic tools (flat modules)
+│   ├── track1/data/         # read-only course CSVs (orders, production_log, workshops)
+│   └── tests/               # pytest suite, no API key needed
+├── frontend/                # React + TypeScript + Vite
+└── TRACK1_IMPLEMENTATION_PLAN.md
+```
+
+Backend and tests:
+
+```bash
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+python -m pytest          # deterministic tools, SQLite store, chat API with a fake agent
+python main.py --local    # one order lookup, no LLM call
+python main.py --api      # asks for provider + API key, serves 127.0.0.1:8000
+```
+
+Frontend (second terminal):
+
+```bash
+cd frontend
+npm install
+npm run dev               # http://localhost:5173, proxies /api/* to the backend
+```
+
+Chat sessions are stored in `backend/manager_copilot.db` (SQLite, git-ignored). Copy `backend/.env.example` to `backend/.env` for local settings; never commit `.env`.
+
+## Implementation Status
+
+| Workflow / layer | Status | Where |
+|---|---|---|
+| Retrieval, judgement, tracing, discovery tools | Built, read-only, tested | `backend/tools.py`, `rules.py`, `discovery.py` |
+| Morning briefing content | Built deterministically; no scheduler, no API endpoint | `backend/briefing.py`; UI reads `frontend/src/fixtures/briefing.json` |
+| Multi-turn Q&A | Built: one LangChain agent, 21 tools, SQLite sessions | `backend/llm.py`, `service.py`, `api.py`, `storage.py` |
+| Feasibility estimates | Built (in-house, per-workshop, fastest/cheapest plan) | `backend/production_estimates.py`, `production_optimizer.py` |
+| Standing watches / alerts | Not started | — |
+| Confirmed actions + audit | UI demo only (browser state); no backend | `frontend/src/components/ConfirmModal.tsx` |
+| APScheduler | Not started | — |
+| Static Skills files | Not started; rules live in one system prompt | `backend/llm.py` |
+| Evaluation set and runner | Not started | — |
 
 ## Project Overview
 
@@ -119,12 +167,12 @@ Evaluation results will be reported by category rather than only as a single ove
 - [x] Track 1 selected
 - [x] MVP scope and architecture defined
 - [x] Initial implementation plan created
-- [ ] Repository structure and development environment
-- [ ] Data access layer and deterministic tools
-- [ ] Agent workflow and static skills
-- [ ] SQLite application state
+- [x] Repository structure and development environment
+- [x] Data access layer and deterministic tools (read-only)
+- [ ] Agent workflow and static skills (agent done; skills not split out)
+- [ ] SQLite application state (chat sessions only; watches, actions, audit missing)
 - [ ] Scheduler and standing watches
-- [ ] React user interface
+- [ ] React user interface (shell done; briefing is a snapshot, actions are browser-only)
 - [ ] End-to-end system integration
 - [ ] Evaluation and failure analysis
 - [ ] Final documentation and demonstration

@@ -1,6 +1,6 @@
 # Manager Co-Pilot — Frontend (Member F)
 
-React + TypeScript + Vite. Built against the backend currently on the `src` branch.
+React + TypeScript + Vite. Built against the backend in `../backend` (originally the `src` branch).
 
 ## Run
 
@@ -10,9 +10,10 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-For live chat, start the backend in another terminal (from the `src` branch code):
+For live chat, start the backend in another terminal:
 
 ```bash
+cd backend
 python main.py --api # serves 127.0.0.1:8000; Vite proxies /api/* to it
 ```
 
@@ -36,8 +37,8 @@ output field (see `src/evidence.ts`).
 ## Regenerate the briefing snapshot
 
 ```bash
-# <backend_dir> = src-branch code with CSVs at track1/data/
-BACKEND_COMMIT=<sha> python3 scripts/make_briefing_fixture.py <backend_dir> [as_of_date]
+# run from frontend/; ../backend holds briefing.py and track1/data/*.csv
+python3 scripts/make_briefing_fixture.py ../backend [as_of_date]
 ```
 
 When the backend adds e.g. `GET /briefings/latest`, replace the fixture import in
