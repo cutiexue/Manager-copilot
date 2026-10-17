@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Files synced in by the Claude app
+Claude outputs/
+
+# Secrets
+.env
+api.txt
