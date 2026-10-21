@@ -59,8 +59,23 @@ class MySQLStore:
 
     def list_sessions(self):
         with self.connection() as conn, conn.cursor() as cur:
-            cur.execute('SELECT id,title,created_at,updated_at FROM assistant_sessions ORDER BY updated_at DESC,id')
-            return cur.fetchall()
+            cur.execute('SELECT id,title,messages,created_at,updated_at FROM assistant_sessions ORDER BY updated_at DESC,id')
+            sessions = cur.fetchall()
+            for session in sessions:
+                messages = json.loads(session.pop('messages'))
+                session['has_messages'] = bool(messages)
+                if session['title'] == 'New conversation':
+                    session['title'] = self._title(messages)
+            return sessions
+
+    @staticmethod
+    def _title(messages):
+        for message in messages:
+            if message.get('type') == 'human':
+                content = message.get('data', {}).get('content')
+                if isinstance(content, str) and content.strip():
+                    return ' '.join(content.split())[:60]
+        return 'New conversation'
 
     def get_history(self, session_id):
         with self.connection() as conn, conn.cursor() as cur:
@@ -73,11 +88,12 @@ class MySQLStore:
     def update_turn(self, session_id, generate):
         # 行锁避免两个入口同时覆盖同一个会话；不同会话可独立执行。
         with self.connection() as conn, conn.cursor() as cur:
-            cur.execute('SELECT messages FROM assistant_sessions WHERE id=%s FOR UPDATE', (session_id,))
+            cur.execute('SELECT title,messages FROM assistant_sessions WHERE id=%s FOR UPDATE', (session_id,))
             row = cur.fetchone()
             if row is None:
                 raise KeyError('Session not found.')
             messages, answer = generate(json.loads(row['messages']))
-            cur.execute('UPDATE assistant_sessions SET messages=%s,updated_at=CURRENT_TIMESTAMP WHERE id=%s',
-                        (json.dumps(messages, ensure_ascii=False, allow_nan=False), session_id))
+            title = self._title(messages) if row['title'] == 'New conversation' else row['title']
+            cur.execute('UPDATE assistant_sessions SET messages=%s,title=%s,updated_at=CURRENT_TIMESTAMP WHERE id=%s',
+                        (json.dumps(messages, ensure_ascii=False, allow_nan=False), title, session_id))
             return answer

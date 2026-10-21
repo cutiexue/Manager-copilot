@@ -2,11 +2,13 @@
 
 from tools import (get_order_status, get_customer_orders, get_overdue_orders,
                    get_orders_at_risk, get_stage_output, compare_stage_output,
-                   trace_order)
+                   trace_order, query_orders)
 from discovery import discover_issues
 from briefing import get_morning_briefing
+from plan_context import get_current_plan, revise_order_plan
 from production_estimates import WORKSHOP_ESTIMATORS, estimate_in_house, estimate_production_plan
-from production_optimizer import optimize_fastest_plan, optimize_cheapest_plan
+from production_optimizer import (optimize_fastest_plan, optimize_cheapest_plan,
+                                  optimize_orders_outsourced, optimize_orders_cheapest)
 
 TOOLS = []
 TOOL_FUNCTIONS = {}
@@ -23,6 +25,69 @@ def register_tool(function, description, properties, required):
 
 
 # 基础查询工具：每项只写用途、参数和必填字段。
+register_tool(get_current_plan,
+              'Read the last successful multi-order plan in this conversation, including allocations, '
+              'dates, quantities and charges. Failed revisions do not replace it. Not a fresh quote.', {}, [])
+register_tool(revise_order_plan,
+              'Revise the saved multi-order plan to minimize charges, preserving its start and order IDs. '
+              'Add extra_days to the explicit date basis. Optionally narrow its orders by status. '
+              'Returns comparison with saved charges only for unchanged order quantities. Read-only scenario.',
+              {'extra_days': {'type': 'integer', 'minimum': 0, 'maximum': 3650},
+               'deadline_basis': {'type': 'string', 'enum': ['completion_date', 'deadline_date']},
+               'status': {'type': 'string', 'enum': ['IN_PROGRESS', 'COMPLETE']}},
+              ['extra_days', 'deadline_basis'])
+
+register_tool(
+    optimize_orders_cheapest,
+    'Minimize external processing charges for multiple orders within deadline_days, sharing '
+    'workshop capacity across categories. Original quantities manufactured anew, not remaining work. '
+    'Use selected for these orders or all plus explicit order_ids. Infeasible means no complete '
+    'plan fits the deadline. No in-house production. Read-only; currency unspecified.',
+    {'quantity_basis': {'type': 'string', 'enum': ['original_order_pieces']},
+     'deadline_days': {'type': 'integer', 'minimum': 1, 'maximum': 3650,
+                       'description': 'Required inclusive calendar days; start date is day one.'},
+     'scope': {'type': 'string', 'enum': ['selected', 'all']},
+     'order_ids': {'type': 'array', 'items': {'type': 'string'}},
+     'start_date': {'type': 'string', 'description': 'YYYY-MM-DD; default 2026-04-01.'}},
+    ['quantity_basis', 'deadline_days', 'expected_order_count'],
+)
+
+register_tool(
+    optimize_orders_outsourced,
+    'Find the fastest all-outsourced plan for a set of orders, sharing workshop capacity across '
+    'both categories. Original quantities manufactured anew only, not remaining-order forecasting. '
+    'Use selected for these orders, all for all orders, or all plus explicit order_ids. '
+    'Report the quantity basis prominently. Cost is reported but not minimized. Read-only.',
+    {'quantity_basis': {'type': 'string', 'enum': ['original_order_pieces']},
+     'scope': {'type': 'string', 'enum': ['selected', 'all']},
+     'order_ids': {'type': 'array', 'items': {'type': 'string'}},
+     'start_date': {'type': 'string', 'description': 'YYYY-MM-DD; default 2026-04-01.'}},
+    ['quantity_basis', 'expected_order_count'],
+)
+
+for _spec in TOOLS:
+    if _spec['function']['name'] in {'optimize_orders_outsourced', 'optimize_orders_cheapest'}:
+        _spec['function']['parameters']['properties']['expected_order_count'] = {
+            'type': 'integer', 'minimum': 0,
+            'description': 'Order count in the scope currently discussed with the user. Re-query if unknown; mismatches block planning.'}
+
+register_tool(
+    query_orders,
+    'Count and filter orders and sum original ordered pieces, with status/category breakdowns. '
+    'Successful queries select their resulting order IDs for follow-ups, even when empty. '
+    'Use selected for these orders; all starts a fresh query including completed orders. '
+    'Filters intersect. Quantities are not remaining workload. Read-only.',
+    {'scope': {'type': 'string', 'enum': ['all', 'selected'], 'description': 'Default all.'},
+     'status': {'type': 'string', 'enum': ['IN_PROGRESS', 'COMPLETE']},
+     'customer': {'type': 'string', 'description': 'Exact full customer name, case insensitive.'},
+     'category': {'type': 'string', 'enum': ['TOPS', 'ACCESSORIES']},
+     'due_from': {'type': 'string', 'description': 'Inclusive due-date lower bound, YYYY-MM-DD.'},
+     'due_to': {'type': 'string', 'description': 'Inclusive due-date upper bound, YYYY-MM-DD.'},
+     'order_ids': {'type': 'array', 'items': {'type': 'string'},
+                   'description': 'Exact order IDs; unknown IDs prevent partial totals.'}},
+    [],
+)
+
 register_tool(
     get_order_status,
     'Look up one order by its exact ID in the factory CSV. Returns not_found if absent.',

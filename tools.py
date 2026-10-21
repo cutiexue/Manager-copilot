@@ -7,6 +7,86 @@ from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, load_orders,
                          production_row_numbers, source_ref)
 from rules import (DUE_SOON_DAYS, RECENT_WORKDAYS, SNAPSHOT, is_overdue,
                    previous_workdays, risk_reasons)
+from order_selection import current_selection
+
+
+def query_orders(scope='all', status=None, customer=None, category=None,
+                 due_from=None, due_to=None, order_ids=None):
+    """Filter orders and compute exact counts and original quantities."""
+    if scope not in ('all', 'selected'):
+        return {'status': 'error', 'message': 'scope must be all or selected.'}
+    if status not in (None, 'IN_PROGRESS', 'COMPLETE') or category not in (None, 'TOPS', 'ACCESSORIES'):
+        return {'status': 'error', 'message': 'Invalid status or category.'}
+    if customer is not None and (not isinstance(customer, str) or not customer.strip()):
+        return {'status': 'error', 'message': 'customer must be a non-empty string.'}
+    if order_ids is not None and (not isinstance(order_ids, list) or any(
+            not isinstance(value, str) or not value.strip() for value in order_ids)):
+        return {'status': 'error', 'message': 'order_ids must be a list of non-empty strings.'}
+    try:
+        lower = date.fromisoformat(due_from) if due_from is not None else None
+        upper = date.fromisoformat(due_to) if due_to is not None else None
+    except (ValueError, TypeError):
+        return {'status': 'error', 'message': 'Use valid YYYY-MM-DD due dates.'}
+    if lower and upper and lower > upper:
+        return {'status': 'error', 'message': 'due_from must not be after due_to.'}
+    rows = load_orders()
+    source_rows = {row['order_id']: index + 2 for index, row in enumerate(rows)}
+    selected = current_selection() if scope == 'selected' else None
+    if scope == 'selected' and selected is None:
+        return {'status': 'needs_clarification', 'message': 'No order selection exists in this conversation. Ask which orders are meant.'}
+    base_ids = set(selected['order_ids']) if selected is not None else set(source_rows)
+    missing = base_ids - set(source_rows)
+    if missing:
+        return {'status': 'insufficient_data', 'message': 'Previously selected orders are absent from the source.',
+                'missing_order_ids': sorted(missing)}
+    if order_ids is not None:
+        requested = {value.strip() for value in order_ids}
+        missing = requested - set(source_rows)
+        if missing:
+            return {'status': 'not_found_ids', 'message': 'Some requested orders do not exist; no partial total was calculated.',
+                    'missing_order_ids': sorted(missing)}
+        base_ids &= requested
+    matches = []
+    for row in rows:
+        if row['order_id'] not in base_ids:
+            continue
+        if status and row['status'] != status:
+            continue
+        if category and row['category'] != category:
+            continue
+        if customer and row['customer'].strip().casefold() != customer.strip().casefold():
+            continue
+        due = date.fromisoformat(row['due_date'])
+        if (lower and due < lower) or (upper and due > upper):
+            continue
+        matches.append(row)
+
+    def grouped(field):
+        groups = {}
+        for row in matches:
+            bucket = groups.setdefault(row[field], {'order_count': 0, 'original_order_pieces': 0,
+                                                    'order_ids': []})
+            bucket['order_count'] += 1
+            bucket['original_order_pieces'] += int(row['pieces'])
+            bucket['order_ids'].append(row['order_id'])
+        return groups
+
+    filters = {key: value for key, value in dict(status=status, customer=customer,
+               category=category, due_from=due_from, due_to=due_to, order_ids=order_ids).items() if value is not None}
+    ids = [row['order_id'] for row in matches]
+    return {
+        'status': 'ok', 'snapshot_date': SNAPSHOT, 'count': len(matches),
+        'original_order_pieces': sum(int(row['pieces']) for row in matches),
+        'by_status': grouped('status'), 'by_category': grouped('category'),
+        'order_ids': ids, 'filters': filters, 'scope': scope,
+        'orders': [{key: row[key] for key in ('order_id', 'category', 'customer', 'pieces', 'due_date', 'status')}
+                   for row in matches],
+        'selection': {'order_ids': ids, 'filters': filters,
+                      'source_tool': 'query_orders'},
+        'source': ORDERS_SOURCE,
+        'source_rows': [source_ref(ORDERS_SOURCE, source_rows[value], value) for value in ids],
+        'warnings': ['Quantities are original ordered pieces, not remaining work. No remaining quantity is supplied.'],
+    }
 
 
 def _order_refs(selected):
@@ -191,6 +271,7 @@ def get_overdue_orders(as_of_date=SNAPSHOT):
         "as_of_date": reference_date.isoformat(),
         "snapshot_date": SNAPSHOT,
         "count": len(overdue_orders),
+        "original_order_pieces": sum(int(order['pieces']) for order in overdue_orders),
         "data": overdue_orders,
         "source": ORDERS_SOURCE,
         "source_rows": _order_refs(overdue_orders),
