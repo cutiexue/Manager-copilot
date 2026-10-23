@@ -51,7 +51,9 @@ function checksFor(briefing: Briefing): Check[] {
           ? [{ key: d.about, name: d.about, context: '', tag: '', flagged: true, note: d.suggested_decision, finding }]
           : [];
       });
-    return { type, title: CHECK_TITLE[type], total: items.length, flagged: items.length, how_picked: '', ranked_by: null, items };
+    return {
+      type, title: CHECK_TITLE[type], total: items.length, flagged: items.length, how_picked: '', flag_rule: '', ranked_by: null, items,
+    };
   });
 }
 
@@ -81,7 +83,7 @@ function CheckTable({ check, onEvidence, onAsk, onRemind }: CheckProps) {
         </h3>
         <span className="check-count">{check.total}</span>
         {check.flagged > 0 && (
-          <span className="check-flagged">
+          <span className="check-flagged" title={check.flag_rule || undefined}>
             <span className="flag-dot" aria-hidden /> {check.flagged} flagged for review
           </span>
         )}
@@ -93,7 +95,7 @@ function CheckTable({ check, onEvidence, onAsk, onRemind }: CheckProps) {
             <tr key={item.key} className={item.flagged ? 'is-flagged' : undefined}>
               <td className="flag-cell">
                 {item.flagged && (
-                  <span className="flag" role="img" aria-label="Flagged for review" title={`Flagged for review. ${item.note}`}>
+                  <span className="flag" role="img" aria-label="Flagged for review" title={check.flag_rule || 'Flagged for review'}>
                     !
                   </span>
                 )}
@@ -155,7 +157,8 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
       </div>
 
       <p className="headline">
-        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} flagged for review
+        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.review_count ?? briefing.decisions.length} flagged
+        for review
       </p>
 
       {checksFor(briefing)

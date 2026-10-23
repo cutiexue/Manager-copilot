@@ -31,7 +31,8 @@ export default function TodayDigest({ fixture, source }: Props) {
         </span>
       </div>
       <p className="headline">
-        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} flagged for review
+        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.review_count ?? briefing.decisions.length} flagged
+        for review
       </p>
       <a className="link" href={hrefFor({ page: 'briefing' })}>
         Full briefing

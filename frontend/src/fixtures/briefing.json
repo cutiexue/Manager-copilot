@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-23T11:09:04+00:00",
+ "generated_at": "2026-10-23T11:24:33+00:00",
  "generator": "briefing.get_morning_briefing()",
- "backend_commit": "393a213",
+ "backend_commit": "c7fc598",
  "briefing": {
   "status": "ok",
   "as_of_date": "2026-04-01",
@@ -751,8 +751,9 @@
     "type": "order_at_risk",
     "title": "Orders at risk",
     "total": 12,
-    "flagged": 3,
+    "flagged": 6,
     "how_picked": "Unfinished orders that are overdue, due within 3 days or without recorded activity for 7+ days.",
+    "flag_rule": "Flagged when 7+ days late or 7+ days without recorded activity.",
     "ranked_by": "2 x overdue calendar days + idle calendar days",
     "items": [
      {
@@ -868,7 +869,7 @@
       "name": "ORD-083",
       "context": "Maple & Co · WASHING",
       "tag": "9 days late",
-      "flagged": false,
+      "flagged": true,
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -904,7 +905,7 @@
       "name": "ORD-002",
       "context": "Cotton Club · WASHING",
       "tag": "3 days late · 9 days idle",
-      "flagged": false,
+      "flagged": true,
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -941,7 +942,7 @@
       "name": "ORD-005",
       "context": "TrendCart · KNITTING",
       "tag": "8 days idle",
-      "flagged": false,
+      "flagged": true,
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -1196,6 +1197,7 @@
     "total": 1,
     "flagged": 1,
     "how_picked": "Stages whose mean output over the last 3 workdays is at least 20% below the 7 workdays before.",
+    "flag_rule": "Every stage found by this check is flagged.",
     "ranked_by": "percentage-point drop of the recent 3-workday mean vs the prior 7-workday mean",
     "items": [
      {
@@ -1283,6 +1285,7 @@
     "total": 1,
     "flagged": 1,
     "how_picked": "Customers with at least 2 unfinished orders, all overdue or quiet.",
+    "flag_rule": "Every customer found by this check is flagged.",
     "ranked_by": "10 x number of unfinished orders (all overdue or quiet)",
     "items": [
      {
@@ -1324,6 +1327,7 @@
     ]
    }
   ],
+  "review_count": 8,
   "total_findings": 14,
   "findings": [
    {

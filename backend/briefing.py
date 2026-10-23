@@ -15,8 +15,8 @@ from pathlib import Path
 from data_loader import PRODUCTION_SOURCE, STAGES, source_ref
 from discovery import discover_issues
 from rules import (BASELINE_WORKDAYS, CUSTOMER_SLIPPING_MIN_ORDERS, DUE_SOON_DAYS, MAX_FINDINGS,
-                   QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, STAGE_DROP_PERCENT, is_due_soon,
-                   is_overdue, is_workday)
+                   QUIET_ORDER_DAYS, RECENT_WORKDAYS, REVIEW_LATE_DAYS, SNAPSHOT, STAGE_DROP_PERCENT,
+                   is_due_soon, is_overdue, is_workday)
 from tools import compare_stage_output, get_orders_at_risk, get_stage_output
 
 # Each finding type maps to one fixed decision prompt; these are prompts for
@@ -151,8 +151,9 @@ def _plural(count, noun):
     return f"{count} {noun}{'' if count == 1 else 's'}"
 
 
-def _check_item(finding, ref, review_keys):
-    """One compact row for a finding: a name, its context and a short tag saying why it was found."""
+def _check_item(finding, ref):
+    """One compact row for a finding: a name, its context, a short tag saying why it was found,
+    and whether it is flagged for review under the rule in rules.py."""
     d = finding["details"]
     kind = finding["type"]
     if kind == "order_at_risk":
@@ -166,43 +167,49 @@ def _check_item(finding, ref, review_keys):
         if d["idle_calendar_days"]:
             parts.append(f"{_plural(d['idle_calendar_days'], 'day')} idle")
         name, context, tag = d["order_id"], f"{d['customer']} · {d['current_stage']}", " · ".join(parts)
+        flagged = d["overdue_calendar_days"] >= REVIEW_LATE_DAYS or d["idle_calendar_days"] >= QUIET_ORDER_DAYS
     elif kind == "stage_output_drop":
         name = d["stage"]
         context = f"last {d['recent_workdays']} workdays vs previous {d['baseline_workdays']}"
         tag = f"{d['change_percent']:.1f}%"
+        flagged = True
     else:
         name, context, tag = d["customer"], _plural(len(d["order_ids"]), "unfinished order"), "all overdue or quiet"
-    return {"key": name, "name": name, "context": context, "tag": tag,
-            "flagged": (kind, finding["summary"]) in review_keys,
+        flagged = True
+    return {"key": name, "name": name, "context": context, "tag": tag, "flagged": flagged,
             "note": _DECISION_PROMPTS[kind], "finding": finding}
 
 
-def _checks(ref, findings, review_keys):
-    """Every finding grouped by the check that produced it, with the briefing's review items flagged.
+def _checks(ref, findings):
+    """Every finding grouped by the check that produced it, with the ones that need review flagged.
 
-    Listing all findings, not only the review items, is what makes the flags meaningful: the page
-    shows which findings were picked for review without extra explanation text. Inclusion rules
-    and thresholds come from rules.py.
+    Each check is judged on its own (REVIEW_LATE_DAYS in rules.py), so how many items of one
+    check are flagged never depends on the others. Listing all findings, not only the flagged
+    ones, is what makes the flags meaningful.
     """
     basis = {f["type"]: f["severity_basis"] for f in reversed(findings)}
     meta = [
         ("order_at_risk", "Orders at risk",
          f"Unfinished orders that are overdue, due within {DUE_SOON_DAYS} days or without recorded "
-         f"activity for {QUIET_ORDER_DAYS}+ days."),
+         f"activity for {QUIET_ORDER_DAYS}+ days.",
+         f"Flagged when {REVIEW_LATE_DAYS}+ days late or {QUIET_ORDER_DAYS}+ days without recorded activity."),
         ("stage_output_drop", "Production",
          f"Stages whose mean output over the last {RECENT_WORKDAYS} workdays is at least "
-         f"{abs(STAGE_DROP_PERCENT):.0f}% below the {BASELINE_WORKDAYS} workdays before."),
+         f"{abs(STAGE_DROP_PERCENT):.0f}% below the {BASELINE_WORKDAYS} workdays before.",
+         "Every stage found by this check is flagged."),
         ("customer_slipping", "Customers",
-         f"Customers with at least {CUSTOMER_SLIPPING_MIN_ORDERS} unfinished orders, all overdue or quiet."),
+         f"Customers with at least {CUSTOMER_SLIPPING_MIN_ORDERS} unfinished orders, all overdue or quiet.",
+         "Every customer found by this check is flagged."),
     ]
     checks = []
-    for kind, title, how_picked in meta:
-        items = [_check_item(f, ref, review_keys) for f in findings if f["type"] == kind]
+    for kind, title, how_picked, flag_rule in meta:
+        items = [_check_item(f, ref) for f in findings if f["type"] == kind]
         # 同类结果已按严重度排序；入选审查的项提到最前，其余保持原有顺序。
         items.sort(key=lambda item: not item["flagged"])
         checks.append({"type": kind, "title": title, "total": len(items),
                        "flagged": sum(item["flagged"] for item in items),
-                       "how_picked": how_picked, "ranked_by": basis.get(kind), "items": items})
+                       "how_picked": how_picked, "flag_rule": flag_rule, "ranked_by": basis.get(kind),
+                       "items": items})
     return checks
 
 
@@ -219,8 +226,9 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
     risk = get_orders_at_risk(as_of_date)
     findings_result = discover_issues(as_of_date, max_findings)
     findings = findings_result["findings"]
-    # The summary covers every finding, not only the ones selected for the item list.
+    # The summary and the review lists cover every finding, not only the ones selected for decisions.
     all_findings = discover_issues(as_of_date, max(findings_result["total_findings"], 1))["findings"]
+    checks = _checks(ref, all_findings)
     data_gaps = list(findings_result["data_gaps"])
     for entry in yesterday["stages"]:
         for field in ("output_status", "comparison_status"):
@@ -259,7 +267,8 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
             "source_rows": risk["source_rows"],
         },
         "summary": _summary(ref, yesterday, risk["data"], risk["source_rows"], all_findings, data_gaps),
-        "checks": _checks(ref, all_findings, {(d["finding_type"], d["about"]) for d in decisions}),
+        "checks": checks,
+        "review_count": sum(check["flagged"] for check in checks),
         "total_findings": findings_result["total_findings"],
         "findings": findings,
         "decisions": decisions,

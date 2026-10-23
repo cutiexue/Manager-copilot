@@ -92,6 +92,8 @@ export interface Check {
   total: number;
   flagged: number;
   how_picked: string;
+  /** When an item of this check gets a review flag */
+  flag_rule: string;
   ranked_by: string | null;
   items: CheckItem[];
 }
@@ -111,6 +113,8 @@ export interface Briefing {
   summary?: BriefingSummaryData;
   /** Missing from briefings produced before review flags existed */
   checks?: Check[];
+  /** Flagged items across all checks */
+  review_count?: number;
   total_findings: number;
   findings: Finding[];
   decisions: Decision[];

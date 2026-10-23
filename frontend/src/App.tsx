@@ -204,7 +204,11 @@ export default function App() {
               ? `Saved snapshot from backend ${data.backend_commit ?? 'unknown'}. ${briefingError ?? ''}`.trim()
               : 'Loading the live briefing'
         }
-        counts={{ decisions: briefing.decisions.length, atRisk: briefing.at_risk.count, actions: actions.length }}
+        counts={{
+          decisions: briefing.review_count ?? briefing.decisions.length,
+          atRisk: briefing.at_risk.count,
+          actions: actions.length,
+        }}
         onPick={() => setMenuOpen(false)}
       />
       {menuOpen && <div className="sidebar-scrim" onClick={() => setMenuOpen(false)} />}
