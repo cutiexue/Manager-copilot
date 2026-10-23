@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException, Request
 
 from briefing import get_briefing_payload
+from order_search import search_orders
 from rules import SNAPSHOT
 
 
@@ -52,5 +53,12 @@ def create_app(service):
     def latest_briefing(as_of_date: str = SNAPSHOT):
         # 没有调度器之前，“最新”就是按数据快照当场生成的晨报；不调用模型。
         return run(get_briefing_payload, as_of_date)
+
+    @app.get('/orders/search')
+    def order_search(q: str = '', limit: int = 8):
+        result = run(search_orders, q, limit)
+        if result['status'] != 'ok':
+            raise HTTPException(400, result['message'])
+        return result
 
     return app

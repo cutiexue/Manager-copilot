@@ -67,3 +67,10 @@ def test_latest_briefing_for_another_date_and_bad_date(client):
     rest_day = client.get("/briefings/latest", params={"as_of_date": "2026-03-30"}).json()
     assert rest_day["briefing"]["yesterday"]["is_workday"] is False
     assert client.get("/briefings/latest", params={"as_of_date": "2026-13-01"}).status_code == 400
+
+
+def test_order_search_endpoint(client):
+    result = client.get("/orders/search", params={"q": "maple", "limit": 5}).json()
+    assert (result["total"], result["count"]) == (19, 5)
+    assert client.get("/orders/search", params={"limit": 0}).status_code == 400
+    assert client.get("/orders/search", params={"limit": "many"}).status_code == 422
