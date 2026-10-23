@@ -54,9 +54,27 @@ class SQLiteStore:
 
     def list_sessions(self):
         with self.connection() as conn:
-            rows = conn.execute('SELECT id,title,created_at,updated_at FROM assistant_sessions '
+            rows = conn.execute('SELECT id,title,messages,created_at,updated_at FROM assistant_sessions '
                                 'ORDER BY updated_at DESC,id').fetchall()
-            return [dict(row) for row in rows]
+        sessions = []
+        for row in rows:
+            session = dict(row)
+            messages = json.loads(session.pop('messages'))
+            session['has_messages'] = bool(messages)
+            if session['title'] == 'New conversation':
+                session['title'] = self._title(messages)
+            sessions.append(session)
+        return sessions
+
+    @staticmethod
+    def _title(messages):
+        # 未命名会话用第一句提问作标题，方便在历史列表中辨认。
+        for message in messages:
+            if message.get('type') == 'human':
+                content = message.get('data', {}).get('content')
+                if isinstance(content, str) and content.strip():
+                    return ' '.join(content.split())[:60]
+        return 'New conversation'
 
     def get_history(self, session_id):
         with self.connection() as conn:
@@ -70,16 +88,18 @@ class SQLiteStore:
         # SQLite 只有一个写锁；模型调用可能长达一分钟，不能在调用期间占住整个数据库。
         # 因此先读出版本号，生成回答后按版本号条件更新：同一会话被并发修改时本轮失败，不会互相覆盖。
         with self.connection() as conn:
-            row = conn.execute('SELECT messages,version FROM assistant_sessions WHERE id=?',
+            row = conn.execute('SELECT title,messages,version FROM assistant_sessions WHERE id=?',
                                (session_id,)).fetchone()
         if row is None:
             raise KeyError('Session not found.')
         messages, answer = generate(json.loads(row['messages']))
+        title = self._title(messages) if row['title'] == 'New conversation' else row['title']
         with self.connection() as conn:
             updated = conn.execute(
-                'UPDATE assistant_sessions SET messages=?,version=version+1,'
+                'UPDATE assistant_sessions SET messages=?,title=?,version=version+1,'
                 'updated_at=CURRENT_TIMESTAMP WHERE id=? AND version=?',
-                (json.dumps(messages, ensure_ascii=False, allow_nan=False), session_id, row['version']))
+                (json.dumps(messages, ensure_ascii=False, allow_nan=False), title, session_id,
+                 row['version']))
             if updated.rowcount != 1:
                 raise ValueError('This conversation changed during the request; send the message again.')
         return answer

@@ -8,9 +8,9 @@ from tool_schemas import TOOL_FUNCTIONS, TOOLS
 
 def test_every_schema_has_a_function():
     names = [tool["function"]["name"] for tool in TOOLS]
-    assert len(names) == len(set(names)) == 21
+    assert len(names) == len(set(names)) == 26
     assert set(names) == set(TOOL_FUNCTIONS)
-    assert len(build_tools()) == 21
+    assert len(build_tools()) == 26
 
 
 def test_execute_tool_runs_a_valid_call():
@@ -23,3 +23,9 @@ def test_execute_tool_rejects_bad_arguments():
     assert execute_tool("get_stage_output", json.dumps(
         {"stage": "DYEING", "production_date": "2026-03-31"}))["status"] == "error"
     assert execute_tool("delete_everything", "{}")["status"] == "error"
+
+
+def test_required_parameters_are_declared():
+    for tool in TOOLS:
+        parameters = tool["function"]["parameters"]
+        assert set(parameters["required"]) <= set(parameters["properties"]), tool["function"]["name"]

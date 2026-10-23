@@ -1,7 +1,9 @@
 """Shared Python interface used by both the CLI and HTTP adapter."""
 
-from langchain_core.messages import HumanMessage, messages_from_dict, messages_to_dict
+from langchain_core.messages import AIMessage, HumanMessage, messages_from_dict, messages_to_dict
 from llm import build_agent
+from order_selection import selection_context
+from plan_context import plan_context
 
 
 class ChatService:
@@ -26,7 +28,8 @@ class ChatService:
 
         def generate(saved):
             messages = messages_from_dict(saved) + [HumanMessage(content=message.strip())]
-            result = self.agent.invoke({'messages': messages}, {'recursion_limit': 16})
+            with selection_context(messages), plan_context(messages):
+                result = self.agent.invoke({'messages': messages}, {'recursion_limit': 16})
             final = result['messages'][-1]
             if final.type != 'ai' or getattr(final, 'tool_calls', None):
                 raise RuntimeError('Agent did not finish its answer.')
@@ -39,3 +42,20 @@ class ChatService:
 
         answer = self.store.update_turn(session_id, generate)
         return {'session_id': session_id, 'answer': answer}
+
+    def morning_briefing(self, session_id):
+        """Generate an on-demand briefing locally and persist it in the conversation."""
+        from briefing import get_morning_briefing, render_briefing_text
+
+        def generate(saved):
+            report = get_morning_briefing()
+            if report['status'] != 'ok':
+                raise RuntimeError('Briefing could not be generated.')
+            answer = render_briefing_text(report)
+            messages = messages_from_dict(saved) + [
+                HumanMessage(content='Show the morning briefing for the dataset reference date.'),
+                AIMessage(content=answer),
+            ]
+            return messages_to_dict(messages), answer
+
+        return {'session_id': session_id, 'answer': self.store.update_turn(session_id, generate)}
