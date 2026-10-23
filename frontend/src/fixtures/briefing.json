@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-23T11:24:33+00:00",
+ "generated_at": "2026-10-23T11:52:12+00:00",
  "generator": "briefing.get_morning_briefing()",
- "backend_commit": "c7fc598",
+ "backend_commit": "dc55b9d",
  "briefing": {
   "status": "ok",
   "as_of_date": "2026-04-01",
@@ -751,17 +751,29 @@
     "type": "order_at_risk",
     "title": "Orders at risk",
     "total": 12,
-    "flagged": 6,
     "how_picked": "Unfinished orders that are overdue, due within 3 days or without recorded activity for 7+ days.",
-    "flag_rule": "Flagged when 7+ days late or 7+ days without recorded activity.",
     "ranked_by": "2 x overdue calendar days + idle calendar days",
+    "levels": [
+     {
+      "level": "act",
+      "label": "Act now",
+      "rule": "Late or idle 7+ days",
+      "count": 6
+     },
+     {
+      "level": "watch",
+      "label": "Watch",
+      "rule": "Late under 7 days or due within 3 days",
+      "count": 6
+     }
+    ],
     "items": [
      {
       "key": "ORD-107",
       "name": "ORD-107",
       "context": "Northwind Apparel · PACKING",
       "tag": "16 days late",
-      "flagged": true,
+      "level": "act",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -797,7 +809,7 @@
       "name": "ORD-120",
       "context": "TrendCart · ASSEMBLY",
       "tag": "15 days late",
-      "flagged": true,
+      "level": "act",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -833,7 +845,7 @@
       "name": "ORD-114",
       "context": "Northwind Apparel · PACKING",
       "tag": "9 days late",
-      "flagged": true,
+      "level": "act",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -869,7 +881,7 @@
       "name": "ORD-083",
       "context": "Maple & Co · WASHING",
       "tag": "9 days late",
-      "flagged": true,
+      "level": "act",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -905,7 +917,7 @@
       "name": "ORD-002",
       "context": "Cotton Club · WASHING",
       "tag": "3 days late · 9 days idle",
-      "flagged": true,
+      "level": "act",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -942,7 +954,7 @@
       "name": "ORD-005",
       "context": "TrendCart · KNITTING",
       "tag": "8 days idle",
-      "flagged": true,
+      "level": "act",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -978,7 +990,7 @@
       "name": "ORD-093",
       "context": "Maple & Co · WASHING",
       "tag": "3 days late",
-      "flagged": false,
+      "level": "watch",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -1014,7 +1026,7 @@
       "name": "ORD-020",
       "context": "TrendCart · WASHING",
       "tag": "1 day late",
-      "flagged": false,
+      "level": "watch",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -1050,7 +1062,7 @@
       "name": "ORD-055",
       "context": "Cotton Club · ASSEMBLY",
       "tag": "1 day late",
-      "flagged": false,
+      "level": "watch",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -1082,47 +1094,11 @@
       }
      },
      {
-      "key": "ORD-103",
-      "name": "ORD-103",
-      "context": "Bright Basics · ASSEMBLY",
-      "tag": "due in 3 days",
-      "flagged": false,
-      "note": "Check the latest progress and whether follow-up is needed.",
-      "finding": {
-       "type": "order_at_risk",
-       "severity": 0,
-       "severity_basis": "2 x overdue calendar days + idle calendar days",
-       "summary": "ORD-103 (Bright Basics, 2000 pcs, stage ASSEMBLY): due in 3 calendar days, still at stage ASSEMBLY.",
-       "details": {
-        "order_id": "ORD-103",
-        "risk_reasons": [
-         "due in 3 calendar days, still at stage ASSEMBLY"
-        ],
-        "customer": "Bright Basics",
-        "current_stage": "ASSEMBLY",
-        "due_date": "2026-04-04",
-        "last_activity_date": "2026-03-30",
-        "overdue_calendar_days": 0,
-        "idle_calendar_days": 0
-       },
-       "evidence": {
-        "source": "track1/data/orders.csv",
-        "source_rows": [
-         {
-          "source": "track1/data/orders.csv",
-          "row": 91,
-          "key": "ORD-103"
-         }
-        ]
-       }
-      }
-     },
-     {
       "key": "ORD-029",
       "name": "ORD-029",
       "context": "Northwind Apparel · WASHING",
       "tag": "due today",
-      "flagged": false,
+      "level": "watch",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -1158,7 +1134,7 @@
       "name": "ORD-108",
       "context": "Harbor Knits · ASSEMBLY",
       "tag": "due in 2 days",
-      "flagged": false,
+      "level": "watch",
       "note": "Check the latest progress and whether follow-up is needed.",
       "finding": {
        "type": "order_at_risk",
@@ -1188,6 +1164,42 @@
         ]
        }
       }
+     },
+     {
+      "key": "ORD-103",
+      "name": "ORD-103",
+      "context": "Bright Basics · ASSEMBLY",
+      "tag": "due in 3 days",
+      "level": "watch",
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 0,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-103 (Bright Basics, 2000 pcs, stage ASSEMBLY): due in 3 calendar days, still at stage ASSEMBLY.",
+       "details": {
+        "order_id": "ORD-103",
+        "risk_reasons": [
+         "due in 3 calendar days, still at stage ASSEMBLY"
+        ],
+        "customer": "Bright Basics",
+        "current_stage": "ASSEMBLY",
+        "due_date": "2026-04-04",
+        "last_activity_date": "2026-03-30",
+        "overdue_calendar_days": 0,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 91,
+          "key": "ORD-103"
+         }
+        ]
+       }
+      }
      }
     ]
    },
@@ -1195,17 +1207,23 @@
     "type": "stage_output_drop",
     "title": "Production",
     "total": 1,
-    "flagged": 1,
     "how_picked": "Stages whose mean output over the last 3 workdays is at least 20% below the 7 workdays before.",
-    "flag_rule": "Every stage found by this check is flagged.",
     "ranked_by": "percentage-point drop of the recent 3-workday mean vs the prior 7-workday mean",
+    "levels": [
+     {
+      "level": "act",
+      "label": "Act now",
+      "rule": "Output down 20%+ (last 3 workdays vs previous 7)",
+      "count": 1
+     }
+    ],
     "items": [
      {
       "key": "ASSEMBLY",
       "name": "ASSEMBLY",
-      "context": "last 3 workdays vs previous 7",
-      "tag": "-29.3%",
-      "flagged": true,
+      "context": "432 vs 611 pcs/workday",
+      "tag": "−29.3%",
+      "level": "act",
       "note": "Check the production records and investigate the drop if confirmed.",
       "finding": {
        "type": "stage_output_drop",
@@ -1283,17 +1301,23 @@
     "type": "customer_slipping",
     "title": "Customers",
     "total": 1,
-    "flagged": 1,
     "how_picked": "Customers with at least 2 unfinished orders, all overdue or quiet.",
-    "flag_rule": "Every customer found by this check is flagged.",
     "ranked_by": "10 x number of unfinished orders (all overdue or quiet)",
+    "levels": [
+     {
+      "level": "act",
+      "label": "Act now",
+      "rule": "2+ unfinished orders, all late or idle",
+      "count": 1
+     }
+    ],
     "items": [
      {
       "key": "Maple & Co",
       "name": "Maple & Co",
-      "context": "2 unfinished orders",
-      "tag": "all overdue or quiet",
-      "flagged": true,
+      "context": "ORD-083, ORD-093",
+      "tag": "2 orders",
+      "level": "act",
       "note": "Review the affected orders before deciding whether customer contact is needed.",
       "finding": {
        "type": "customer_slipping",
@@ -1327,7 +1351,8 @@
     ]
    }
   ],
-  "review_count": 8,
+  "act_count": 8,
+  "watch_count": 6,
   "total_findings": 14,
   "findings": [
    {

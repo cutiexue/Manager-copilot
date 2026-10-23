@@ -50,21 +50,29 @@ def test_summary_comes_first_and_every_sentence_has_sources():
         {"source": "track1/data/orders.csv", "row": 81, "key": "ORD-107"}]
 
 
-def test_checks_list_every_finding_and_flag_by_the_review_rule():
+def test_checks_give_every_finding_a_level_and_state_the_rule():
     briefing = get_morning_briefing()
     checks = briefing["checks"]
-    assert [(c["type"], c["total"], c["flagged"]) for c in checks] == [
-        ("order_at_risk", 12, 6), ("stage_output_drop", 1, 1), ("customer_slipping", 1, 1)]
-    assert briefing["review_count"] == 8
-    orders = checks[0]["items"]
-    # 7+ days late or 7+ days idle is flagged; flagged orders come first, highest score first.
-    assert [(i["name"], i["tag"], i["flagged"]) for i in orders[:8]] == [
-        ("ORD-107", "16 days late", True), ("ORD-120", "15 days late", True), ("ORD-114", "9 days late", True),
-        ("ORD-083", "9 days late", True), ("ORD-002", "3 days late · 9 days idle", True),
-        ("ORD-005", "8 days idle", True), ("ORD-093", "3 days late", False), ("ORD-020", "1 day late", False)]
-    assert {i["tag"] for i in orders if not i["flagged"]} >= {"due today", "due in 2 days", "1 day late"}
-    assert checks[0]["flag_rule"] == "Flagged when 7+ days late or 7+ days without recorded activity."
-    assert checks[1]["items"][0]["tag"] == "-29.3%"
+    assert [(c["type"], c["total"], [(lv["level"], lv["count"]) for lv in c["levels"]]) for c in checks] == [
+        ("order_at_risk", 12, [("act", 6), ("watch", 6)]),
+        ("stage_output_drop", 1, [("act", 1)]),
+        ("customer_slipping", 1, [("act", 1)])]
+    assert (briefing["act_count"], briefing["watch_count"]) == (8, 6)
+    # Every at-risk order is marked: act now when 7+ days late or 7+ days idle, otherwise watch.
+    assert [(lv["label"], lv["rule"]) for lv in checks[0]["levels"]] == [
+        ("Act now", "Late or idle 7+ days"), ("Watch", "Late under 7 days or due within 3 days")]
+    # Act now first, highest score first; orders not yet late follow by due date.
+    assert [(i["name"], i["tag"], i["level"]) for i in checks[0]["items"]] == [
+        ("ORD-107", "16 days late", "act"), ("ORD-120", "15 days late", "act"), ("ORD-114", "9 days late", "act"),
+        ("ORD-083", "9 days late", "act"), ("ORD-002", "3 days late · 9 days idle", "act"),
+        ("ORD-005", "8 days idle", "act"), ("ORD-093", "3 days late", "watch"), ("ORD-020", "1 day late", "watch"),
+        ("ORD-055", "1 day late", "watch"), ("ORD-029", "due today", "watch"), ("ORD-108", "due in 2 days", "watch"),
+        ("ORD-103", "due in 3 days", "watch")]
+    stage, customer = checks[1]["items"][0], checks[2]["items"][0]
+    assert (stage["context"], stage["tag"]) == ("432 vs 611 pcs/workday", "−29.3%")
+    assert checks[1]["levels"][0]["rule"] == "Output down 20%+ (last 3 workdays vs previous 7)"
+    assert (customer["context"], customer["tag"]) == ("ORD-083, ORD-093", "2 orders")
+    assert checks[2]["levels"][0]["rule"] == "2+ unfinished orders, all late or idle"
 
 
 def test_summary_on_a_day_after_sunday():

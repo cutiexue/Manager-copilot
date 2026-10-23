@@ -14,8 +14,8 @@ from pathlib import Path
 
 from data_loader import PRODUCTION_SOURCE, STAGES, source_ref
 from discovery import discover_issues
-from rules import (BASELINE_WORKDAYS, CUSTOMER_SLIPPING_MIN_ORDERS, DUE_SOON_DAYS, MAX_FINDINGS,
-                   QUIET_ORDER_DAYS, RECENT_WORKDAYS, REVIEW_LATE_DAYS, SNAPSHOT, STAGE_DROP_PERCENT,
+from rules import (ACT_NOW_LATE_DAYS, BASELINE_WORKDAYS, CUSTOMER_SLIPPING_MIN_ORDERS, DUE_SOON_DAYS,
+                   MAX_FINDINGS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, STAGE_DROP_PERCENT,
                    is_due_soon, is_overdue, is_workday)
 from tools import compare_stage_output, get_orders_at_risk, get_stage_output
 
@@ -151,9 +151,12 @@ def _plural(count, noun):
     return f"{count} {noun}{'' if count == 1 else 's'}"
 
 
+_LEVEL_LABELS = {"act": "Act now", "watch": "Watch"}
+
+
 def _check_item(finding, ref):
     """One compact row for a finding: a name, its context, a short tag saying why it was found,
-    and whether it is flagged for review under the rule in rules.py."""
+    and its level on the briefing page ("act" or "watch") under the rules in rules.py."""
     d = finding["details"]
     kind = finding["type"]
     if kind == "order_at_risk":
@@ -167,50 +170,80 @@ def _check_item(finding, ref):
         if d["idle_calendar_days"]:
             parts.append(f"{_plural(d['idle_calendar_days'], 'day')} idle")
         name, context, tag = d["order_id"], f"{d['customer']} · {d['current_stage']}", " · ".join(parts)
-        flagged = d["overdue_calendar_days"] >= REVIEW_LATE_DAYS or d["idle_calendar_days"] >= QUIET_ORDER_DAYS
+        act = d["overdue_calendar_days"] >= ACT_NOW_LATE_DAYS or d["idle_calendar_days"] >= QUIET_ORDER_DAYS
     elif kind == "stage_output_drop":
         name = d["stage"]
-        context = f"last {d['recent_workdays']} workdays vs previous {d['baseline_workdays']}"
-        tag = f"{d['change_percent']:.1f}%"
-        flagged = True
+        context = f"{d['recent_mean']:.0f} vs {d['baseline_mean']:.0f} pcs/workday"
+        tag = f"{d['change_percent']:.1f}%".replace("-", "−")
+        act = True
     else:
-        name, context, tag = d["customer"], _plural(len(d["order_ids"]), "unfinished order"), "all overdue or quiet"
-        flagged = True
-    return {"key": name, "name": name, "context": context, "tag": tag, "flagged": flagged,
+        name, context, tag = d["customer"], ", ".join(d["order_ids"]), _plural(len(d["order_ids"]), "order")
+        act = True
+    return {"key": name, "name": name, "context": context, "tag": tag, "level": "act" if act else "watch",
             "note": _DECISION_PROMPTS[kind], "finding": finding}
 
 
-def _checks(ref, findings):
-    """Every finding grouped by the check that produced it, with the ones that need review flagged.
+def _level_rules():
+    """What puts an item of each check at each level, in words short enough to sit above the items."""
+    if ACT_NOW_LATE_DAYS == QUIET_ORDER_DAYS:
+        late_or_idle = f"Late or idle {ACT_NOW_LATE_DAYS}+ days"
+    else:
+        late_or_idle = f"Late {ACT_NOW_LATE_DAYS}+ days or idle {QUIET_ORDER_DAYS}+ days"
+    return {
+        "order_at_risk": {
+            "act": late_or_idle,
+            "watch": f"Late under {_plural(ACT_NOW_LATE_DAYS, 'day')} or due within {_plural(DUE_SOON_DAYS, 'day')}",
+        },
+        "stage_output_drop": {
+            "act": f"Output down {abs(STAGE_DROP_PERCENT):.0f}%+ "
+                   f"(last {RECENT_WORKDAYS} workdays vs previous {BASELINE_WORKDAYS})",
+        },
+        "customer_slipping": {
+            "act": f"{CUSTOMER_SLIPPING_MIN_ORDERS}+ unfinished orders, all late or idle",
+        },
+    }
 
-    Each check is judged on its own (REVIEW_LATE_DAYS in rules.py), so how many items of one
-    check are flagged never depends on the others. Listing all findings, not only the flagged
-    ones, is what makes the flags meaningful.
+
+def _row_order(item, ref):
+    """Act now before watch; within a level the highest score first, then the earliest due date."""
+    details = item["finding"]["details"]
+    days_left = (date.fromisoformat(details["due_date"]) - ref).days if "due_date" in details else 0
+    return (item["level"] != "act", -item["finding"]["severity"], days_left)
+
+
+def _checks(ref, findings):
+    """Every finding grouped by the check that produced it, each at a level: act now or watch.
+
+    Each check is judged on its own (ACT_NOW_LATE_DAYS in rules.py), so an item's level never
+    depends on the other checks. Every item carries a level, and each level carries the rule
+    that put items there, so the page can show the rule beside the items it explains.
     """
     basis = {f["type"]: f["severity_basis"] for f in reversed(findings)}
+    rules = _level_rules()
     meta = [
         ("order_at_risk", "Orders at risk",
          f"Unfinished orders that are overdue, due within {DUE_SOON_DAYS} days or without recorded "
-         f"activity for {QUIET_ORDER_DAYS}+ days.",
-         f"Flagged when {REVIEW_LATE_DAYS}+ days late or {QUIET_ORDER_DAYS}+ days without recorded activity."),
+         f"activity for {QUIET_ORDER_DAYS}+ days."),
         ("stage_output_drop", "Production",
          f"Stages whose mean output over the last {RECENT_WORKDAYS} workdays is at least "
-         f"{abs(STAGE_DROP_PERCENT):.0f}% below the {BASELINE_WORKDAYS} workdays before.",
-         "Every stage found by this check is flagged."),
+         f"{abs(STAGE_DROP_PERCENT):.0f}% below the {BASELINE_WORKDAYS} workdays before."),
         ("customer_slipping", "Customers",
-         f"Customers with at least {CUSTOMER_SLIPPING_MIN_ORDERS} unfinished orders, all overdue or quiet.",
-         "Every customer found by this check is flagged."),
+         f"Customers with at least {CUSTOMER_SLIPPING_MIN_ORDERS} unfinished orders, all overdue or quiet."),
     ]
     checks = []
-    for kind, title, how_picked, flag_rule in meta:
-        items = [_check_item(f, ref) for f in findings if f["type"] == kind]
-        # 同类结果已按严重度排序；入选审查的项提到最前，其余保持原有顺序。
-        items.sort(key=lambda item: not item["flagged"])
-        checks.append({"type": kind, "title": title, "total": len(items),
-                       "flagged": sum(item["flagged"] for item in items),
-                       "how_picked": how_picked, "flag_rule": flag_rule, "ranked_by": basis.get(kind),
-                       "items": items})
+    for kind, title, how_picked in meta:
+        items = sorted((_check_item(f, ref) for f in findings if f["type"] == kind),
+                       key=lambda item: _row_order(item, ref))
+        levels = [{"level": level, "label": _LEVEL_LABELS[level], "rule": rule,
+                   "count": sum(item["level"] == level for item in items)}
+                  for level, rule in rules[kind].items()]
+        checks.append({"type": kind, "title": title, "total": len(items), "how_picked": how_picked,
+                       "ranked_by": basis.get(kind), "levels": levels, "items": items})
     return checks
+
+
+def _level_count(checks, level):
+    return sum(entry["count"] for check in checks for entry in check["levels"] if entry["level"] == level)
 
 
 def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
@@ -268,7 +301,8 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
         },
         "summary": _summary(ref, yesterday, risk["data"], risk["source_rows"], all_findings, data_gaps),
         "checks": checks,
-        "review_count": sum(check["flagged"] for check in checks),
+        "act_count": _level_count(checks, "act"),
+        "watch_count": _level_count(checks, "watch"),
         "total_findings": findings_result["total_findings"],
         "findings": findings,
         "decisions": decisions,

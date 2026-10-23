@@ -1,5 +1,6 @@
 import type { Briefing, BriefingFixture, BriefingSource } from '../types';
 import { hrefFor } from '../route';
+import Headline from './Headline';
 
 interface Props {
   fixture: BriefingFixture;
@@ -17,7 +18,7 @@ export function suggestionsFor(briefing: Briefing): string[] {
   return out;
 }
 
-// One line of today's numbers above the chat box; the flagged details are on the Briefing page.
+// The briefing's headline above the chat box; the marked items are on the Briefing page.
 export default function TodayDigest({ fixture, source }: Props) {
   const { briefing } = fixture;
 
@@ -30,10 +31,7 @@ export default function TodayDigest({ fixture, source }: Props) {
           {source === 'snapshot' ? ' · saved snapshot' : ''}
         </span>
       </div>
-      <p className="headline">
-        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.review_count ?? briefing.decisions.length} flagged
-        for review
-      </p>
+      <Headline briefing={briefing} />
       <a className="link" href={hrefFor({ page: 'briefing' })}>
         Full briefing
       </a>

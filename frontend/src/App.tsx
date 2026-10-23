@@ -6,6 +6,7 @@ import type { ActionProposal, BriefingFixture, BriefingSource, EvidenceView, Ses
 import Sidebar from './components/Sidebar';
 import TodayDigest, { suggestionsFor } from './components/TodayDigest';
 import BriefingSummary from './components/BriefingSummary';
+import { actCount } from './components/Headline';
 import DetailPanel from './components/DetailPanel';
 import Chat from './components/Chat';
 import EvidenceDrawer from './components/EvidenceDrawer';
@@ -205,7 +206,7 @@ export default function App() {
               : 'Loading the live briefing'
         }
         counts={{
-          decisions: briefing.review_count ?? briefing.decisions.length,
+          decisions: actCount(briefing),
           atRisk: briefing.at_risk.count,
           actions: actions.length,
         }}

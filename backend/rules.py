@@ -34,11 +34,12 @@ STAGE_DROP_PERCENT = -20.0
 # orders and every one of them is overdue or quiet.
 CUSTOMER_SLIPPING_MIN_ORDERS = 2
 
-# Review flags on the briefing page: an at-risk order is flagged when it is at least
-# this many calendar days late, or has gone quiet (QUIET_ORDER_DAYS without recorded
-# activity). Stage drops and slipping customers have already passed their own
-# thresholds above, so each of them is flagged. Each check is judged on its own.
-REVIEW_LATE_DAYS = 7
+# Levels on the briefing page. An at-risk order is "act now" when it is at least this
+# many calendar days late, or has gone quiet (QUIET_ORDER_DAYS without recorded
+# activity); every other at-risk order is "watch". Stage drops and slipping customers
+# have already passed their own thresholds above, so each of them is "act now".
+# Each check is judged on its own.
+ACT_NOW_LATE_DAYS = 7
 
 # Discovery returns at most this many findings, ranked by severity.
 MAX_FINDINGS = 5

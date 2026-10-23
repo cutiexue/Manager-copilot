@@ -72,14 +72,28 @@ export interface BriefingSummaryData {
   points: SummaryPoint[];
 }
 
-/** One finding as a compact row; flagged = one of the briefing's review items. */
+/** How urgent a briefing item is: act on it now, or keep watching it. */
+export type Level = 'act' | 'watch';
+
+/** One level of a check, with the rule that puts items there. */
+export interface CheckLevel {
+  level: Level;
+  label: string;
+  /** e.g. "Late or idle 7+ days" */
+  rule: string;
+  count: number;
+}
+
+/** One finding as a compact row, at one level. */
 export interface CheckItem {
   key: string;
   name: string;
   context: string;
-  /** Short reason, e.g. "16 days late" or "-29.3%" */
+  /** Short reason, e.g. "16 days late" or "−29.3%" */
   tag: string;
-  flagged: boolean;
+  /** Missing from briefings produced before levels existed; those set `flagged` instead */
+  level?: Level;
+  flagged?: boolean;
   /** Suggested follow-up check for this kind of finding */
   note: string;
   finding: Finding;
@@ -90,11 +104,12 @@ export interface Check {
   type: FindingType;
   title: string;
   total: number;
-  flagged: number;
   how_picked: string;
-  /** When an item of this check gets a review flag */
-  flag_rule: string;
   ranked_by: string | null;
+  /** Missing from briefings produced before levels existed */
+  levels?: CheckLevel[];
+  /** Older briefings only: when an item was flagged */
+  flag_rule?: string;
   items: CheckItem[];
 }
 
@@ -113,7 +128,10 @@ export interface Briefing {
   summary?: BriefingSummaryData;
   /** Missing from briefings produced before review flags existed */
   checks?: Check[];
-  /** Flagged items across all checks */
+  /** Items at each level across all checks */
+  act_count?: number;
+  watch_count?: number;
+  /** Older briefings only: flagged items across all checks */
   review_count?: number;
   total_findings: number;
   findings: Finding[];

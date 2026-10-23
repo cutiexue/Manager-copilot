@@ -30,6 +30,8 @@
   /* Status (not accent): system red for risk/error only; others stay neutral */
   --risk: #d70015;
   --risk-bg: rgba(215, 0, 21, 0.08);
+  /* Watch (amber): >= 3:1 on the surface, and apart from --risk for colour-blind readers */
+  --watch: #c08000;
   --scrim: rgba(0, 0, 0, 0.4);
   --lift: 3px 5px 30px 0 rgba(0, 0, 0, 0.22);
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -55,6 +57,7 @@
     --nav-pill: rgba(255, 255, 255, 0.12);
     --risk: #ff6961;
     --risk-bg: rgba(255, 105, 97, 0.14);
+    --watch: #ffb340;
     --scrim: rgba(0, 0, 0, 0.6);
     --lift: 3px 5px 30px 0 rgba(0, 0, 0, 0.6);
     color-scheme: dark;
@@ -127,38 +130,76 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 
 /* Briefing: same white panel as the rest of the page */
 .briefing { background: var(--hero-bg); color: var(--hero-text); padding: 32px; }
-.briefing-head { display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; align-items: center; }
+.briefing-head { display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; align-items: flex-start; }
 .briefing h2 { font-size: 34px; line-height: 1.12; letter-spacing: -0.2px; }
+.dateline { margin: 6px 0 0; font-size: 17px; letter-spacing: -0.374px; color: var(--hero-muted); }
 .headline { margin: 8px 0 0; font-size: 19px; line-height: 1.26; letter-spacing: 0.1px; color: var(--hero-muted); }
+.briefing > .headline { margin-top: 20px; }
 .headline strong { color: var(--hero-text); font-weight: 600; }
 .notice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; padding: 6px 6px 6px 12px; border-radius: 10px; background: var(--fill); color: var(--text-2); }
-/* Checks: every finding as a compact row; the briefing's review items are flagged and come first */
-.check { margin-top: 28px; }
+
+/* Status marks: red circle = act now, amber triangle = watch; the label is always beside them */
+.mark { flex: none; display: inline-block; width: 18px; height: 18px; vertical-align: -3px; overflow: visible; }
+.mark-shape { stroke-width: 1.6; stroke-linejoin: round; }
+.mark-act .mark-shape { fill: var(--risk); stroke: var(--risk); }
+.mark-watch .mark-shape { fill: var(--watch); stroke: var(--watch); }
+.mark-glyph { fill: none; stroke: var(--surface); stroke-width: 2.2; stroke-linecap: round; }
+.mark-dot { fill: var(--surface); }
+
+/* Sections of the briefing, in daily-report order: production, orders, customers */
+.check { margin-top: 32px; }
 .check-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px solid var(--hairline); }
 .check-head h3 { margin: 0; font-size: 21px; font-weight: 600; line-height: 1.19; letter-spacing: 0.231px; color: var(--hero-text); }
-.check-count { font-size: 14px; color: var(--hero-faint); font-variant-numeric: tabular-nums; }
-.check-flagged { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--hero-muted); }
-.flag-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--risk); }
+
+/* Yesterday's output: one tile per stage (figure, change vs average, recent trend) */
+.strip { padding: 14px 0 2px; container-type: inline-size; }
+.strip-head { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.strip-title { font-size: 14px; font-weight: 600; letter-spacing: -0.224px; color: var(--text-2); }
+.strip-note { font-size: 12px; letter-spacing: -0.12px; color: var(--faint); }
+.strip-rest { margin: 0; font-size: 14px; color: var(--hero-muted); }
+/* Two per row when narrow, all stages in one row when there is room, never a lone tile on a row */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@container (min-width: 640px) { .tiles { grid-template-columns: repeat(var(--tiles, 4), minmax(0, 1fr)); } }
+.tile { display: grid; gap: 2px; min-width: 0; padding: 12px 14px 10px; border: none; border-radius: 12px; background: var(--surface-2); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.tile:hover { background: var(--fill); }
+.tile-label { font-size: 12px; font-weight: 600; letter-spacing: 0.3px; color: var(--muted); }
+.tile-figures { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 8px; }
+.tile-value { font-size: 26px; font-weight: 600; line-height: 1.15; letter-spacing: -0.3px; }
+.tile-delta { font-size: 14px; letter-spacing: -0.224px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.spark { display: block; width: 100%; height: 34px; margin-top: 4px; overflow: visible; }
+.spark-line { fill: none; stroke: var(--faint); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.spark-avg { stroke: var(--faint); stroke-opacity: 0.4; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.spark-dot { stroke: var(--text); stroke-width: 6; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.spark-hit { fill: transparent; }
+
+/* Findings of a check, grouped by level; each group opens with its mark, label and rule */
 .review { width: 100%; border-collapse: collapse; }
 .review th, .review td { padding: 8px 8px; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: middle; font-weight: 400; }
-.review tr:last-child th, .review tr:last-child td { border-bottom: none; }
-.review .flag-cell { width: 26px; padding-left: 0; }
-.flag { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--risk); color: var(--surface); font-size: 12px; font-weight: 700; line-height: 1; }
+.review tbody:last-child tr:last-child > * { border-bottom: none; }
+.review .lvl-head > * { padding: 16px 8px 8px 0; font-size: 14px; letter-spacing: -0.224px; }
+.review tbody + tbody .lvl-head > * { padding-top: 24px; }
+.lvl-head .mark { margin-right: 8px; }
+.lvl-label { font-weight: 600; color: var(--hero-text); }
+.lvl-rule { color: var(--hero-muted); }
+.lvl-rule::before { content: '·'; margin: 0 6px; }
+.review .lvl-count { padding-right: 0; text-align: right; color: var(--hero-faint); font-variant-numeric: tabular-nums; }
+.review .mark-cell { width: 26px; padding-left: 0; }
 .row-name { white-space: nowrap; font-size: 15px; letter-spacing: -0.24px; font-variant-numeric: tabular-nums; }
-.is-flagged .row-name { font-weight: 600; }
+.lvl-act .row-name { font-weight: 600; }
 .row-context { width: 100%; font-size: 14px; letter-spacing: -0.224px; color: var(--hero-muted); }
 .row-tag { white-space: nowrap; text-align: right !important; font-size: 14px; letter-spacing: -0.224px; font-variant-numeric: tabular-nums; color: var(--text-2); }
-.is-flagged .row-tag { font-weight: 600; color: var(--hero-text); }
+.lvl-act .row-tag { font-weight: 600; color: var(--hero-text); }
 .review .row-icons { white-space: nowrap; text-align: right; padding-right: 0; }
 .icon-btn { display: inline-grid; place-items: center; width: 28px; height: 28px; border: none; border-radius: 6px; background: none; color: var(--link); cursor: pointer; }
 .icon-btn:hover { background: var(--fill); }
-/* Actions stay visible on flagged rows; on other rows they appear on hover or keyboard focus */
+/* Row actions are on every row, quiet until the row is hovered or focused */
 @media (hover: hover) {
-  .review tr:not(.is-flagged) .icon-btn { opacity: 0; transition: opacity 0.15s; }
-  .review tr:not(.is-flagged):hover .icon-btn, .review tr:not(.is-flagged):focus-within .icon-btn { opacity: 1; }
+  .review .icon-btn { color: var(--faint); transition: color 0.15s; }
+  .review tr:hover .icon-btn, .review tr:focus-within .icon-btn { color: var(--link); }
 }
-.check > .link { padding-top: 8px; }
-.warnings { list-style: none; padding: 0; margin: 18px 0 0; color: var(--hero-faint); }
+.review .lvl-more td { padding: 4px 0 8px; }
+.review .lvl-more .link { padding: 4px 0; }
+.warnings { list-style: none; padding: 0; margin: 28px 0 0; color: var(--hero-faint); }
 
 /* Finding type: text + symbol, neutral fill; only risk carries the status red */
 .badge { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 600; letter-spacing: -0.12px; padding: 2px 9px; border-radius: 980px; background: var(--fill); color: var(--text-2); }
@@ -326,12 +367,17 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 }
 @media (max-width: 560px) {
   .digest { padding: 18px 16px 14px; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* Rows become two lines: name, then the reason; icons stay on the right */
   .review, .review tbody { display: block; }
   .review tr { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; column-gap: 4px; padding: 6px 0; border-bottom: 1px solid var(--hairline); }
-  .review tr:last-child { border-bottom: none; }
+  .review tbody:last-child tr:last-child { border-bottom: none; }
   .review th, .review td { padding: 0; border-bottom: none; }
-  .review .flag-cell { grid-row: 1 / span 2; }
+  .review .lvl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 16px 0 8px; }
+  .review tbody + tbody .lvl-head { padding-top: 22px; }
+  .review .lvl-head > *, .review tbody + tbody .lvl-head > * { padding: 0; }
+  .review .lvl-more { display: block; }
+  .review .mark-cell { grid-row: 1 / span 2; }
   .review .row-context { display: none; }
   .review .row-tag { grid-column: 2; grid-row: 2; text-align: left !important; font-size: 13px; }
   .review .row-icons { grid-column: 3; grid-row: 1 / span 2; }
