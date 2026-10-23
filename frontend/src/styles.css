@@ -34,34 +34,36 @@
   --watch: #c08000;
   --scrim: rgba(0, 0, 0, 0.4);
   --lift: 3px 5px 30px 0 rgba(0, 0, 0, 0.22);
+  --seg-on: #ffffff;          /* selected segment of a segmented control */
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #000000;
-    --surface: #1d1d1f;
-    --surface-2: #272729;
-    --fill: #2a2a2d;
-    --text: #f5f5f7;
-    --text-2: rgba(255, 255, 255, 0.86);
-    --muted: rgba(255, 255, 255, 0.64);
-    --faint: rgba(255, 255, 255, 0.48);
-    --hairline: rgba(255, 255, 255, 0.12);
-    --link: #2997ff;
-    --fill-strong: #3a3a3d;
-    --nav-bg: rgba(0, 0, 0, 0.72);
-    --nav-text: #f5f5f7;
-    --nav-muted: rgba(255, 255, 255, 0.56);
-    --nav-pill: rgba(255, 255, 255, 0.12);
-    --risk: #ff6961;
-    --risk-bg: rgba(255, 105, 97, 0.14);
-    --watch: #ffb340;
-    --scrim: rgba(0, 0, 0, 0.6);
-    --lift: 3px 5px 30px 0 rgba(0, 0, 0, 0.6);
-    color-scheme: dark;
-  }
+/* Dark theme. index.html sets data-theme before the first paint, from the saved choice
+   (Light / Dark in the sidebar) or, by default, the system appearance; see theme.ts. */
+:root[data-theme='dark'] {
+  --bg: #000000;
+  --surface: #1d1d1f;
+  --surface-2: #272729;
+  --fill: #2a2a2d;
+  --text: #f5f5f7;
+  --text-2: rgba(255, 255, 255, 0.86);
+  --muted: rgba(255, 255, 255, 0.64);
+  --faint: rgba(255, 255, 255, 0.48);
+  --hairline: rgba(255, 255, 255, 0.12);
+  --link: #2997ff;
+  --fill-strong: #3a3a3d;
+  --nav-bg: rgba(0, 0, 0, 0.72);
+  --nav-text: #f5f5f7;
+  --nav-muted: rgba(255, 255, 255, 0.56);
+  --nav-pill: rgba(255, 255, 255, 0.12);
+  --risk: #ff6961;
+  --risk-bg: rgba(255, 105, 97, 0.14);
+  --watch: #ffb340;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --lift: 3px 5px 30px 0 rgba(0, 0, 0, 0.6);
+  --seg-on: #48484a;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -114,6 +116,12 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 .nav-label { margin: 0 10px 4px; font-size: 12px; font-weight: 600; letter-spacing: -0.12px; color: var(--faint); }
 .side-note { margin: 0 10px; font-size: 12px; letter-spacing: -0.12px; color: var(--faint); }
 .sidebar-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; padding: 0 6px; }
+/* Theme: Light / Dark / Match system, on its own row under the status pills */
+.theme-row { flex-basis: 100%; margin-top: 4px; }
+.theme-switch { display: inline-flex; gap: 2px; padding: 2px; border-radius: 980px; background: var(--nav-pill); }
+.theme-opt { display: grid; place-items: center; width: 30px; height: 24px; border: none; border-radius: 980px; background: none; color: var(--nav-muted); cursor: pointer; }
+.theme-opt:hover { color: var(--nav-text); }
+.theme-opt[aria-pressed='true'] { background: var(--seg-on); color: var(--nav-text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16); }
 .pill { display: inline-block; padding: 3px 10px; border-radius: 980px; background: var(--nav-pill); color: var(--nav-text); font-size: 12px; letter-spacing: -0.12px; }
 .pill-warn { background: var(--text); color: var(--bg); }
 

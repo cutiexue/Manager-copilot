@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { BriefingSource, Session } from '../types';
 import { hrefFor, type Page, type Route } from '../route';
 import Icon, { type IconName } from './Icon';
+import ThemeSwitch from './ThemeSwitch';
 
 interface Props {
   route: Route;
@@ -87,6 +88,9 @@ export default function Sidebar({
         <span className={briefingSource === 'live' ? 'pill' : 'pill pill-warn'} title={briefingDetail}>
           {SOURCE_LABEL[briefingSource]}
         </span>
+        <div className="theme-row">
+          <ThemeSwitch />
+        </div>
       </div>
     </nav>
   );
