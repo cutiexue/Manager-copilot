@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import type { Briefing, EvidenceView } from '../types';
+import type { AtRiskOrder, Briefing, EvidenceView } from '../types';
 import { evidenceForOrder, evidenceForStage } from '../evidence';
+import Icon from './Icon';
 
 interface Props {
   briefing: Briefing;
   onEvidence: (v: EvidenceView) => void;
   onAsk: (text: string) => void;
+  onRemind: (order: AtRiskOrder) => void;
 }
 
 type Tab = 'yesterday' | 'risk';
 
-export default function DetailPanel({ briefing, onEvidence, onAsk }: Props) {
+export default function DetailPanel({ briefing, onEvidence, onAsk, onRemind }: Props) {
   const [tab, setTab] = useState<Tab>('yesterday');
   const y = briefing.yesterday;
 
@@ -56,8 +58,8 @@ export default function DetailPanel({ briefing, onEvidence, onAsk }: Props) {
                         {c == null ? '—' : `${c < 0 ? '▼ ' : c > 0 ? '▲ +' : ''}${c.toFixed(1)}%`}
                       </td>
                       <td>
-                        <button className="btn btn-small" onClick={() => onEvidence(evidenceForStage(y.date, s))}>
-                          Evidence
+                        <button className="btn btn-ghost btn-small" onClick={() => onEvidence(evidenceForStage(y.date, s))}>
+                          <Icon name="evidence" size={14} /> Evidence
                         </button>
                       </td>
                     </tr>
@@ -83,11 +85,14 @@ export default function DetailPanel({ briefing, onEvidence, onAsk }: Props) {
                     <div className="small">{o.risk_reasons.join('; ')}</div>
                   </div>
                   <div className="row-actions">
-                    <button className="btn btn-small" onClick={() => onEvidence(evidenceForOrder(briefing, o))}>
-                      Evidence
+                    <button className="btn btn-ghost btn-small" onClick={() => onEvidence(evidenceForOrder(briefing, o))}>
+                      <Icon name="evidence" size={14} /> Evidence
                     </button>
-                    <button className="btn btn-small" onClick={() => onAsk(`What is the latest status of ${o.order_id}?`)}>
-                      Ask
+                    <button className="btn btn-ghost btn-small" onClick={() => onAsk(`What is the latest status of ${o.order_id}?`)}>
+                      <Icon name="ask" size={14} /> Ask
+                    </button>
+                    <button className="btn btn-ghost btn-small" onClick={() => onRemind(o)}>
+                      <Icon name="remind" size={14} /> Remind…
                     </button>
                   </div>
                 </li>

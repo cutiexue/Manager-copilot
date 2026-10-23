@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { BriefingSource, Session } from '../types';
 import { hrefFor, type Page, type Route } from '../route';
+import Icon, { type IconName } from './Icon';
 
 interface Props {
   route: Route;
@@ -15,20 +16,6 @@ interface Props {
   onPick: () => void;
 }
 
-const Icon = ({ d }: { d: string }) => (
-  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden fill="none" stroke="currentColor" strokeWidth="2"
-    strokeLinecap="round" strokeLinejoin="round">
-    <path d={d} />
-  </svg>
-);
-
-const ICONS = {
-  plus: 'M12 5v14M5 12h14',
-  briefing: 'M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 8h6M9 12h6M9 16h4',
-  orders: 'M3 20h18M6 20V11M12 20V5M18 20v-7',
-  actions: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM8 12l3 3 5-6',
-};
-
 const SOURCE_LABEL: Record<BriefingSource, string> = {
   live: 'Briefing: live',
   checking: 'Briefing: checking…',
@@ -36,10 +23,10 @@ const SOURCE_LABEL: Record<BriefingSource, string> = {
 };
 
 export default function Sidebar({ route, sessions, sessionsLoaded, sessionsError, asOfDate, briefingSource, counts, onPick }: Props) {
-  const nav: { page: Page; label: string; icon: string; count?: number }[] = [
-    { page: 'briefing', label: 'Briefing', icon: ICONS.briefing, count: counts.decisions },
-    { page: 'orders', label: 'Orders & output', icon: ICONS.orders, count: counts.atRisk },
-    { page: 'actions', label: 'Actions', icon: ICONS.actions, count: counts.actions || undefined },
+  const nav: { page: Page; label: string; icon: IconName; count?: number }[] = [
+    { page: 'briefing', label: 'Briefing', icon: 'briefing', count: counts.decisions },
+    { page: 'orders', label: 'Orders & output', icon: 'orders', count: counts.atRisk },
+    { page: 'actions', label: 'Actions', icon: 'actions', count: counts.actions || undefined },
   ];
   // Conversations that never got a message are not worth listing.
   const recent = sessions.filter((s) => s.has_messages !== false);
@@ -69,16 +56,17 @@ export default function Sidebar({ route, sessions, sessionsLoaded, sessionsError
         </div>
       </div>
 
-      <a className="btn btn-primary new-chat" href={hrefFor({ page: 'home' })}
-        aria-current={route.page === 'home' ? 'page' : undefined} onClick={onPick}>
-        <Icon d={ICONS.plus} /> New chat
+      <a className="new-chat" href={hrefFor({ page: 'home' })} aria-current={route.page === 'home' ? 'page' : undefined}
+        onClick={onPick}>
+        <span className="new-chat-icon"><Icon name="plus" size={14} /></span>
+        New chat
       </a>
 
       <div className="nav">
         {nav.map((item) => (
           <a key={item.page} href={hrefFor({ page: item.page })} aria-current={route.page === item.page ? 'page' : undefined}
             onClick={onPick}>
-            <Icon d={item.icon} />
+            <Icon name={item.icon} />
             {item.label}
             {item.count !== undefined && <span className="count">{item.count}</span>}
           </a>

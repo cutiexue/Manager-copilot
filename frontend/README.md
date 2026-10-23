@@ -29,6 +29,7 @@ Other commands: `npm run typecheck`, `npm run build`.
 | Chat | `GET/POST /sessions`, `GET/POST /sessions/{id}/messages` (api.py) | **Live** backend calls |
 | Morning briefing | `GET /briefings/latest` (api.py → `briefing.get_briefing_payload()`) | **Live**; falls back to `src/fixtures/briefing.json` when the backend is unreachable, labelled "snapshot" |
 | Evidence drawer | source rows cited by the tools, resolved to the raw CSV rows | Comes with the briefing payload (live or snapshot) |
+| Order search in the reminder dialog | `GET /orders/search` (order_search.py) | **Live**; capped results, so it scales with the order book |
 | Create reminder + confirm | in-browser state only | **Demo**: backend has no action/confirm endpoint yet |
 | Watches, feasibility, order detail, audit API | — | Not started; waiting for backend endpoints |
 
@@ -55,11 +56,17 @@ URL hash, so refresh keeps the page and the browser back button works.
 |---|---|
 | `#/` | **New chat** (home): today's top 3 briefing items above a centred chat box, with suggested questions |
 | `#/chat/<id>` | An open conversation; the sidebar's *Recent* list holds saved conversations |
-| `#/briefing` | Full morning briefing (all items, evidence, Ask Co-Pilot, Create reminder) |
-| `#/orders` | Yesterday's output and at-risk orders |
-| `#/actions` | Action log (demo, browser only) |
+| `#/briefing` | Full morning briefing: all items as a list, each with Evidence, Ask and Remind… |
+| `#/orders` | Yesterday's output and at-risk orders (Evidence, Ask, Remind… per order) |
+| `#/actions` | Action log (demo, browser only) and **New reminder**, which searches all orders |
 
 "Ask" buttons on any page open a new conversation with the question typed in but not sent.
+"Remind…" and "New reminder" open one dialog: the order is preset or searched for, and nothing is
+recorded until the manager confirms or cancels.
+
+Buttons follow three levels: blue fill only for the main action on a screen (Send, Confirm,
+New reminder), neutral fill for secondary controls (Cancel, Close, Retry), and blue text with an
+icon for per-item actions (Evidence, Ask, Remind…).
 The evidence drawer and the confirm dialog open over whichever page is showing. Below 860 px
 the sidebar becomes a slide-in menu.
 
@@ -80,7 +87,9 @@ src/
     ├── DetailPanel.tsx        yesterday's output / at-risk orders
     ├── Chat.tsx               multi-turn chat, error states
     ├── EvidenceDrawer.tsx     claim, calculation, source rows
-    ├── ConfirmModal.tsx       explicit confirm before any action
+    ├── ConfirmModal.tsx       reminder dialog: preset or searched order, explicit confirm
+    ├── OrderPicker.tsx        order search combobox (keyboard: Up/Down, Enter)
+    ├── Icon.tsx               shared stroke icons
     ├── ActionLog.tsx          proposed/confirmed/cancelled log
     └── TypeBadge.tsx          finding type: text + symbol, not colour only
 ```

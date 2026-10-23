@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { api } from '../api';
 import type { ChatMessage, Session } from '../types';
+import Icon from './Icon';
 
 interface Props {
   /** null = a new conversation, created on the first message */
@@ -170,7 +171,7 @@ export default function Chat({
             <div className="alert" role="alert">
               <strong>{offline ? 'Backend offline.' : 'Request failed.'}</strong> {problem}
               <button className="btn btn-small" onClick={retry}>
-                Retry
+                <Icon name="refresh" size={14} /> Retry
               </button>
             </div>
           )}

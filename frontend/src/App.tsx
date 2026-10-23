@@ -37,6 +37,7 @@ export default function App() {
   const [evidence, setEvidence] = useState<EvidenceView | null>(null);
   const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
   const [draft, setDraft] = useState<ProposalDraft | null>(null);
+  const [draftOpenedAt, setDraftOpenedAt] = useState('');
   const [actions, setActions] = useState<ActionProposal[]>([]);
 
   const loadBriefing = useCallback(async () => {
@@ -92,24 +93,23 @@ export default function App() {
     [navigate],
   );
 
+  // Opening the dialog is a draft; nothing is recorded or executed until the manager decides.
   const propose = useCallback((d: ProposalDraft) => {
-    // Step 1 of the plan's state machine: the proposal exists but nothing is executed yet.
-    const p: ActionProposal = {
-      id: `ACT-${String(Date.now()).slice(-6)}`,
-      kind: d.kind,
-      target: d.target,
-      text: d.text,
-      state: 'PROPOSED',
-      created_at: new Date().toISOString(),
-    };
-    setActions((a) => [p, ...a]);
-    setDraft({ ...d, proposalId: p.id });
+    setDraft(d);
+    setDraftOpenedAt(new Date().toISOString());
   }, []);
 
-  const decide = (id: string, state: 'CONFIRMED' | 'CANCELLED', text?: string) => {
-    setActions((a) =>
-      a.map((p) => (p.id === id ? { ...p, state, text: text ?? p.text, decided_at: new Date().toISOString() } : p)),
-    );
+  const decide = (state: 'CONFIRMED' | 'CANCELLED', target: string, text: string) => {
+    const p: ActionProposal = {
+      id: `ACT-${String(Date.now()).slice(-6)}`,
+      kind: draft?.kind ?? 'reminder',
+      target,
+      text,
+      state,
+      created_at: draftOpenedAt,
+      decided_at: new Date().toISOString(),
+    };
+    setActions((a) => [p, ...a]);
     setDraft(null);
   };
 
@@ -165,13 +165,25 @@ export default function App() {
             evidence to see the source data.
           </p>
         </header>
-        <DetailPanel briefing={briefing} onEvidence={setEvidence} onAsk={ask} />
+        <DetailPanel
+          briefing={briefing}
+          onEvidence={setEvidence}
+          onAsk={ask}
+          onRemind={(o) =>
+            propose({
+              kind: 'reminder',
+              order: { order_id: o.order_id, customer: o.customer, detail: `${o.current_stage} · ${o.risk_reasons.join('; ')}` },
+              text: `Follow up on ${o.order_id} (${o.customer}): ${o.risk_reasons.join('; ')}.`,
+              reason: `At-risk order in the ${briefing.as_of_date} briefing`,
+            })
+          }
+        />
       </div>
     );
   } else {
     page = (
       <div className="page">
-        <ActionLog actions={actions} />
+        <ActionLog actions={actions} onNewReminder={() => propose({ kind: 'reminder', text: '' })} />
       </div>
     );
   }
@@ -202,11 +214,12 @@ export default function App() {
 
       <EvidenceDrawer view={evidence} rows={data.source_rows} onClose={() => setEvidence(null)} />
 
-      {draft && draft.proposalId && (
+      {draft && (
         <ConfirmModal
           draft={draft}
-          onConfirm={(text) => decide(draft.proposalId!, 'CONFIRMED', text)}
-          onCancel={() => decide(draft.proposalId!, 'CANCELLED')}
+          onConfirm={(target, text) => decide('CONFIRMED', target, text)}
+          // Closing before choosing what the reminder is about leaves nothing to record.
+          onCancel={(target, text) => (target ? decide('CANCELLED', target, text) : setDraft(null))}
         />
       )}
     </div>

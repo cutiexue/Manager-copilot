@@ -1,6 +1,7 @@
 import type { Briefing, BriefingFixture, BriefingSource, EvidenceView } from '../types';
 import { evidenceForDecision, questionFor } from '../evidence';
 import { hrefFor } from '../route';
+import Icon from './Icon';
 import TypeBadge from './TypeBadge';
 
 interface Props {
@@ -49,11 +50,11 @@ export default function TodayDigest({ fixture, source, onEvidence, onAsk }: Prop
               <p>{d.about}</p>
             </div>
             <div className="row-actions">
-              <button className="btn btn-small" onClick={() => onEvidence(evidenceForDecision(briefing, d))}>
-                Evidence
+              <button className="btn btn-ghost btn-small" onClick={() => onEvidence(evidenceForDecision(briefing, d))}>
+                <Icon name="evidence" size={14} /> Evidence
               </button>
-              <button className="btn btn-small" onClick={() => onAsk(questionFor(briefing, d))}>
-                Ask
+              <button className="btn btn-ghost btn-small" onClick={() => onAsk(questionFor(briefing, d))}>
+                <Icon name="ask" size={14} /> Ask
               </button>
             </div>
           </li>

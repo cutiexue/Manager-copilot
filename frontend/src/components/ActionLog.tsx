@@ -1,17 +1,26 @@
 import type { ActionProposal } from '../types';
+import Icon from './Icon';
 
 const STATE_LABEL = { PROPOSED: '… Proposed', CONFIRMED: '✓ Confirmed', CANCELLED: '✕ Cancelled' } as const;
 
 const time = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
 
-export default function ActionLog({ actions }: { actions: ActionProposal[] }) {
+export default function ActionLog({ actions, onNewReminder }: { actions: ActionProposal[]; onNewReminder: () => void }) {
   return (
     <section className="panel actions" aria-labelledby="actions-title">
-      <h2 id="actions-title">
-        Actions &amp; audit <span className="pill pill-warn small">demo · not saved</span>
-      </h2>
+      <div className="actions-head">
+        <h2 id="actions-title">
+          Actions &amp; audit <span className="pill pill-warn small">demo · not saved</span>
+        </h2>
+        <button className="btn btn-primary" onClick={onNewReminder}>
+          <Icon name="plus" size={14} /> New reminder
+        </button>
+      </div>
       {actions.length === 0 ? (
-        <p className="empty small">No actions yet. Use “Create reminder…” on a briefing item — you will be asked to confirm first.</p>
+        <p className="empty small">
+          No actions yet. Use “New reminder” to pick any order, or “Remind…” on a briefing item or an at-risk order. You
+          will be asked to confirm first.
+        </p>
       ) : (
         <table className="table small">
           <thead>

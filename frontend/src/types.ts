@@ -111,6 +111,32 @@ export interface SendMessageResponse {
   answer: string;
 }
 
+// ---- Order search (GET /orders/search) ----
+export interface OrderHit {
+  order_id: string;
+  customer: string;
+  product: string;
+  category: string;
+  pieces: number;
+  due_date: string;
+  status: 'IN_PROGRESS' | 'COMPLETE';
+  current_stage: string;
+  last_activity_date: string;
+  /** From the backend's risk rules; empty when the order needs no attention */
+  risk_reasons: string[];
+  source_row: number;
+}
+
+export interface OrderSearchResult {
+  status: 'ok';
+  query: string;
+  /** All matches; only the first `count` are returned */
+  total: number;
+  count: number;
+  orders: OrderHit[];
+  snapshot_date: string;
+}
+
 // ---- What the evidence drawer shows ----
 export interface EvidenceView {
   title: string;
