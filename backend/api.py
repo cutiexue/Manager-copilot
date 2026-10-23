@@ -2,6 +2,9 @@
 
 from fastapi import FastAPI, HTTPException, Request
 
+from briefing import get_briefing_payload
+from rules import SNAPSHOT
+
 
 def create_app(service):
     app = FastAPI(title='DSS5105 Factory Assistant')
@@ -44,5 +47,10 @@ def create_app(service):
         from starlette.concurrency import run_in_threadpool
         data = await body(request, ['message'])
         return await run_in_threadpool(run, service.send_message, session_id, data.get('message'))
+
+    @app.get('/briefings/latest')
+    def latest_briefing(as_of_date: str = SNAPSHOT):
+        # 没有调度器之前，“最新”就是按数据快照当场生成的晨报；不调用模型。
+        return run(get_briefing_payload, as_of_date)
 
     return app

@@ -6,9 +6,13 @@ scheduler can generate the briefing without an LLM call. The agent may narrate
 the structured result, but it must not invent numbers beyond it.
 """
 
-from datetime import date, timedelta
+import csv
+import subprocess
+from datetime import date, datetime, timedelta, timezone
+from functools import lru_cache
+from pathlib import Path
 
-from data_loader import STAGES
+from data_loader import PRODUCTION_SOURCE, STAGES
 from discovery import discover_issues
 from rules import MAX_FINDINGS, SNAPSHOT, is_workday
 from tools import compare_stage_output, get_orders_at_risk, get_stage_output
@@ -169,3 +173,56 @@ def render_briefing_text(briefing):
     lines.extend(f"Warning: {warning}" for warning in briefing["warnings"])
     lines.extend(f"Data gap: {gap['stage']}: {gap['reason']}" for gap in briefing["data_gaps"])
     return "\n".join(lines)
+
+
+BACKEND_DIR = Path(__file__).resolve().parent
+
+
+def _collect_refs(node, refs):
+    """Gather every (source, row) citation in a tool result."""
+    if isinstance(node, dict):
+        if "source" in node and "row" in node:
+            refs.add((node["source"], node["row"]))
+        elif "source_row" in node:
+            # baseline_records 只带行号，来源固定是 production_log.csv。
+            refs.add((PRODUCTION_SOURCE, node["source_row"]))
+        for value in node.values():
+            _collect_refs(value, refs)
+    elif isinstance(node, list):
+        for value in node:
+            _collect_refs(value, refs)
+
+
+@lru_cache(maxsize=1)
+def _backend_commit():
+    try:
+        result = subprocess.run(["git", "-C", str(BACKEND_DIR), "rev-parse", "--short", "HEAD"],
+                                capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return result.stdout.strip() or None
+
+
+def get_briefing_payload(as_of_date=SNAPSHOT):
+    """Briefing plus the raw CSV rows it cites, in the shape of the frontend fixture."""
+    briefing = get_morning_briefing(as_of_date)
+    if briefing.get("status") != "ok":
+        raise ValueError(briefing.get("message", "Briefing could not be generated."))
+    refs = set()
+    _collect_refs(briefing, refs)
+    tables = {}
+    rows = {}
+    for source, row in sorted(refs):
+        if source not in tables:
+            with (BACKEND_DIR / source).open(encoding="utf-8-sig", newline="") as handle:
+                tables[source] = list(csv.reader(handle))
+        header, values = tables[source][0], tables[source][row - 1]  # row 是文件行号，表头为第 1 行
+        rows[f"{source}#{row}"] = dict(zip(header, values))
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generator": "GET /briefings/latest",
+        "backend_commit": _backend_commit(),
+        "briefing": briefing,
+        "source_rows": rows,
+        "briefing_text": render_briefing_text(briefing),
+    }

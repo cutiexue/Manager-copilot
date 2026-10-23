@@ -1,4 +1,7 @@
-"""HTTP chat flow with a fake agent: no API key or network needed."""
+"""HTTP chat flow with a fake agent and the briefing endpoint: no API key or network needed."""
+
+import json
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -41,3 +44,26 @@ def test_errors_map_to_http_status(client):
     assert client.post("/sessions", json={"title": "x", "admin": True}).status_code == 400
     session_id = client.post("/sessions", json={}).json()["id"]
     assert client.post(f"/sessions/{session_id}/messages", json={"message": "  "}).status_code == 400
+
+
+FIXTURE = Path(__file__).resolve().parents[2] / "frontend" / "src" / "fixtures" / "briefing.json"
+
+
+def test_latest_briefing_matches_the_frontend_snapshot(client):
+    # 前端在后端离线时退回快照，所以实时接口和快照必须是同一种结构、同样的内容。
+    response = client.get("/briefings/latest")
+    assert response.status_code == 200
+    payload = response.json()
+    fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    assert set(payload) == set(fixture)
+    assert payload["generator"] == "GET /briefings/latest"
+    assert payload["briefing"] == fixture["briefing"]
+    assert payload["source_rows"] == fixture["source_rows"]
+    assert payload["briefing_text"] == fixture["briefing_text"]
+    assert payload["source_rows"]["track1/data/orders.csv#86"]["order_id"] == "ORD-002"
+
+
+def test_latest_briefing_for_another_date_and_bad_date(client):
+    rest_day = client.get("/briefings/latest", params={"as_of_date": "2026-03-30"}).json()
+    assert rest_day["briefing"]["yesterday"]["is_workday"] is False
+    assert client.get("/briefings/latest", params={"as_of_date": "2026-13-01"}).status_code == 400
