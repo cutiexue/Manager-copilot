@@ -27,18 +27,21 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 python -m pytest          # deterministic tools, SQLite store, chat API with a fake agent
 python main.py --local    # one order lookup, no LLM call
-python main.py --api      # asks for provider + API key, serves 127.0.0.1:8000
+python main.py            # terminal menu: conversations, history, on-demand briefing
+python main.py --api      # serves 127.0.0.1:8000 for the frontend
 ```
+
+Both `main.py` modes use the provider and API key saved in `backend/.env` (see `backend/.env.example`) or the environment, and only ask for the key when none is set. `--provider deepseek|openai` overrides `LLM_PROVIDER`.
 
 Frontend (second terminal):
 
 ```bash
 cd frontend
-npm install
+npm ci                    # installs exactly what package-lock.json pins
 npm run dev               # http://localhost:5173, proxies /api/* to the backend
 ```
 
-Chat sessions are stored in `backend/manager_copilot.db` (SQLite, git-ignored). Copy `backend/.env.example` to `backend/.env` for local settings; never commit `.env`.
+Chat sessions are stored in `backend/manager_copilot.db` (SQLite, git-ignored). Never commit `.env`.
 
 ## Implementation Status
 
@@ -46,8 +49,8 @@ Chat sessions are stored in `backend/manager_copilot.db` (SQLite, git-ignored). 
 |---|---|---|
 | Retrieval, judgement, tracing, discovery tools | Built, read-only, tested | `backend/tools.py`, `rules.py`, `discovery.py` |
 | Morning briefing content | Built deterministically; no scheduler, no API endpoint | `backend/briefing.py`; UI reads `frontend/src/fixtures/briefing.json` |
-| Multi-turn Q&A | Built: one LangChain agent, 21 tools, SQLite sessions | `backend/llm.py`, `service.py`, `api.py`, `storage.py` |
-| Feasibility estimates | Built (in-house, per-workshop, fastest/cheapest plan) | `backend/production_estimates.py`, `production_optimizer.py` |
+| Multi-turn Q&A | Built: one LangChain agent, 26 tools, SQLite sessions with auto titles; "these orders" follow-ups restore the last order query | `backend/llm.py`, `service.py`, `api.py`, `storage.py`, `order_selection.py` |
+| Feasibility estimates | Built: single batch (in-house, per-workshop, fastest/cheapest) and multi-order outsourcing plans with revision | `backend/production_estimates.py`, `production_optimizer.py`, `plan_context.py` |
 | Standing watches / alerts | Not started | — |
 | Confirmed actions + audit | UI demo only (browser state); no backend | `frontend/src/components/ConfirmModal.tsx` |
 | APScheduler | Not started | — |
