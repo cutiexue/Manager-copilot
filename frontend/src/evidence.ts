@@ -1,7 +1,7 @@
 // Turn tool outputs into what the evidence drawer shows.
 // Rule from the implementation plan: the frontend never computes business numbers.
 // Every value below is copied (and only formatted) from fields the backend returned.
-import type { AtRiskOrder, Briefing, Decision, Finding, SourceRef, YesterdayStage } from './types';
+import type { AtRiskOrder, Briefing, Decision, Finding, SourceRef, SummaryPoint, YesterdayStage } from './types';
 
 const PRODUCTION = 'track1/data/production_log.csv';
 
@@ -91,5 +91,22 @@ export function evidenceForOrder(briefing: Briefing, o: AtRiskOrder) {
       { label: 'As-of date', value: briefing.as_of_date },
     ],
     refs: briefing.at_risk.source_rows.filter((r) => r.key === o.order_id),
+  };
+}
+
+const POINT_LABEL: Record<string, string> = {
+  orders_at_risk: 'Orders at risk',
+  most_overdue: 'Most overdue order',
+  stage_output_drop: 'Output drop',
+  customer_slipping: 'Customer slipping',
+  yesterday: "Yesterday's output",
+};
+
+export function evidenceForPoint(point: SummaryPoint) {
+  return {
+    title: POINT_LABEL[point.kind] ?? 'Summary',
+    claim: point.text,
+    calculation: [],
+    refs: point.evidence?.source_rows ?? [],
   };
 }

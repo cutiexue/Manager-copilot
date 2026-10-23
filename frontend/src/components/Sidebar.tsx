@@ -10,6 +10,8 @@ interface Props {
   sessionsError: string | null;
   asOfDate: string;
   briefingSource: BriefingSource;
+  /** Where the briefing came from (generator, time, backend commit), shown on hover */
+  briefingDetail: string;
   /** Badge numbers, copied from the briefing payload and the action log */
   counts: { decisions: number; atRisk: number; actions: number };
   /** Called on every link click, e.g. to close the menu on small screens */
@@ -22,7 +24,9 @@ const SOURCE_LABEL: Record<BriefingSource, string> = {
   snapshot: 'Briefing: snapshot',
 };
 
-export default function Sidebar({ route, sessions, sessionsLoaded, sessionsError, asOfDate, briefingSource, counts, onPick }: Props) {
+export default function Sidebar({
+  route, sessions, sessionsLoaded, sessionsError, asOfDate, briefingSource, briefingDetail, counts, onPick,
+}: Props) {
   const nav: { page: Page; label: string; icon: IconName; count?: number }[] = [
     { page: 'briefing', label: 'Briefing', icon: 'briefing', count: counts.decisions },
     { page: 'orders', label: 'Orders & output', icon: 'orders', count: counts.atRisk },
@@ -80,7 +84,9 @@ export default function Sidebar({ route, sessions, sessionsLoaded, sessionsError
 
       <div className="sidebar-foot">
         <span className="pill" title="Business analysis uses the dataset clock, not today's date.">Data as of {asOfDate}</span>
-        <span className={briefingSource === 'live' ? 'pill' : 'pill pill-warn'}>{SOURCE_LABEL[briefingSource]}</span>
+        <span className={briefingSource === 'live' ? 'pill' : 'pill pill-warn'} title={briefingDetail}>
+          {SOURCE_LABEL[briefingSource]}
+        </span>
       </div>
     </nav>
   );

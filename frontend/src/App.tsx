@@ -135,7 +135,7 @@ export default function App() {
         onTurnSettled={() => void loadSessions()}
         welcome={
           route.page === 'home' ? (
-            <TodayDigest fixture={data} source={source} onEvidence={setEvidence} onAsk={ask} />
+            <TodayDigest fixture={data} source={source} onEvidence={setEvidence} />
           ) : undefined
         }
         suggestions={route.page === 'home' ? suggestionsFor(briefing) : undefined}
@@ -197,6 +197,13 @@ export default function App() {
         sessionsError={sessionsError}
         asOfDate={briefing.as_of_date}
         briefingSource={source}
+        briefingDetail={
+          source === 'live'
+            ? `Generated ${new Date(data.generated_at).toLocaleString()} by ${data.generator}, backend ${data.backend_commit ?? 'unknown'}`
+            : source === 'snapshot'
+              ? `Saved snapshot from backend ${data.backend_commit ?? 'unknown'}. ${briefingError ?? ''}`.trim()
+              : 'Loading the live briefing'
+        }
         counts={{ decisions: briefing.decisions.length, atRisk: briefing.at_risk.count, actions: actions.length }}
         onPick={() => setMenuOpen(false)}
       />

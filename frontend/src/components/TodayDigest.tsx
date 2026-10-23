@@ -1,17 +1,12 @@
 import type { Briefing, BriefingFixture, BriefingSource, EvidenceView } from '../types';
-import { evidenceForDecision, questionFor } from '../evidence';
 import { hrefFor } from '../route';
-import Icon from './Icon';
-import TypeBadge from './TypeBadge';
+import SummaryText from './SummaryText';
 
 interface Props {
   fixture: BriefingFixture;
   source: BriefingSource;
   onEvidence: (v: EvidenceView) => void;
-  onAsk: (text: string) => void;
 }
-
-const TOP = 3;
 
 /** Starter questions built from the briefing's own findings; templates only, no numbers. */
 export function suggestionsFor(briefing: Briefing): string[] {
@@ -24,9 +19,9 @@ export function suggestionsFor(briefing: Briefing): string[] {
   return out;
 }
 
-// The Home page shows the top of the morning briefing above the chat box, so the most
-// important risks are visible on arrival without leaving the conversation.
-export default function TodayDigest({ fixture, source, onEvidence, onAsk }: Props) {
+// The Home page leads with the briefing summary above the chat box: every check in one short
+// paragraph, each sentence with its sources, so nothing is ranked against things of another kind.
+export default function TodayDigest({ fixture, source, onEvidence }: Props) {
   const { briefing } = fixture;
 
   return (
@@ -38,28 +33,13 @@ export default function TodayDigest({ fixture, source, onEvidence, onAsk }: Prop
           {source === 'snapshot' ? ' · saved snapshot' : ''}
         </span>
       </div>
-      <p className="digest-headline">
-        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} items need your decision
-      </p>
-      <ol className="digest-list">
-        {briefing.decisions.slice(0, TOP).map((d, i) => (
-          <li key={d.about}>
-            <span className="rank" aria-label={`Priority ${i + 1}`}>{i + 1}</span>
-            <div className="digest-item">
-              <TypeBadge type={d.finding_type} />
-              <p>{d.about}</p>
-            </div>
-            <div className="row-actions">
-              <button className="btn btn-ghost btn-small" onClick={() => onEvidence(evidenceForDecision(briefing, d))}>
-                <Icon name="evidence" size={14} /> Evidence
-              </button>
-              <button className="btn btn-ghost btn-small" onClick={() => onAsk(questionFor(briefing, d))}>
-                <Icon name="ask" size={14} /> Ask
-              </button>
-            </div>
-          </li>
-        ))}
-      </ol>
+      {briefing.summary ? (
+        <SummaryText summary={briefing.summary} onEvidence={onEvidence} />
+      ) : (
+        <p className="headline">
+          <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} items need your decision
+        </p>
+      )}
       <a className="link" href={hrefFor({ page: 'briefing' })}>
         Full briefing
       </a>

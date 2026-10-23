@@ -57,6 +57,31 @@ export interface AtRiskOrder {
   risk_reasons: string[];
 }
 
+/** One sentence of the briefing summary, with the source rows behind it. */
+export interface SummaryPoint {
+  kind: string;
+  text: string;
+  evidence: Evidence | null;
+  order_id?: string;
+  stage?: string;
+  customer?: string;
+}
+
+/** How one check (finding type) picks the items listed under it. */
+export interface SummarySection {
+  type: FindingType;
+  title: string;
+  total: number;
+  how_picked: string;
+  ranked_by: string | null;
+}
+
+export interface BriefingSummaryData {
+  text: string;
+  points: SummaryPoint[];
+  sections: SummarySection[];
+}
+
 export interface Briefing {
   status: 'ok';
   as_of_date: string;
@@ -68,6 +93,8 @@ export interface Briefing {
     stages: YesterdayStage[];
   };
   at_risk: { count: number; orders: AtRiskOrder[]; source_rows: SourceRef[] };
+  /** Missing from briefings produced before the summary existed */
+  summary?: BriefingSummaryData;
   total_findings: number;
   findings: Finding[];
   decisions: Decision[];
