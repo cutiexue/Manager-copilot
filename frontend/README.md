@@ -17,7 +17,8 @@ cd backend
 python main.py --api # serves 127.0.0.1:8000; Vite proxies /api/* to it
 ```
 
-Without the backend the page still loads; the chat panel shows a "Backend offline" state.
+Without the backend the page still loads: the briefing falls back to the saved snapshot
+(header pill "Briefing: snapshot") and the chat panel shows a "Backend offline" state.
 
 Other commands: `npm run typecheck`, `npm run build`.
 
@@ -26,8 +27,8 @@ Other commands: `npm run typecheck`, `npm run build`.
 | Area | Source | Status |
 |---|---|---|
 | Chat | `GET/POST /sessions`, `GET/POST /sessions/{id}/messages` (api.py) | **Live** backend calls |
-| Morning briefing | `src/fixtures/briefing.json` — verbatim output of `briefing.get_morning_briefing()` | **Snapshot**: backend has no briefing endpoint yet |
-| Evidence drawer | source rows cited by the tools, resolved to the raw CSV rows | Snapshot (same fixture) |
+| Morning briefing | `GET /briefings/latest` (api.py → `briefing.get_briefing_payload()`) | **Live**; falls back to `src/fixtures/briefing.json` when the backend is unreachable, labelled "snapshot" |
+| Evidence drawer | source rows cited by the tools, resolved to the raw CSV rows | Comes with the briefing payload (live or snapshot) |
 | Create reminder + confirm | in-browser state only | **Demo**: backend has no action/confirm endpoint yet |
 | Watches, feasibility, order detail, audit API | — | Not started; waiting for backend endpoints |
 
@@ -41,9 +42,9 @@ output field (see `src/evidence.ts`).
 python3 scripts/make_briefing_fixture.py ../backend [as_of_date]
 ```
 
-When the backend adds e.g. `GET /briefings/latest`, replace the fixture import in
-`src/App.tsx` with an API call — the types in `src/types.ts` already match the
-briefing structure.
+The snapshot is only the offline fallback. `GET /briefings/latest` returns the same
+shape, and a backend test asserts that the live payload still equals this file — when
+it fails, regenerate the snapshot.
 
 ## Layout (plan §12)
 

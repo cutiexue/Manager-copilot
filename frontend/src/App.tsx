@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import fixtureJson from './fixtures/briefing.json';
-import type { ActionProposal, BriefingFixture, EvidenceView } from './types';
+import { api } from './api';
+import type { ActionProposal, BriefingFixture, BriefingSource, EvidenceView } from './types';
 import BriefingSummary from './components/BriefingSummary';
 import DetailPanel from './components/DetailPanel';
 import Chat from './components/Chat';
@@ -8,14 +9,36 @@ import EvidenceDrawer from './components/EvidenceDrawer';
 import ConfirmModal, { type ProposalDraft } from './components/ConfirmModal';
 import ActionLog from './components/ActionLog';
 
-const fixture = fixtureJson as unknown as BriefingFixture;
+const snapshot = fixtureJson as unknown as BriefingFixture;
 
 export default function App() {
-  const { briefing } = fixture;
+  // The saved snapshot shows immediately; the live briefing replaces it once the backend answers.
+  const [data, setData] = useState<BriefingFixture>(snapshot);
+  const [source, setSource] = useState<BriefingSource>('checking');
+  const [briefingError, setBriefingError] = useState<string | null>(null);
+  const { briefing } = data;
   const [evidence, setEvidence] = useState<EvidenceView | null>(null);
   const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
   const [draft, setDraft] = useState<ProposalDraft | null>(null);
   const [actions, setActions] = useState<ActionProposal[]>([]);
+
+  const loadBriefing = useCallback(async () => {
+    setSource('checking');
+    try {
+      setData(await api.latestBriefing());
+      setBriefingError(null);
+      setSource('live');
+    } catch (e) {
+      // Fall back to the snapshot and say so; never show stale live data as current.
+      setData(snapshot);
+      setBriefingError(e instanceof Error ? e.message : 'Unexpected error.');
+      setSource('snapshot');
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadBriefing();
+  }, [loadBriefing]);
 
   const ask = useCallback((text: string) => setPrefill({ text, nonce: Date.now() }), []);
 
@@ -52,12 +75,17 @@ export default function App() {
         </div>
         <div className="clock" title="Business analysis uses the dataset clock, not today's date.">
           <span className="pill">Data as of {briefing.as_of_date}</span>
-          <span className="pill pill-warn">Briefing: snapshot</span>
+          <span className={source === 'live' ? 'pill' : 'pill pill-warn'}>
+            {source === 'live' ? 'Briefing: live' : source === 'checking' ? 'Briefing: checking…' : 'Briefing: snapshot'}
+          </span>
         </div>
       </header>
 
       <BriefingSummary
-        fixture={fixture}
+        fixture={data}
+        source={source}
+        error={briefingError}
+        onRefresh={() => void loadBriefing()}
         onEvidence={setEvidence}
         onAsk={ask}
         onPropose={(d) => propose(d)}
@@ -70,7 +98,7 @@ export default function App() {
 
       <ActionLog actions={actions} />
 
-      <EvidenceDrawer view={evidence} rows={fixture.source_rows} onClose={() => setEvidence(null)} />
+      <EvidenceDrawer view={evidence} rows={data.source_rows} onClose={() => setEvidence(null)} />
 
       {draft && draft.proposalId && (
         <ConfirmModal

@@ -1,4 +1,4 @@
-import type { ChatMessage, SendMessageResponse, Session } from './types';
+import type { BriefingFixture, ChatMessage, SendMessageResponse, Session } from './types';
 
 // All calls go through the Vite proxy (/api -> backend). See vite.config.ts.
 const BASE = '/api';
@@ -37,6 +37,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  latestBriefing: () => request<BriefingFixture>('/briefings/latest'),
   listSessions: () => request<Session[]>('/sessions'),
   createSession: (title: string) =>
     request<Session>('/sessions', { method: 'POST', body: JSON.stringify({ title }) }),

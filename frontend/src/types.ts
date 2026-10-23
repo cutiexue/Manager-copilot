@@ -77,6 +77,7 @@ export interface Briefing {
   warnings: string[];
 }
 
+/** Same shape for the live `GET /briefings/latest` payload and the saved snapshot fixture. */
 export interface BriefingFixture {
   generated_at: string;
   generator: string;
@@ -86,6 +87,9 @@ export interface BriefingFixture {
   source_rows: Record<string, Record<string, string>>;
   briefing_text: string;
 }
+
+/** Where the briefing on screen came from. */
+export type BriefingSource = 'checking' | 'live' | 'snapshot';
 
 // ---- Chat API (api.py) ----
 export interface Session {
