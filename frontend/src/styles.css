@@ -154,7 +154,10 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 /* Yesterday's output: one tile per stage (figure, change vs average, recent trend) */
 .strip { padding: 14px 0 2px; container-type: inline-size; }
 .strip-head { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; margin-bottom: 10px; }
-.strip-title { font-size: 14px; font-weight: 600; letter-spacing: -0.224px; color: var(--text-2); }
+/* Sub-headings inside a section (Yesterday, each level) sit one step between the 21px section title and the 15px rows */
+.strip-title { font-size: 17px; font-weight: 600; line-height: 1.24; letter-spacing: -0.374px; color: var(--hero-text); }
+.strip-date { font-weight: 400; color: var(--hero-muted); }
+.strip-date::before { content: '·'; margin: 0 6px; }
 .strip-note { font-size: 12px; letter-spacing: -0.12px; color: var(--faint); }
 .strip-rest { margin: 0; font-size: 14px; color: var(--hero-muted); }
 /* Two per row when narrow, all stages in one row when there is room, never a lone tile on a row */
@@ -176,9 +179,9 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 .review { width: 100%; border-collapse: collapse; }
 .review th, .review td { padding: 8px 8px; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: middle; font-weight: 400; }
 .review tbody:last-child tr:last-child > * { border-bottom: none; }
-.review .lvl-head > * { padding: 16px 8px 8px 0; font-size: 14px; letter-spacing: -0.224px; }
-.review tbody + tbody .lvl-head > * { padding-top: 24px; }
-.lvl-head .mark { margin-right: 8px; }
+.review .lvl-head > * { padding: 18px 8px 10px 0; font-size: 17px; line-height: 1.24; letter-spacing: -0.374px; }
+.review tbody + tbody .lvl-head > * { padding-top: 28px; }
+.lvl-head .mark { width: 20px; height: 20px; margin-right: 8px; vertical-align: -4px; }
 .lvl-label { font-weight: 600; color: var(--hero-text); }
 .lvl-rule { color: var(--hero-muted); }
 .lvl-rule::before { content: '·'; margin: 0 6px; }
@@ -375,7 +378,7 @@ code { font: 13px var(--mono); letter-spacing: 0; }
   .review th, .review td { padding: 0; border-bottom: none; }
   .review .lvl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 16px 0 8px; }
   .review tbody + tbody .lvl-head { padding-top: 22px; }
-  .review .lvl-head > *, .review tbody + tbody .lvl-head > * { padding: 0; }
+  .review .lvl-head > *, .review tbody + tbody .lvl-head > * { padding: 0; font-size: 16px; }
   .review .lvl-more { display: block; }
   .review .mark-cell { grid-row: 1 / span 2; }
   .review .row-context { display: none; }

@@ -81,7 +81,9 @@ export default function YesterdayStrip({ briefing, onEvidence }: Props) {
   return (
     <div className="strip">
       <div className="strip-head">
-        <span className="strip-title">Yesterday · {shortDate(y.date)}</span>
+        <span className="strip-title">
+          Yesterday<span className="strip-date">{shortDate(y.date)}</span>
+        </span>
         {y.is_workday && workdays && <span className="strip-note">pieces · vs {workdays}-workday avg</span>}
       </div>
       {y.is_workday ? (
