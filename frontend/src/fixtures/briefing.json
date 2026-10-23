@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-23T10:44:15+00:00",
+ "generated_at": "2026-10-23T11:09:04+00:00",
  "generator": "briefing.get_morning_briefing()",
- "backend_commit": "a233857",
+ "backend_commit": "393a213",
  "briefing": {
   "status": "ok",
   "as_of_date": "2026-04-01",
@@ -744,31 +744,586 @@
       ]
      }
     }
-   ],
-   "sections": [
-    {
-     "type": "order_at_risk",
-     "title": "Orders at risk",
-     "total": 12,
-     "how_picked": "Unfinished orders that are overdue, due within 3 days or without recorded activity for 7+ days.",
-     "ranked_by": "2 x overdue calendar days + idle calendar days"
-    },
-    {
-     "type": "stage_output_drop",
-     "title": "Production",
-     "total": 1,
-     "how_picked": "Stages whose mean output over the last 3 workdays is at least 20% below the 7 workdays before.",
-     "ranked_by": "percentage-point drop of the recent 3-workday mean vs the prior 7-workday mean"
-    },
-    {
-     "type": "customer_slipping",
-     "title": "Customers",
-     "total": 1,
-     "how_picked": "Customers with at least 2 unfinished orders, all overdue or quiet.",
-     "ranked_by": "10 x number of unfinished orders (all overdue or quiet)"
-    }
    ]
   },
+  "checks": [
+   {
+    "type": "order_at_risk",
+    "title": "Orders at risk",
+    "total": 12,
+    "flagged": 3,
+    "how_picked": "Unfinished orders that are overdue, due within 3 days or without recorded activity for 7+ days.",
+    "ranked_by": "2 x overdue calendar days + idle calendar days",
+    "items": [
+     {
+      "key": "ORD-107",
+      "name": "ORD-107",
+      "context": "Northwind Apparel · PACKING",
+      "tag": "16 days late",
+      "flagged": true,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 32,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-107 (Northwind Apparel, 2000 pcs, stage PACKING): overdue by 16 calendar days.",
+       "details": {
+        "order_id": "ORD-107",
+        "risk_reasons": [
+         "overdue by 16 calendar days"
+        ],
+        "customer": "Northwind Apparel",
+        "current_stage": "PACKING",
+        "due_date": "2026-03-16",
+        "last_activity_date": "2026-04-01",
+        "overdue_calendar_days": 16,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 81,
+          "key": "ORD-107"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-120",
+      "name": "ORD-120",
+      "context": "TrendCart · ASSEMBLY",
+      "tag": "15 days late",
+      "flagged": true,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 30,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-120 (TrendCart, 1500 pcs, stage ASSEMBLY): overdue by 15 calendar days.",
+       "details": {
+        "order_id": "ORD-120",
+        "risk_reasons": [
+         "overdue by 15 calendar days"
+        ],
+        "customer": "TrendCart",
+        "current_stage": "ASSEMBLY",
+        "due_date": "2026-03-17",
+        "last_activity_date": "2026-03-30",
+        "overdue_calendar_days": 15,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 76,
+          "key": "ORD-120"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-114",
+      "name": "ORD-114",
+      "context": "Northwind Apparel · PACKING",
+      "tag": "9 days late",
+      "flagged": true,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 18,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-114 (Northwind Apparel, 2000 pcs, stage PACKING): overdue by 9 calendar days.",
+       "details": {
+        "order_id": "ORD-114",
+        "risk_reasons": [
+         "overdue by 9 calendar days"
+        ],
+        "customer": "Northwind Apparel",
+        "current_stage": "PACKING",
+        "due_date": "2026-03-23",
+        "last_activity_date": "2026-03-30",
+        "overdue_calendar_days": 9,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 85,
+          "key": "ORD-114"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-083",
+      "name": "ORD-083",
+      "context": "Maple & Co · WASHING",
+      "tag": "9 days late",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 18,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-083 (Maple & Co, 1000 pcs, stage WASHING): overdue by 9 calendar days.",
+       "details": {
+        "order_id": "ORD-083",
+        "risk_reasons": [
+         "overdue by 9 calendar days"
+        ],
+        "customer": "Maple & Co",
+        "current_stage": "WASHING",
+        "due_date": "2026-03-23",
+        "last_activity_date": "2026-03-30",
+        "overdue_calendar_days": 9,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 88,
+          "key": "ORD-083"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-002",
+      "name": "ORD-002",
+      "context": "Cotton Club · WASHING",
+      "tag": "3 days late · 9 days idle",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 15,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-002 (Cotton Club, 1000 pcs, stage WASHING): overdue by 3 calendar days; no recorded activity for 9 calendar days.",
+       "details": {
+        "order_id": "ORD-002",
+        "risk_reasons": [
+         "overdue by 3 calendar days",
+         "no recorded activity for 9 calendar days"
+        ],
+        "customer": "Cotton Club",
+        "current_stage": "WASHING",
+        "due_date": "2026-03-29",
+        "last_activity_date": "2026-03-23",
+        "overdue_calendar_days": 3,
+        "idle_calendar_days": 9
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 86,
+          "key": "ORD-002"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-005",
+      "name": "ORD-005",
+      "context": "TrendCart · KNITTING",
+      "tag": "8 days idle",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 8,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-005 (TrendCart, 500 pcs, stage KNITTING): no recorded activity for 8 calendar days.",
+       "details": {
+        "order_id": "ORD-005",
+        "risk_reasons": [
+         "no recorded activity for 8 calendar days"
+        ],
+        "customer": "TrendCart",
+        "current_stage": "KNITTING",
+        "due_date": "2026-04-20",
+        "last_activity_date": "2026-03-24",
+        "overdue_calendar_days": 0,
+        "idle_calendar_days": 8
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 105,
+          "key": "ORD-005"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-093",
+      "name": "ORD-093",
+      "context": "Maple & Co · WASHING",
+      "tag": "3 days late",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 6,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-093 (Maple & Co, 100 pcs, stage WASHING): overdue by 3 calendar days.",
+       "details": {
+        "order_id": "ORD-093",
+        "risk_reasons": [
+         "overdue by 3 calendar days"
+        ],
+        "customer": "Maple & Co",
+        "current_stage": "WASHING",
+        "due_date": "2026-03-29",
+        "last_activity_date": "2026-04-01",
+        "overdue_calendar_days": 3,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 99,
+          "key": "ORD-093"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-020",
+      "name": "ORD-020",
+      "context": "TrendCart · WASHING",
+      "tag": "1 day late",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 2,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-020 (TrendCart, 1200 pcs, stage WASHING): overdue by 1 calendar days.",
+       "details": {
+        "order_id": "ORD-020",
+        "risk_reasons": [
+         "overdue by 1 calendar days"
+        ],
+        "customer": "TrendCart",
+        "current_stage": "WASHING",
+        "due_date": "2026-03-31",
+        "last_activity_date": "2026-03-30",
+        "overdue_calendar_days": 1,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 90,
+          "key": "ORD-020"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-055",
+      "name": "ORD-055",
+      "context": "Cotton Club · ASSEMBLY",
+      "tag": "1 day late",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 2,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-055 (Cotton Club, 800 pcs, stage ASSEMBLY): overdue by 1 calendar days.",
+       "details": {
+        "order_id": "ORD-055",
+        "risk_reasons": [
+         "overdue by 1 calendar days"
+        ],
+        "customer": "Cotton Club",
+        "current_stage": "ASSEMBLY",
+        "due_date": "2026-03-31",
+        "last_activity_date": "2026-04-01",
+        "overdue_calendar_days": 1,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 100,
+          "key": "ORD-055"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-103",
+      "name": "ORD-103",
+      "context": "Bright Basics · ASSEMBLY",
+      "tag": "due in 3 days",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 0,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-103 (Bright Basics, 2000 pcs, stage ASSEMBLY): due in 3 calendar days, still at stage ASSEMBLY.",
+       "details": {
+        "order_id": "ORD-103",
+        "risk_reasons": [
+         "due in 3 calendar days, still at stage ASSEMBLY"
+        ],
+        "customer": "Bright Basics",
+        "current_stage": "ASSEMBLY",
+        "due_date": "2026-04-04",
+        "last_activity_date": "2026-03-30",
+        "overdue_calendar_days": 0,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 91,
+          "key": "ORD-103"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-029",
+      "name": "ORD-029",
+      "context": "Northwind Apparel · WASHING",
+      "tag": "due today",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 0,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-029 (Northwind Apparel, 1500 pcs, stage WASHING): due in 0 calendar days, still at stage WASHING.",
+       "details": {
+        "order_id": "ORD-029",
+        "risk_reasons": [
+         "due in 0 calendar days, still at stage WASHING"
+        ],
+        "customer": "Northwind Apparel",
+        "current_stage": "WASHING",
+        "due_date": "2026-04-01",
+        "last_activity_date": "2026-04-01",
+        "overdue_calendar_days": 0,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 92,
+          "key": "ORD-029"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "key": "ORD-108",
+      "name": "ORD-108",
+      "context": "Harbor Knits · ASSEMBLY",
+      "tag": "due in 2 days",
+      "flagged": false,
+      "note": "Check the latest progress and whether follow-up is needed.",
+      "finding": {
+       "type": "order_at_risk",
+       "severity": 0,
+       "severity_basis": "2 x overdue calendar days + idle calendar days",
+       "summary": "ORD-108 (Harbor Knits, 2000 pcs, stage ASSEMBLY): due in 2 calendar days, still at stage ASSEMBLY.",
+       "details": {
+        "order_id": "ORD-108",
+        "risk_reasons": [
+         "due in 2 calendar days, still at stage ASSEMBLY"
+        ],
+        "customer": "Harbor Knits",
+        "current_stage": "ASSEMBLY",
+        "due_date": "2026-04-03",
+        "last_activity_date": "2026-03-31",
+        "overdue_calendar_days": 0,
+        "idle_calendar_days": 0
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 101,
+          "key": "ORD-108"
+         }
+        ]
+       }
+      }
+     }
+    ]
+   },
+   {
+    "type": "stage_output_drop",
+    "title": "Production",
+    "total": 1,
+    "flagged": 1,
+    "how_picked": "Stages whose mean output over the last 3 workdays is at least 20% below the 7 workdays before.",
+    "ranked_by": "percentage-point drop of the recent 3-workday mean vs the prior 7-workday mean",
+    "items": [
+     {
+      "key": "ASSEMBLY",
+      "name": "ASSEMBLY",
+      "context": "last 3 workdays vs previous 7",
+      "tag": "-29.3%",
+      "flagged": true,
+      "note": "Check the production records and investigate the drop if confirmed.",
+      "finding": {
+       "type": "stage_output_drop",
+       "severity": 29.3,
+       "severity_basis": "percentage-point drop of the recent 3-workday mean vs the prior 7-workday mean",
+       "summary": "ASSEMBLY output fell 29.3% (recent mean 432.0 vs baseline 611.0 pieces/workday).",
+       "details": {
+        "stage": "ASSEMBLY",
+        "recent_workdays": 3,
+        "baseline_workdays": 7,
+        "recent_mean": 432.0,
+        "baseline_mean": 611.0,
+        "change_percent": -29.3
+       },
+       "evidence": {
+        "source": "track1/data/production_log.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 359,
+          "key": "2026-03-31 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 355,
+          "key": "2026-03-30 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 347,
+          "key": "2026-03-28 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 343,
+          "key": "2026-03-27 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 339,
+          "key": "2026-03-26 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 335,
+          "key": "2026-03-25 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 331,
+          "key": "2026-03-24 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 327,
+          "key": "2026-03-23 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 319,
+          "key": "2026-03-21 ASSEMBLY"
+         },
+         {
+          "source": "track1/data/production_log.csv",
+          "row": 315,
+          "key": "2026-03-20 ASSEMBLY"
+         }
+        ]
+       }
+      }
+     }
+    ]
+   },
+   {
+    "type": "customer_slipping",
+    "title": "Customers",
+    "total": 1,
+    "flagged": 1,
+    "how_picked": "Customers with at least 2 unfinished orders, all overdue or quiet.",
+    "ranked_by": "10 x number of unfinished orders (all overdue or quiet)",
+    "items": [
+     {
+      "key": "Maple & Co",
+      "name": "Maple & Co",
+      "context": "2 unfinished orders",
+      "tag": "all overdue or quiet",
+      "flagged": true,
+      "note": "Review the affected orders before deciding whether customer contact is needed.",
+      "finding": {
+       "type": "customer_slipping",
+       "severity": 20,
+       "severity_basis": "10 x number of unfinished orders (all overdue or quiet)",
+       "summary": "All 2 unfinished Maple & Co orders are overdue or quiet.",
+       "details": {
+        "customer": "Maple & Co",
+        "order_ids": [
+         "ORD-083",
+         "ORD-093"
+        ]
+       },
+       "evidence": {
+        "source": "track1/data/orders.csv",
+        "source_rows": [
+         {
+          "source": "track1/data/orders.csv",
+          "row": 88,
+          "key": "ORD-083"
+         },
+         {
+          "source": "track1/data/orders.csv",
+          "row": 99,
+          "key": "ORD-093"
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  ],
   "total_findings": 14,
   "findings": [
    {

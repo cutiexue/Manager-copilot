@@ -41,7 +41,7 @@ export default function TodayDigest({ fixture, source, onEvidence }: Props) {
         </p>
       )}
       <a className="link" href={hrefFor({ page: 'briefing' })}>
-        Full briefing · {briefing.decisions.length} items to follow up
+        Full briefing · {briefing.decisions.length} flagged for review
       </a>
     </section>
   );

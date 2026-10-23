@@ -144,23 +144,66 @@ def _summary(ref, yesterday, risk_orders, risk_rows, findings, data_gaps):
         add("data_gaps", f"{len(data_gaps)} {'check' if len(data_gaps) == 1 else 'checks'} could not be "
                          "completed because records are missing.")
 
-    # 每类检查的入选规则，供界面在明细上方说明“为什么是这几项”；阈值都来自 rules.py。
+    return {"text": " ".join(point["text"] for point in points), "points": points}
+
+
+def _plural(count, noun):
+    return f"{count} {noun}{'' if count == 1 else 's'}"
+
+
+def _check_item(finding, ref, review_keys):
+    """One compact row for a finding: a name, its context and a short tag saying why it was found."""
+    d = finding["details"]
+    kind = finding["type"]
+    if kind == "order_at_risk":
+        parts = []
+        if d["overdue_calendar_days"]:
+            parts.append(f"{_plural(d['overdue_calendar_days'], 'day')} late")
+        else:
+            left = (date.fromisoformat(d["due_date"]) - ref).days
+            if 0 <= left <= DUE_SOON_DAYS:
+                parts.append("due today" if left == 0 else f"due in {_plural(left, 'day')}")
+        if d["idle_calendar_days"]:
+            parts.append(f"{_plural(d['idle_calendar_days'], 'day')} idle")
+        name, context, tag = d["order_id"], f"{d['customer']} · {d['current_stage']}", " · ".join(parts)
+    elif kind == "stage_output_drop":
+        name = d["stage"]
+        context = f"last {d['recent_workdays']} workdays vs previous {d['baseline_workdays']}"
+        tag = f"{d['change_percent']:.1f}%"
+    else:
+        name, context, tag = d["customer"], _plural(len(d["order_ids"]), "unfinished order"), "all overdue or quiet"
+    return {"key": name, "name": name, "context": context, "tag": tag,
+            "flagged": (kind, finding["summary"]) in review_keys,
+            "note": _DECISION_PROMPTS[kind], "finding": finding}
+
+
+def _checks(ref, findings, review_keys):
+    """Every finding grouped by the check that produced it, with the briefing's review items flagged.
+
+    Listing all findings, not only the review items, is what makes the flags meaningful: the page
+    shows which findings were picked for review without extra explanation text. Inclusion rules
+    and thresholds come from rules.py.
+    """
     basis = {f["type"]: f["severity_basis"] for f in reversed(findings)}
-    sections = [
-        {"type": "order_at_risk", "title": "Orders at risk", "total": len(risk_orders),
-         "how_picked": f"Unfinished orders that are overdue, due within {DUE_SOON_DAYS} days or without recorded "
-                       f"activity for {QUIET_ORDER_DAYS}+ days.",
-         "ranked_by": basis.get("order_at_risk")},
-        {"type": "stage_output_drop", "title": "Production", "total": len(drops),
-         "how_picked": f"Stages whose mean output over the last {RECENT_WORKDAYS} workdays is at least "
-                       f"{abs(STAGE_DROP_PERCENT):.0f}% below the {BASELINE_WORKDAYS} workdays before.",
-         "ranked_by": basis.get("stage_output_drop")},
-        {"type": "customer_slipping", "title": "Customers",
-         "total": sum(f["type"] == "customer_slipping" for f in findings),
-         "how_picked": f"Customers with at least {CUSTOMER_SLIPPING_MIN_ORDERS} unfinished orders, all overdue or quiet.",
-         "ranked_by": basis.get("customer_slipping")},
+    meta = [
+        ("order_at_risk", "Orders at risk",
+         f"Unfinished orders that are overdue, due within {DUE_SOON_DAYS} days or without recorded "
+         f"activity for {QUIET_ORDER_DAYS}+ days."),
+        ("stage_output_drop", "Production",
+         f"Stages whose mean output over the last {RECENT_WORKDAYS} workdays is at least "
+         f"{abs(STAGE_DROP_PERCENT):.0f}% below the {BASELINE_WORKDAYS} workdays before."),
+        ("customer_slipping", "Customers",
+         f"Customers with at least {CUSTOMER_SLIPPING_MIN_ORDERS} unfinished orders, all overdue or quiet."),
     ]
-    return {"text": " ".join(point["text"] for point in points), "points": points, "sections": sections}
+    checks = []
+    for kind, title, how_picked in meta:
+        items = [_check_item(f, ref, review_keys) for f in findings if f["type"] == kind]
+        # 同类结果已按严重度排序；入选审查的项提到最前，其余保持原有顺序。
+        items.sort(key=lambda item: not item["flagged"])
+        checks.append({"type": kind, "title": title, "total": len(items),
+                       "flagged": sum(item["flagged"] for item in items),
+                       "how_picked": how_picked, "ranked_by": basis.get(kind), "items": items})
+    return checks
 
 
 def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
@@ -216,6 +259,7 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
             "source_rows": risk["source_rows"],
         },
         "summary": _summary(ref, yesterday, risk["data"], risk["source_rows"], all_findings, data_gaps),
+        "checks": _checks(ref, all_findings, {(d["finding_type"], d["about"]) for d in decisions}),
         "total_findings": findings_result["total_findings"],
         "findings": findings,
         "decisions": decisions,

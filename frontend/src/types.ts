@@ -67,19 +67,33 @@ export interface SummaryPoint {
   customer?: string;
 }
 
-/** How one check (finding type) picks the items listed under it. */
-export interface SummarySection {
-  type: FindingType;
-  title: string;
-  total: number;
-  how_picked: string;
-  ranked_by: string | null;
-}
-
 export interface BriefingSummaryData {
   text: string;
   points: SummaryPoint[];
-  sections: SummarySection[];
+}
+
+/** One finding as a compact row; flagged = one of the briefing's review items. */
+export interface CheckItem {
+  key: string;
+  name: string;
+  context: string;
+  /** Short reason, e.g. "16 days late" or "-29.3%" */
+  tag: string;
+  flagged: boolean;
+  /** Suggested follow-up check for this kind of finding */
+  note: string;
+  finding: Finding;
+}
+
+/** Every finding of one check (finding type), with how the check picks them. */
+export interface Check {
+  type: FindingType;
+  title: string;
+  total: number;
+  flagged: number;
+  how_picked: string;
+  ranked_by: string | null;
+  items: CheckItem[];
 }
 
 export interface Briefing {
@@ -95,6 +109,8 @@ export interface Briefing {
   at_risk: { count: number; orders: AtRiskOrder[]; source_rows: SourceRef[] };
   /** Missing from briefings produced before the summary existed */
   summary?: BriefingSummaryData;
+  /** Missing from briefings produced before review flags existed */
+  checks?: Check[];
   total_findings: number;
   findings: Finding[];
   decisions: Decision[];

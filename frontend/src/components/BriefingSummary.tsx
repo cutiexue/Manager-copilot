@@ -1,6 +1,6 @@
-import type { Briefing, BriefingFixture, BriefingSource, Decision, EvidenceView, SummarySection } from '../types';
-import { FINDING_LABEL, evidenceForDecision, findingFor, questionFor } from '../evidence';
-import { hrefFor } from '../route';
+import { useState } from 'react';
+import type { Briefing, BriefingFixture, BriefingSource, Check, CheckItem, EvidenceView, Finding } from '../types';
+import { FINDING_LABEL, evidenceForFinding, findingFor, questionForFinding } from '../evidence';
 import type { ProposalDraft } from './ConfirmModal';
 import Icon from './Icon';
 import SummaryText from './SummaryText';
@@ -15,10 +15,9 @@ interface Props {
   onPropose: (d: ProposalDraft) => void;
 }
 
-/** Reminder draft for a briefing item: about its order, or about the customer or stage it names. */
-function reminderFor(briefing: Briefing, d: Decision): ProposalDraft {
-  const details = findingFor(briefing, d)?.details ?? {};
-  const field = (key: string) => (typeof details[key] === 'string' ? (details[key] as string) : undefined);
+/** Reminder draft for a finding: about its order, or about the customer or stage it names. */
+function reminderFor(finding: Finding, note: string, asOfDate: string): ProposalDraft {
+  const field = (key: string) => (typeof finding.details[key] === 'string' ? (finding.details[key] as string) : undefined);
   const orderId = field('order_id');
   const about = orderId
     ? {
@@ -28,27 +27,115 @@ function reminderFor(briefing: Briefing, d: Decision): ProposalDraft {
           detail: [field('current_stage'), field('due_date') && `due ${field('due_date')}`].filter(Boolean).join(' · '),
         },
       }
-    : { subject: field('customer') ? `${field('customer')} (customer)` : field('stage') ? `${field('stage')} stage` : d.about };
+    : {
+        subject: field('customer') ? `${field('customer')} (customer)` : field('stage') ? `${field('stage')} stage` : finding.summary,
+      };
   return {
     kind: 'reminder',
     ...about,
-    text: `Follow up: ${d.about} ${d.suggested_decision}`,
-    reason: `${FINDING_LABEL[d.finding_type]} in the ${briefing.as_of_date} briefing`,
+    text: `Follow up: ${finding.summary} ${note}`,
+    reason: `${FINDING_LABEL[finding.type]} in the ${asOfDate} briefing`,
   };
 }
 
-const SECTION_TITLE = { order_at_risk: 'Orders at risk', stage_output_drop: 'Production', customer_slipping: 'Customers' };
+const CHECK_TITLE = { order_at_risk: 'Orders at risk', stage_output_drop: 'Production', customer_slipping: 'Customers' };
 
-/** Sections from the backend, or plain ones for briefings produced before the summary existed. */
-function sectionsFor(briefing: Briefing): SummarySection[] {
-  if (briefing.summary) return briefing.summary.sections;
-  return (['order_at_risk', 'stage_output_drop', 'customer_slipping'] as const).map((type) => ({
-    type,
-    title: SECTION_TITLE[type],
-    total: type === 'order_at_risk' ? briefing.at_risk.count : briefing.decisions.filter((d) => d.finding_type === type).length,
-    how_picked: '',
-    ranked_by: null,
-  }));
+/** Checks from the backend, or flagged-only ones for briefings produced before checks existed. */
+function checksFor(briefing: Briefing): Check[] {
+  if (briefing.checks) return briefing.checks;
+  return (Object.keys(CHECK_TITLE) as (keyof typeof CHECK_TITLE)[]).map((type) => {
+    const items = briefing.decisions
+      .filter((d) => d.finding_type === type)
+      .flatMap((d) => {
+        const finding = findingFor(briefing, d);
+        return finding
+          ? [{ key: d.about, name: d.about, context: '', tag: '', flagged: true, note: d.suggested_decision, finding }]
+          : [];
+      });
+    return { type, title: CHECK_TITLE[type], total: items.length, flagged: items.length, how_picked: '', ranked_by: null, items };
+  });
+}
+
+// Unflagged rows shown under the flagged ones before "Show all".
+const EXTRA_ROWS = 2;
+
+interface CheckProps {
+  check: Check;
+  onEvidence: (v: EvidenceView) => void;
+  onAsk: (text: string) => void;
+  onRemind: (item: CheckItem) => void;
+}
+
+// Every finding of one check as a compact row. The briefing's review items carry a flag and come
+// first; how the check picks its findings is in the heading's tooltip rather than on the page.
+function CheckTable({ check, onEvidence, onAsk, onRemind }: CheckProps) {
+  const [expanded, setExpanded] = useState(false);
+  const rest = check.items.filter((item) => !item.flagged);
+  const visible = expanded ? check.items : [...check.items.filter((item) => item.flagged), ...rest.slice(0, EXTRA_ROWS)];
+  const rule = [check.how_picked, check.ranked_by && `Ranked by ${check.ranked_by}.`].filter(Boolean).join(' ');
+
+  return (
+    <section className="check" aria-labelledby={`check-${check.type}`}>
+      <div className="check-head">
+        <h3 id={`check-${check.type}`} title={rule || undefined}>
+          {check.title}
+        </h3>
+        <span className="check-count">{check.total}</span>
+        {check.flagged > 0 && (
+          <span className="check-flagged">
+            <span className="flag-dot" aria-hidden /> {check.flagged} flagged for review
+          </span>
+        )}
+      </div>
+      <table className="review">
+        {rule && <caption className="sr-only">{`${check.title}: ${rule}`}</caption>}
+        <tbody>
+          {visible.map((item) => (
+            <tr key={item.key} className={item.flagged ? 'is-flagged' : undefined}>
+              <td className="flag-cell">
+                {item.flagged && (
+                  <span className="flag" role="img" aria-label="Flagged for review" title={`Flagged for review. ${item.note}`}>
+                    !
+                  </span>
+                )}
+              </td>
+              <th scope="row" className="row-name">
+                {item.name}
+              </th>
+              <td className="row-context">{item.context}</td>
+              <td className="row-tag">{item.tag}</td>
+              <td className="row-icons">
+                <button
+                  className="icon-btn"
+                  title="Evidence"
+                  aria-label={`Evidence for ${item.name}`}
+                  onClick={() => onEvidence(evidenceForFinding(item.finding))}
+                >
+                  <Icon name="evidence" />
+                </button>
+                <button
+                  className="icon-btn"
+                  title="Ask Co-Pilot"
+                  aria-label={`Ask about ${item.name}`}
+                  onClick={() => onAsk(questionForFinding(item.finding))}
+                >
+                  <Icon name="ask" />
+                </button>
+                <button className="icon-btn" title="Remind…" aria-label={`Remind about ${item.name}`} onClick={() => onRemind(item)}>
+                  <Icon name="remind" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {rest.length > EXTRA_ROWS && (
+        <button className="link" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded}>
+          {expanded ? 'Show fewer' : `Show all ${check.total}`}
+        </button>
+      )}
+    </section>
+  );
 }
 
 export default function BriefingSummary({ fixture, source, error, onRefresh, onEvidence, onAsk, onPropose }: Props) {
@@ -75,58 +162,18 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
           <strong>{briefing.at_risk.count} orders at risk</strong>
         </p>
       )}
-      {/* The backend calls these "decisions"; each is a suggested follow-up check, not a decision the system made. */}
-      <p className="followups">
-        <strong>{briefing.decisions.length} items to follow up</strong>, grouped by the check that found them. Each has a
-        suggested next step.
-      </p>
 
-      {sectionsFor(briefing).map((section) => {
-        const items = briefing.decisions.filter((d) => d.finding_type === section.type);
-        if (items.length === 0) return null;
-        return (
-          <section key={section.type} className="check" aria-labelledby={`check-${section.type}`}>
-            <div className="check-head">
-              <h3 id={`check-${section.type}`}>{section.title}</h3>
-              <span className="check-count">
-                {items.length < section.total ? `top ${items.length} of ${section.total}` : section.total}
-              </span>
-              {section.type === 'order_at_risk' && items.length < section.total && (
-                <a className="link" href={hrefFor({ page: 'orders' })}>
-                  All {section.total} at-risk orders
-                </a>
-              )}
-            </div>
-            {section.how_picked && (
-              <p className="check-rule">
-                {section.how_picked}
-                {section.ranked_by && items.length > 1 && <> Highest first, by {section.ranked_by}.</>}
-              </p>
-            )}
-            <ul className="items">
-              {items.map((d) => (
-                <li key={d.about} className="item">
-                  <p className="item-title">{d.about}</p>
-                  <p className="item-note">
-                    <span className="item-note-label">Next step:</span> {d.suggested_decision}
-                  </p>
-                  <div className="row-actions">
-                    <button className="btn btn-ghost btn-small" onClick={() => onEvidence(evidenceForDecision(briefing, d))}>
-                      <Icon name="evidence" size={14} /> Evidence
-                    </button>
-                    <button className="btn btn-ghost btn-small" onClick={() => onAsk(questionFor(briefing, d))}>
-                      <Icon name="ask" size={14} /> Ask
-                    </button>
-                    <button className="btn btn-ghost btn-small" onClick={() => onPropose(reminderFor(briefing, d))}>
-                      <Icon name="remind" size={14} /> Remind…
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
+      {checksFor(briefing)
+        .filter((check) => check.items.length > 0)
+        .map((check) => (
+          <CheckTable
+            key={check.type}
+            check={check}
+            onEvidence={onEvidence}
+            onAsk={onAsk}
+            onRemind={(item) => onPropose(reminderFor(item.finding, item.note, briefing.as_of_date))}
+          />
+        ))}
 
       {briefing.warnings.length > 0 && (
         <ul className="warnings small">

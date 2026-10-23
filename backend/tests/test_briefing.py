@@ -50,11 +50,20 @@ def test_summary_comes_first_and_every_sentence_has_sources():
         {"source": "track1/data/orders.csv", "row": 81, "key": "ORD-107"}]
 
 
-def test_sections_explain_how_items_are_picked():
-    sections = get_morning_briefing()["summary"]["sections"]
-    assert [(s["type"], s["total"]) for s in sections] == [
-        ("order_at_risk", 12), ("stage_output_drop", 1), ("customer_slipping", 1)]
-    assert "at least 20% below" in sections[1]["how_picked"]
+def test_checks_list_every_finding_and_flag_the_review_items():
+    briefing = get_morning_briefing()
+    checks = briefing["checks"]
+    assert [(c["type"], c["total"], c["flagged"]) for c in checks] == [
+        ("order_at_risk", 12, 3), ("stage_output_drop", 1, 1), ("customer_slipping", 1, 1)]
+    # 被标记的正好是晨报列出的那几项，而且排在最前面。
+    assert sum(c["flagged"] for c in checks) == len(briefing["decisions"]) == 5
+    orders = checks[0]["items"]
+    assert [(i["name"], i["tag"], i["flagged"]) for i in orders[:5]] == [
+        ("ORD-107", "16 days late", True), ("ORD-120", "15 days late", True), ("ORD-114", "9 days late", True),
+        ("ORD-083", "9 days late", False), ("ORD-002", "3 days late · 9 days idle", False)]
+    assert {i["tag"] for i in orders} >= {"due today", "due in 2 days", "8 days idle", "1 day late"}
+    assert checks[1]["items"][0]["tag"] == "-29.3%"
+    assert "at least 20% below" in checks[1]["how_picked"]
 
 
 def test_summary_on_a_day_after_sunday():

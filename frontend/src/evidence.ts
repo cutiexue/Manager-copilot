@@ -36,10 +36,10 @@ export function findingFor(briefing: Briefing, decision: Decision): Finding | un
   return briefing.findings.find((f) => f.summary === decision.about && f.type === decision.finding_type);
 }
 
-/** The question an "Ask" button puts into the chat box for a briefing item. */
-export function questionFor(briefing: Briefing, decision: Decision): string {
-  const orderId = findingFor(briefing, decision)?.details.order_id;
-  return typeof orderId === 'string' ? `What is the latest status of ${orderId}?` : `Tell me more about: ${decision.about}`;
+/** The question an "Ask" button puts into the chat box for a finding. */
+export function questionForFinding(finding: Finding): string {
+  const orderId = finding.details.order_id;
+  return typeof orderId === 'string' ? `What is the latest status of ${orderId}?` : `Tell me more about: ${finding.summary}`;
 }
 
 export function evidenceForFinding(finding: Finding) {
@@ -52,12 +52,6 @@ export function evidenceForFinding(finding: Finding) {
     ],
     refs: finding.evidence.source_rows,
   };
-}
-
-export function evidenceForDecision(briefing: Briefing, decision: Decision) {
-  const finding = findingFor(briefing, decision);
-  if (finding) return evidenceForFinding(finding);
-  return { title: FINDING_LABEL[decision.finding_type], claim: decision.about, calculation: [], refs: decision.evidence.source_rows };
 }
 
 export function evidenceForStage(date: string, s: YesterdayStage) {

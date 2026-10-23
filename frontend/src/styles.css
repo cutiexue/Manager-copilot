@@ -136,22 +136,32 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 .summary { margin: 14px 0 0; max-width: 860px; font-size: 19px; line-height: 1.55; letter-spacing: -0.2px; color: var(--text); }
 .cite { display: inline-flex; vertical-align: -2px; margin-left: 3px; padding: 2px; border: none; border-radius: 4px; background: none; color: var(--link); cursor: pointer; }
 .cite:hover { background: var(--fill); }
-/* Details: items grouped by the check that found them, with how that check picks them */
-.followups { margin: 26px 0 0; font-size: 15px; letter-spacing: -0.24px; color: var(--hero-muted); }
-.followups strong { color: var(--hero-text); font-weight: 600; }
-.check { margin-top: 22px; }
-.check-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+/* Checks: every finding as a compact row; the briefing's review items are flagged and come first */
+.check { margin-top: 28px; }
+.check-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px solid var(--hairline); }
 .check-head h3 { margin: 0; font-size: 21px; font-weight: 600; line-height: 1.19; letter-spacing: 0.231px; color: var(--hero-text); }
 .check-count { font-size: 14px; color: var(--hero-faint); font-variant-numeric: tabular-nums; }
-.check-head .link { margin-left: auto; padding: 0; }
-.check-rule { margin: 4px 0 6px; font-size: 13px; line-height: 1.38; letter-spacing: -0.08px; color: var(--hero-muted); }
-.items { list-style: none; padding: 0; margin: 0; }
-.item { display: grid; justify-items: start; gap: 4px; padding: 14px 0; border-top: 1px solid var(--hairline); }
-.item-title { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.35; letter-spacing: -0.374px; }
-.item-note { margin: 0; font-size: 14px; line-height: 1.43; letter-spacing: -0.224px; color: var(--hero-muted); }
-.item-note-label { font-weight: 600; color: var(--text-2); }
-/* Ghost buttons have inner padding; pull the row left so the first label lines up with the text above */
-.item .row-actions { margin-left: -7px; }
+.check-flagged { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--hero-muted); }
+.flag-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--risk); }
+.review { width: 100%; border-collapse: collapse; }
+.review th, .review td { padding: 8px 8px; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: middle; font-weight: 400; }
+.review tr:last-child th, .review tr:last-child td { border-bottom: none; }
+.review .flag-cell { width: 26px; padding-left: 0; }
+.flag { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--risk); color: var(--surface); font-size: 12px; font-weight: 700; line-height: 1; }
+.row-name { white-space: nowrap; font-size: 15px; letter-spacing: -0.24px; font-variant-numeric: tabular-nums; }
+.is-flagged .row-name { font-weight: 600; }
+.row-context { width: 100%; font-size: 14px; letter-spacing: -0.224px; color: var(--hero-muted); }
+.row-tag { white-space: nowrap; text-align: right !important; font-size: 14px; letter-spacing: -0.224px; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.is-flagged .row-tag { font-weight: 600; color: var(--hero-text); }
+.review .row-icons { white-space: nowrap; text-align: right; padding-right: 0; }
+.icon-btn { display: inline-grid; place-items: center; width: 28px; height: 28px; border: none; border-radius: 6px; background: none; color: var(--link); cursor: pointer; }
+.icon-btn:hover { background: var(--fill); }
+/* Actions stay visible on flagged rows; on other rows they appear on hover or keyboard focus */
+@media (hover: hover) {
+  .review tr:not(.is-flagged) .icon-btn { opacity: 0; transition: opacity 0.15s; }
+  .review tr:not(.is-flagged):hover .icon-btn, .review tr:not(.is-flagged):focus-within .icon-btn { opacity: 1; }
+}
+.check > .link { padding-top: 8px; }
 .warnings { list-style: none; padding: 0; margin: 18px 0 0; color: var(--hero-faint); }
 
 /* Finding type: text + symbol, neutral fill; only risk carries the status red */
@@ -322,6 +332,15 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 @media (max-width: 560px) {
   .digest { padding: 18px 16px 14px; }
   .summary { font-size: 17px; }
+  /* Rows become two lines: name, then the reason; icons stay on the right */
+  .review, .review tbody { display: block; }
+  .review tr { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; column-gap: 4px; padding: 6px 0; border-bottom: 1px solid var(--hairline); }
+  .review tr:last-child { border-bottom: none; }
+  .review th, .review td { padding: 0; border-bottom: none; }
+  .review .flag-cell { grid-row: 1 / span 2; }
+  .review .row-context { display: none; }
+  .review .row-tag { grid-column: 2; grid-row: 2; text-align: left !important; font-size: 13px; }
+  .review .row-icons { grid-column: 3; grid-row: 1 / span 2; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sidebar { transition: none; }
