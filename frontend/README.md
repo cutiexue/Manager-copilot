@@ -46,19 +46,39 @@ The snapshot is only the offline fallback. `GET /briefings/latest` returns the s
 shape, and a backend test asserts that the live payload still equals this file — when
 it fails, regenerate the snapshot.
 
+## Pages
+
+A sidebar (like Claude or ChatGPT) switches between focused pages. Addresses use the
+URL hash, so refresh keeps the page and the browser back button works.
+
+| Address | Page |
+|---|---|
+| `#/` | **New chat** (home): today's top 3 briefing items above a centred chat box, with suggested questions |
+| `#/chat/<id>` | An open conversation; the sidebar's *Recent* list holds saved conversations |
+| `#/briefing` | Full morning briefing (all items, evidence, Ask Co-Pilot, Create reminder) |
+| `#/orders` | Yesterday's output and at-risk orders |
+| `#/actions` | Action log (demo, browser only) |
+
+"Ask" buttons on any page open a new conversation with the question typed in but not sent.
+The evidence drawer and the confirm dialog open over whichever page is showing. Below 860 px
+the sidebar becomes a slide-in menu.
+
 ## Layout (plan §12)
 
 ```
 src/
-├── App.tsx                    page layout and state
+├── App.tsx                    shell, pages and shared state (briefing, conversations, actions)
+├── route.ts                   hash routes (#/, #/chat/<id>, #/briefing, #/orders, #/actions)
 ├── api.ts                     backend client (via /api proxy)
 ├── types.ts                   backend response shapes
-├── evidence.ts                tool output → evidence drawer view
-├── fixtures/briefing.json     briefing snapshot
+├── evidence.ts                tool output → evidence drawer view, Ask questions
+├── fixtures/briefing.json     briefing snapshot (offline fallback)
 └── components/
-    ├── BriefingSummary.tsx    top-3 items, concise first
+    ├── Sidebar.tsx            new chat, page links, recent conversations, data status
+    ├── TodayDigest.tsx        home: top-3 briefing items and suggested questions
+    ├── BriefingSummary.tsx    full briefing page, concise first
     ├── DetailPanel.tsx        yesterday's output / at-risk orders
-    ├── Chat.tsx               multi-turn chat, sessions, error states
+    ├── Chat.tsx               multi-turn chat, error states
     ├── EvidenceDrawer.tsx     claim, calculation, source rows
     ├── ConfirmModal.tsx       explicit confirm before any action
     ├── ActionLog.tsx          proposed/confirmed/cancelled log

@@ -97,6 +97,8 @@ export interface Session {
   title: string;
   created_at?: string;
   updated_at?: string;
+  /** false for a conversation that was created but never got a message */
+  has_messages?: boolean;
 }
 
 export interface ChatMessage {

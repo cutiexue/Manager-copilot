@@ -36,6 +36,12 @@ export function findingFor(briefing: Briefing, decision: Decision): Finding | un
   return briefing.findings.find((f) => f.summary === decision.about && f.type === decision.finding_type);
 }
 
+/** The question an "Ask" button puts into the chat box for a briefing item. */
+export function questionFor(briefing: Briefing, decision: Decision): string {
+  const orderId = findingFor(briefing, decision)?.details.order_id;
+  return typeof orderId === 'string' ? `What is the latest status of ${orderId}?` : `Tell me more about: ${decision.about}`;
+}
+
 export function evidenceForFinding(finding: Finding) {
   return {
     title: FINDING_LABEL[finding.type] ?? finding.type,

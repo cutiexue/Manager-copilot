@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { BriefingFixture, BriefingSource, EvidenceView } from '../types';
-import { FINDING_LABEL, evidenceForDecision, findingFor } from '../evidence';
+import { FINDING_LABEL, evidenceForDecision, findingFor, questionFor } from '../evidence';
 import type { ProposalDraft } from './ConfirmModal';
 import TypeBadge from './TypeBadge';
 
@@ -70,12 +70,7 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
                 <button className="btn" onClick={() => onEvidence(evidenceForDecision(briefing, d))}>
                   View evidence
                 </button>
-                <button
-                  className="btn"
-                  onClick={() =>
-                    onAsk(orderId ? `What is the latest status of ${orderId}?` : `Tell me more about: ${d.about}`)
-                  }
-                >
+                <button className="btn" onClick={() => onAsk(questionFor(briefing, d))}>
                   Ask Co-Pilot
                 </button>
                 <button
