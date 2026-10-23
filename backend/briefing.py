@@ -12,9 +12,11 @@ from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 
-from data_loader import PRODUCTION_SOURCE, STAGES
+from data_loader import PRODUCTION_SOURCE, STAGES, source_ref
 from discovery import discover_issues
-from rules import MAX_FINDINGS, SNAPSHOT, is_workday
+from rules import (BASELINE_WORKDAYS, CUSTOMER_SLIPPING_MIN_ORDERS, DUE_SOON_DAYS, MAX_FINDINGS,
+                   QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, STAGE_DROP_PERCENT, is_due_soon,
+                   is_overdue, is_workday)
 from tools import compare_stage_output, get_orders_at_risk, get_stage_output
 
 # Each finding type maps to one fixed decision prompt; these are prompts for
@@ -57,6 +59,110 @@ def _yesterday_section(yesterday):
     return {"date": yesterday.isoformat(), "is_workday": True, "stages": stages}
 
 
+def _join(parts):
+    """'a', 'a and b', 'a, b and c'."""
+    return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+
+
+def _summary(ref, yesterday, risk_orders, risk_rows, findings, data_gaps):
+    """A short paragraph for the top of the briefing, one sourced sentence per check.
+
+    Every sentence is built from the same tool outputs as the rest of the briefing and
+    carries its own source rows, so the summary adds no numbers and needs no LLM call.
+    """
+    points = []
+
+    def add(kind, text, rows=None, **subject):
+        evidence = {"source": rows[0]["source"], "source_rows": rows} if rows else None
+        points.append({"kind": kind, "text": text, **subject, "evidence": evidence})
+
+    # 1. 需要关注的未完成订单，按原因分开计数（与 get_orders_at_risk 同一套规则，互不重叠）。
+    overdue = [o for o in risk_orders if is_overdue(o, ref)]
+    due_soon = [o for o in risk_orders if not is_overdue(o, ref) and is_due_soon(o, ref)]
+    quiet_only = [o for o in risk_orders if not is_overdue(o, ref) and not is_due_soon(o, ref)]
+    if risk_orders:
+        parts = []
+        if overdue:
+            parts.append(f"{len(overdue)} {'is' if len(overdue) == 1 else 'are'} overdue")
+        if due_soon:
+            parts.append(f"{len(due_soon)} {'is' if len(due_soon) == 1 else 'are'} due within {DUE_SOON_DAYS} days")
+        if quiet_only:
+            parts.append(f"{len(quiet_only)} {'has' if len(quiet_only) == 1 else 'have'} had no recorded "
+                         f"activity for {QUIET_ORDER_DAYS} days or more")
+        count = len(risk_orders)
+        add("orders_at_risk", f"{count} unfinished {'order needs' if count == 1 else 'orders need'} attention: "
+                              f"{_join(parts)}.", risk_rows)
+    else:
+        add("orders_at_risk", "No unfinished order is overdue, due soon or quiet.")
+
+    # 2. The most overdue order: earliest due date among overdue orders.
+    if overdue:
+        worst = min(overdue, key=lambda o: (o["due_date"], o["order_id"]))
+        days = (ref - date.fromisoformat(worst["due_date"])).days
+        add("most_overdue", f"The most overdue is {worst['order_id']} for {worst['customer']}, "
+                            f"{days} days past its due date.",
+            [row for row in risk_rows if row["key"] == worst["order_id"]], order_id=worst["order_id"])
+
+    # 3. Stage output drops from discovery (recent workdays vs the workdays before).
+    drops = [f for f in findings if f["type"] == "stage_output_drop"]
+    for finding in drops:
+        d = finding["details"]
+        add("stage_output_drop", f"{d['stage']} output fell {abs(d['change_percent']):.1f}% over the last "
+                                 f"{d['recent_workdays']} workdays compared with the {d['baseline_workdays']} before.",
+            finding["evidence"]["source_rows"], stage=d["stage"])
+    stage_gaps = [gap for gap in data_gaps if gap.get("section") != "yesterday"]
+    if not drops and not stage_gaps:
+        add("no_stage_drop", f"No stage's output fell {abs(STAGE_DROP_PERCENT):.0f}% or more over the last "
+                             f"{RECENT_WORKDAYS} workdays.")
+
+    # 4. Customers whose unfinished orders are all overdue or quiet.
+    for finding in (f for f in findings if f["type"] == "customer_slipping"):
+        d = finding["details"]
+        count = len(d["order_ids"])
+        add("customer_slipping", f"{'Both' if count == 2 else f'All {count}'} unfinished {d['customer']} orders "
+                                 "are overdue or quiet.", finding["evidence"]["source_rows"], customer=d["customer"])
+
+    # 5. Yesterday's output against each stage's own recent average.
+    compared = [s for s in yesterday["stages"] if s.get("change_percent") is not None]
+    if not yesterday["is_workday"]:
+        add("yesterday", f"Yesterday ({yesterday['date']}) was a scheduled rest day.")
+    elif compared:
+        lowest = min(compared, key=lambda s: s["change_percent"])
+        rows = [row for s in compared for row in s.get("source_rows", [])] + [
+            source_ref(PRODUCTION_SOURCE, r["source_row"], f"{r['date']} {r['stage']}")
+            for s in compared for r in s.get("baseline_records", [])]
+        if lowest["change_percent"] < 0:
+            others = [abs(s["change_percent"]) for s in compared if s is not lowest]
+            text = (f"Yesterday ({yesterday['date']}) {lowest['stage']} completed {lowest['pieces_completed']} pieces, "
+                    f"{abs(lowest['change_percent']):.1f}% below its {lowest['baseline_workdays']}-workday average")
+            text += f"; the other stages were within {max(others):.1f}% of theirs." if others else "."
+        else:
+            text = f"Yesterday ({yesterday['date']}) every stage was at or above its {lowest['baseline_workdays']}-workday average."
+        add("yesterday", text, rows)
+
+    if data_gaps:
+        add("data_gaps", f"{len(data_gaps)} {'check' if len(data_gaps) == 1 else 'checks'} could not be "
+                         "completed because records are missing.")
+
+    # 每类检查的入选规则，供界面在明细上方说明“为什么是这几项”；阈值都来自 rules.py。
+    basis = {f["type"]: f["severity_basis"] for f in reversed(findings)}
+    sections = [
+        {"type": "order_at_risk", "title": "Orders at risk", "total": len(risk_orders),
+         "how_picked": f"Unfinished orders that are overdue, due within {DUE_SOON_DAYS} days or without recorded "
+                       f"activity for {QUIET_ORDER_DAYS}+ days.",
+         "ranked_by": basis.get("order_at_risk")},
+        {"type": "stage_output_drop", "title": "Production", "total": len(drops),
+         "how_picked": f"Stages whose mean output over the last {RECENT_WORKDAYS} workdays is at least "
+                       f"{abs(STAGE_DROP_PERCENT):.0f}% below the {BASELINE_WORKDAYS} workdays before.",
+         "ranked_by": basis.get("stage_output_drop")},
+        {"type": "customer_slipping", "title": "Customers",
+         "total": sum(f["type"] == "customer_slipping" for f in findings),
+         "how_picked": f"Customers with at least {CUSTOMER_SLIPPING_MIN_ORDERS} unfinished orders, all overdue or quiet.",
+         "ranked_by": basis.get("customer_slipping")},
+    ]
+    return {"text": " ".join(point["text"] for point in points), "points": points, "sections": sections}
+
+
 def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
     """Structured morning briefing: yesterday, what is at risk, what needs a decision."""
     try:
@@ -70,6 +176,8 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
     risk = get_orders_at_risk(as_of_date)
     findings_result = discover_issues(as_of_date, max_findings)
     findings = findings_result["findings"]
+    # The summary covers every finding, not only the ones selected for the item list.
+    all_findings = discover_issues(as_of_date, max(findings_result["total_findings"], 1))["findings"]
     data_gaps = list(findings_result["data_gaps"])
     for entry in yesterday["stages"]:
         for field in ("output_status", "comparison_status"):
@@ -107,6 +215,7 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
             ],
             "source_rows": risk["source_rows"],
         },
+        "summary": _summary(ref, yesterday, risk["data"], risk["source_rows"], all_findings, data_gaps),
         "total_findings": findings_result["total_findings"],
         "findings": findings,
         "decisions": decisions,
@@ -131,6 +240,8 @@ def render_briefing_text(briefing):
         return f"Briefing unavailable: {briefing.get('message', 'unknown error')}"
 
     lines = [f"Morning briefing — {briefing['as_of_date']} (snapshot {briefing['snapshot_date']})"]
+    if "summary" in briefing:
+        lines += [briefing["summary"]["text"], ""]
 
     yesterday = briefing["yesterday"]
     if yesterday["is_workday"]:
