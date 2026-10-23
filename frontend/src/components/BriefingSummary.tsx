@@ -37,12 +37,14 @@ function reminderFor(briefing: Briefing, d: Decision): ProposalDraft {
   };
 }
 
+const SECTION_TITLE = { order_at_risk: 'Orders at risk', stage_output_drop: 'Production', customer_slipping: 'Customers' };
+
 /** Sections from the backend, or plain ones for briefings produced before the summary existed. */
 function sectionsFor(briefing: Briefing): SummarySection[] {
   if (briefing.summary) return briefing.summary.sections;
   return (['order_at_risk', 'stage_output_drop', 'customer_slipping'] as const).map((type) => ({
     type,
-    title: FINDING_LABEL[type],
+    title: SECTION_TITLE[type],
     total: type === 'order_at_risk' ? briefing.at_risk.count : briefing.decisions.filter((d) => d.finding_type === type).length,
     how_picked: '',
     ranked_by: null,
@@ -70,9 +72,14 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
         <SummaryText summary={briefing.summary} onEvidence={onEvidence} />
       ) : (
         <p className="headline">
-          <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} items need your decision
+          <strong>{briefing.at_risk.count} orders at risk</strong>
         </p>
       )}
+      {/* The backend calls these "decisions"; each is a suggested follow-up check, not a decision the system made. */}
+      <p className="followups">
+        <strong>{briefing.decisions.length} items to follow up</strong>, grouped by the check that found them. Each has a
+        suggested next step.
+      </p>
 
       {sectionsFor(briefing).map((section) => {
         const items = briefing.decisions.filter((d) => d.finding_type === section.type);
@@ -100,7 +107,9 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
               {items.map((d) => (
                 <li key={d.about} className="item">
                   <p className="item-title">{d.about}</p>
-                  <p className="item-note">{d.suggested_decision}</p>
+                  <p className="item-note">
+                    <span className="item-note-label">Next step:</span> {d.suggested_decision}
+                  </p>
                   <div className="row-actions">
                     <button className="btn btn-ghost btn-small" onClick={() => onEvidence(evidenceForDecision(briefing, d))}>
                       <Icon name="evidence" size={14} /> Evidence

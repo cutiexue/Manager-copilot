@@ -37,11 +37,11 @@ export default function TodayDigest({ fixture, source, onEvidence }: Props) {
         <SummaryText summary={briefing.summary} onEvidence={onEvidence} />
       ) : (
         <p className="headline">
-          <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} items need your decision
+          <strong>{briefing.at_risk.count} orders at risk</strong>
         </p>
       )}
       <a className="link" href={hrefFor({ page: 'briefing' })}>
-        Full briefing
+        Full briefing · {briefing.decisions.length} items to follow up
       </a>
     </section>
   );
