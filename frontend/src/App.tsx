@@ -135,7 +135,7 @@ export default function App() {
         onTurnSettled={() => void loadSessions()}
         welcome={
           route.page === 'home' ? (
-            <TodayDigest fixture={data} source={source} onEvidence={setEvidence} />
+            <TodayDigest fixture={data} source={source} />
           ) : undefined
         }
         suggestions={route.page === 'home' ? suggestionsFor(briefing) : undefined}

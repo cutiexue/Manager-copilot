@@ -1,11 +1,9 @@
-import type { Briefing, BriefingFixture, BriefingSource, EvidenceView } from '../types';
+import type { Briefing, BriefingFixture, BriefingSource } from '../types';
 import { hrefFor } from '../route';
-import SummaryText from './SummaryText';
 
 interface Props {
   fixture: BriefingFixture;
   source: BriefingSource;
-  onEvidence: (v: EvidenceView) => void;
 }
 
 /** Starter questions built from the briefing's own findings; templates only, no numbers. */
@@ -19,9 +17,8 @@ export function suggestionsFor(briefing: Briefing): string[] {
   return out;
 }
 
-// The Home page leads with the briefing summary above the chat box: every check in one short
-// paragraph, each sentence with its sources, so nothing is ranked against things of another kind.
-export default function TodayDigest({ fixture, source, onEvidence }: Props) {
+// One line of today's numbers above the chat box; the flagged details are on the Briefing page.
+export default function TodayDigest({ fixture, source }: Props) {
   const { briefing } = fixture;
 
   return (
@@ -33,15 +30,11 @@ export default function TodayDigest({ fixture, source, onEvidence }: Props) {
           {source === 'snapshot' ? ' · saved snapshot' : ''}
         </span>
       </div>
-      {briefing.summary ? (
-        <SummaryText summary={briefing.summary} onEvidence={onEvidence} />
-      ) : (
-        <p className="headline">
-          <strong>{briefing.at_risk.count} orders at risk</strong>
-        </p>
-      )}
+      <p className="headline">
+        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} flagged for review
+      </p>
       <a className="link" href={hrefFor({ page: 'briefing' })}>
-        Full briefing · {briefing.decisions.length} flagged for review
+        Full briefing
       </a>
     </section>
   );

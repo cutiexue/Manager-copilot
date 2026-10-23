@@ -3,7 +3,6 @@ import type { Briefing, BriefingFixture, BriefingSource, Check, CheckItem, Evide
 import { FINDING_LABEL, evidenceForFinding, findingFor, questionForFinding } from '../evidence';
 import type { ProposalDraft } from './ConfirmModal';
 import Icon from './Icon';
-import SummaryText from './SummaryText';
 
 interface Props {
   fixture: BriefingFixture;
@@ -155,13 +154,9 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
         )}
       </div>
 
-      {briefing.summary ? (
-        <SummaryText summary={briefing.summary} onEvidence={onEvidence} />
-      ) : (
-        <p className="headline">
-          <strong>{briefing.at_risk.count} orders at risk</strong>
-        </p>
-      )}
+      <p className="headline">
+        <strong>{briefing.at_risk.count} orders at risk</strong> · {briefing.decisions.length} flagged for review
+      </p>
 
       {checksFor(briefing)
         .filter((check) => check.items.length > 0)

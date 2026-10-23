@@ -132,10 +132,6 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 .headline { margin: 8px 0 0; font-size: 19px; line-height: 1.26; letter-spacing: 0.1px; color: var(--hero-muted); }
 .headline strong { color: var(--hero-text); font-weight: 600; }
 .notice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; padding: 6px 6px 6px 12px; border-radius: 10px; background: var(--fill); color: var(--text-2); }
-/* Summary: one sourced sentence per check, each with a small citation button */
-.summary { margin: 14px 0 0; max-width: 860px; font-size: 19px; line-height: 1.55; letter-spacing: -0.2px; color: var(--text); }
-.cite { display: inline-flex; vertical-align: -2px; margin-left: 3px; padding: 2px; border: none; border-radius: 4px; background: none; color: var(--link); cursor: pointer; }
-.cite:hover { background: var(--fill); }
 /* Checks: every finding as a compact row; the briefing's review items are flagged and come first */
 .check { margin-top: 28px; }
 .check-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px solid var(--hairline); }
@@ -229,7 +225,6 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 
 /* Home: the top of today's briefing, above the chat box */
 .digest { background: var(--surface); border-radius: 16px; padding: 22px 24px 18px; margin-bottom: 18px; }
-.digest .summary { margin: 6px 0 2px; font-size: 17px; line-height: 1.55; letter-spacing: -0.3px; }
 .digest .headline { margin: 6px 0 2px; font-size: 17px; }
 .digest-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .digest-head h2 { font-size: 28px; line-height: 1.14; letter-spacing: 0.196px; }
@@ -331,7 +326,6 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 }
 @media (max-width: 560px) {
   .digest { padding: 18px 16px 14px; }
-  .summary { font-size: 17px; }
   /* Rows become two lines: name, then the reason; icons stay on the right */
   .review, .review tbody { display: block; }
   .review tr { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; column-gap: 4px; padding: 6px 0; border-bottom: 1px solid var(--hairline); }
