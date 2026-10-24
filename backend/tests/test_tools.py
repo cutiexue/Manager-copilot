@@ -55,17 +55,37 @@ def test_missing_records_are_not_zero():
     assert "not zero" in result["message"]
 
 
-def test_unknown_order_is_not_found():
-    assert get_order_status("ORD-999") == {"status": "not_found", "data": None}
+def test_unknown_order_is_not_found_and_nothing_is_guessed():
+    result = get_order_status("ORD-999")
+    assert (result["status"], result["data"]) == ("not_found", None)
+    assert "ORD-999" in result["message"]
 
 
 def test_customer_lookup_ignores_case_and_spaces():
     assert get_customer_orders(" trendcart ")["count"] == 17
 
 
-@pytest.mark.xfail(strict=True, reason="Known gap: order IDs match case-sensitively (README).")
-def test_order_id_lookup_ignores_case():
-    assert get_order_status("ord-002")["status"] == "ok"
+@pytest.mark.parametrize("spelling", ["ORD-002", "ord-002", "ORD002", " ord 2 ", "2"])
+def test_order_id_lookup_accepts_any_spelling(spelling):
+    assert get_order_status(spelling)["data"]["order_id"] == "ORD-002"
+
+
+def test_a_unique_part_of_a_customer_name_is_resolved_and_said_so():
+    result = get_customer_orders("maple")
+    assert (result["customer"], result["count"]) == ("Maple & Co", 19)
+    assert "Maple & Co" in result["note"]
+
+
+def test_an_ambiguous_or_unknown_customer_returns_candidates_instead_of_a_guess():
+    ambiguous = get_customer_orders("co")
+    assert ambiguous["status"] == "ambiguous"
+    assert set(ambiguous["candidates"]) == {"Cotton Club", "Maple & Co"}
+    misspelt = get_customer_orders("Trend Kart")
+    assert (misspelt["status"], misspelt["candidates"]) == ("not_found", ["TrendCart"])
+    from tools import query_orders
+    assert query_orders(customer="co")["status"] == "ambiguous"
+    assert query_orders(customer="maple", status="IN_PROGRESS")["order_ids"] == ["ORD-083", "ORD-093"]
+    assert query_orders(order_ids=["ord-83", "93"])["count"] == 2
 
 
 def test_risk_result_states_its_thresholds_as_numbers():

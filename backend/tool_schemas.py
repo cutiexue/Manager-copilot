@@ -10,6 +10,11 @@ from production_estimates import WORKSHOP_ESTIMATORS, estimate_in_house, estimat
 from production_optimizer import (optimize_fastest_plan, optimize_cheapest_plan,
                                   optimize_orders_outsourced, optimize_orders_cheapest)
 from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES
+from action_tools import (draft_chase_message, list_follow_ups, propose_order_note, propose_reminder,
+                          propose_watch)
+from data_loader import STAGES
+from order_search import search_orders
+from watches import CONDITIONS as WATCH_CONDITIONS
 
 TOOLS = []
 TOOL_FUNCTIONS = {}
@@ -233,3 +238,50 @@ for _function in (optimize_fastest_plan, optimize_cheapest_plan):
                                         "description": "Inclusive calendar days: start date is day one."}
         _required.append("deadline_days")
     register_tool(_function, _function.__doc__ + " Read-only new-batch scenario. Report assumptions; not total real cost or guaranteed delivery.", _properties, _required)
+
+
+# Order search and follow-up actions. The action tools only create proposals; the manager
+# confirms them in the app, and no tool can confirm.
+_ORDER = {"type": "string", "description": "Order ID such as ORD-107 (any spelling: ord107, 107)."}
+register_tool(search_orders,
+              "Find candidate orders for loose text: an order ID in any spelling, part of a customer name, "
+              "a product or a stage. Returns ranked matches with risk reasons. Use it when the user names an "
+              "order loosely or several orders could match, then ask which one they mean instead of guessing.",
+              {"query": {"type": "string", "description": "What the user called the order(s)."},
+               "limit": {"type": "integer", "minimum": 1, "maximum": 20}},
+              ["query"])
+register_tool(propose_reminder,
+              "Propose an in-app reminder. Creates a PROPOSED item only: it is saved when the manager presses "
+              "Confirm in the app, never by you. `when` uses the real calendar in Singapore time, not the dataset "
+              "date: e.g. 'tomorrow 09:00', 'friday 3pm', 'in 2 hours', '2026-10-25T09:00' (default tomorrow 09:00).",
+              {"text": {"type": "string", "description": "What to remind the manager about."},
+               "when": {"type": "string"},
+               "order_id": _ORDER,
+               "subject": {"type": "string", "description": "Customer, stage or topic when there is no single order."}},
+              ["text"])
+register_tool(propose_order_note,
+              "Propose a local note on an order (kept in the app, never written to the course CSV). "
+              "PROPOSED only; the manager confirms it in the app.",
+              {"order_id": _ORDER, "text": {"type": "string"}},
+              ["order_id", "text"])
+register_tool(draft_chase_message,
+              "Propose a chase-up message draft for the order's customer; write the full text from tool facts. "
+              "PROPOSED only; when confirmed it is saved as a draft and is never sent automatically.",
+              {"order_id": _ORDER, "text": {"type": "string", "description": "The complete draft message."}},
+              ["order_id", "text"])
+register_tool(propose_watch,
+              "Propose a standing watch on an order. Conditions: not_moved_by (alert if the order has no new "
+              "activity by `deadline`, a YYYY-MM-DD date in the dataset calendar), becomes_overdue, completed, "
+              "reaches_stage (needs `stage`). Watches are checked against scripted data snapshots, not live data. "
+              "PROPOSED only; the manager confirms it in the app.",
+              {"order_id": _ORDER,
+               "condition": {"type": "string", "enum": list(WATCH_CONDITIONS)},
+               "deadline": {"type": "string", "description": "YYYY-MM-DD, required for not_moved_by."},
+               "stage": {"type": "string", "enum": list(STAGES), "description": "Required for reaches_stage."}},
+              ["order_id", "condition"])
+register_tool(list_follow_ups,
+              "List the manager's follow-ups: pending proposals, reminders, notes, chase-up drafts, watches and "
+              "unread alerts. Read-only.",
+              {"kind": {"type": "string", "enum": ["pending_proposals", "reminders", "notes", "chase_drafts",
+                                                  "watches", "unread_alerts"]}},
+              [])

@@ -8,9 +8,12 @@ from tool_schemas import TOOL_FUNCTIONS, TOOLS
 
 def test_every_schema_has_a_function():
     names = [tool["function"]["name"] for tool in TOOLS]
-    assert len(names) == len(set(names)) == 26
+    assert len(names) == len(set(names)) == 32
     assert set(names) == set(TOOL_FUNCTIONS)
-    assert len(build_tools()) == 26
+    assert len(build_tools()) == 32
+    # The agent can propose follow-ups but never confirm or execute them.
+    assert {"propose_reminder", "propose_order_note", "draft_chase_message", "propose_watch"} <= set(names)
+    assert not [name for name in names if "confirm" in name or "execute" in name]
 
 
 def test_execute_tool_runs_a_valid_call():

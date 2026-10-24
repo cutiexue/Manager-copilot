@@ -1,5 +1,7 @@
 """Provide tools for querying factory data."""
 
+import difflib
+import re
 from datetime import date, timedelta
 
 from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, load_orders,
@@ -8,6 +10,40 @@ from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, load_orders,
 from rules import (DUE_SOON_DAYS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, is_overdue,
                    previous_workdays, risk_reasons)
 from order_selection import current_selection
+from order_search import search_orders
+
+
+_ORDER_ID = re.compile(r"(?:ORD)?[\s-]*0*(\d{1,4})")
+
+
+def canonical_order_id(value):
+    """'ord-107', 'ORD107' or ' 107 ' -> 'ORD-107'; None when the text is not shaped like an order ID."""
+    if not isinstance(value, str):
+        return None
+    match = _ORDER_ID.fullmatch(value.strip().upper())
+    return f"ORD-{int(match.group(1)):03d}" if match else None
+
+
+def resolve_customer(name):
+    """A customer name in any case, or a unique part of one; otherwise the candidates to ask about.
+
+    'maple' -> Maple & Co; 'co' matches Cotton Club and Maple & Co, so the caller must ask which
+    one is meant instead of picking. Unknown names come back with the closest spellings."""
+    names = sorted({order["customer"] for order in load_orders()})
+    wanted = name.strip().casefold()
+    exact = [n for n in names if n.casefold() == wanted]
+    if exact:
+        return {"status": "ok", "customer": exact[0], "matched": "exact"}
+    partial = [n for n in names if wanted and wanted in n.casefold()]
+    if len(partial) == 1:
+        return {"status": "ok", "customer": partial[0], "matched": "partial"}
+    if partial:
+        return {"status": "ambiguous", "candidates": partial,
+                "message": f"'{name.strip()}' matches several customers; ask which one is meant."}
+    folded = {n.casefold(): n for n in names}
+    close = [folded[c] for c in difflib.get_close_matches(wanted, list(folded), n=3, cutoff=0.6)]
+    return {"status": "not_found", "candidates": close,
+            "message": f"No customer named '{name.strip()}'." + (f" Closest: {', '.join(close)}." if close else "")}
 
 
 def query_orders(scope='all', status=None, customer=None, category=None,
@@ -39,8 +75,13 @@ def query_orders(scope='all', status=None, customer=None, category=None,
     if missing:
         return {'status': 'insufficient_data', 'message': 'Previously selected orders are absent from the source.',
                 'missing_order_ids': sorted(missing)}
+    if customer is not None:
+        match = resolve_customer(customer)
+        if match["status"] != "ok":
+            return {**match, "count": 0, "order_ids": [], "orders": []}
+        customer = match["customer"]
     if order_ids is not None:
-        requested = {value.strip() for value in order_ids}
+        requested = {canonical_order_id(value) or value.strip() for value in order_ids}
         missing = requested - set(source_rows)
         if missing:
             return {'status': 'not_found_ids', 'message': 'Some requested orders do not exist; no partial total was calculated.',
@@ -97,38 +138,31 @@ def _order_refs(selected):
 
 
 def get_order_status(order_id):
-    """Return the matching order or a not_found result."""
-    # 读取全部订单。
-    orders = load_orders()
-
-    # 按订单编号精确匹配。
-    for order in orders:
-        if order["order_id"] == order_id:
+    """Return the order for an ID in any spelling (ORD-107, ord107, 107), or not_found with candidates."""
+    wanted = canonical_order_id(order_id) or order_id.strip()
+    for order in load_orders():
+        if order["order_id"] == wanted:
             return {"status": "ok", "data": order,
                     "source": ORDERS_SOURCE,
                     "source_rows": _order_refs([order])}
-
-    return {"status": "not_found", "data": None}
+    # Never guess: offer the closest orders and let the user pick.
+    hits = search_orders(order_id, limit=5)
+    candidates = [hit["order_id"] for hit in hits.get("orders", [])] if hits.get("status") == "ok" else []
+    return {"status": "not_found", "data": None, "candidates": candidates,
+            "message": f"No order {order_id.strip()!r} in the data." + (" Ask which one is meant." if candidates else "")}
 
 
 def get_customer_orders(customer):
-    """Return all orders matching a customer name, ignoring case and outer spaces."""
-    orders = load_orders()
-    matched_orders = []
-
-    # 只处理内存里的查询文本，不修改 CSV。
-    customer_name = customer.strip().casefold()
-    for order in orders:
-        if order["customer"].strip().casefold() == customer_name:
-            matched_orders.append(order)
-
-    # 查完所有订单后再返回，避免只返回第一条。
-    if matched_orders:
-        return {"status": "ok", "count": len(matched_orders), "data": matched_orders,
-                "source": ORDERS_SOURCE,
-                "source_rows": _order_refs(matched_orders)}
-
-    return {"status": "not_found", "count": 0, "data": []}
+    """All orders of one customer: the full name in any case, or a unique part of it."""
+    match = resolve_customer(customer)
+    if match["status"] != "ok":
+        return {**match, "count": 0, "data": []}
+    matched_orders = [order for order in load_orders() if order["customer"] == match["customer"]]
+    result = {"status": "ok", "customer": match["customer"], "count": len(matched_orders), "data": matched_orders,
+              "source": ORDERS_SOURCE, "source_rows": _order_refs(matched_orders)}
+    if match["matched"] == "partial":
+        result["note"] = f"'{customer.strip()}' was read as {match['customer']}, the only customer it matches."
+    return result
 
 
 def get_stage_output(stage, production_date):

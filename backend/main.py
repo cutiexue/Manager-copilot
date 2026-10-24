@@ -2,9 +2,11 @@
 
 import argparse
 import getpass
+import os
 from dataclasses import replace
+from pathlib import Path
 
-from config import load_config
+from config import load_config, read_env
 from tools import get_order_status
 
 
@@ -185,7 +187,12 @@ def main():
     if args.api:
         import uvicorn
         from api import create_app
-        uvicorn.run(create_app(service), host="127.0.0.1", port=args.port)
+        from scheduler import AppScheduler
+        settings = read_env(Path(__file__).with_name(".env"))
+        settings.update(os.environ)
+        scheduler = AppScheduler(service.actions, briefing_time=settings.get("BRIEFING_TIME", "07:00"),
+                                 watch_minutes=int(settings.get("WATCH_CHECK_MINUTES", "1")))
+        uvicorn.run(create_app(service, scheduler=scheduler), host="127.0.0.1", port=args.port)
         return
     run_chat(service)
 

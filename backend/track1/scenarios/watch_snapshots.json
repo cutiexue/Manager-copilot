@@ -1,0 +1,32 @@
+{
+  "about": "Scripted order updates for demonstrating standing watches. The course CSVs never change, so each version below applies simulated changes on top of the 2026-04-01 course data for one later day. Only the watch checker reads this file; every other tool keeps the course data. These are not real events.",
+  "versions": [
+    {
+      "version": "v0",
+      "date": "2026-04-01",
+      "label": "Course data",
+      "changes": []
+    },
+    {
+      "version": "v1",
+      "date": "2026-04-02",
+      "label": "Scripted update · Thu 2 Apr",
+      "changes": [
+        {"order_id": "ORD-107", "status": "COMPLETE", "current_stage": "COMPLETE", "last_activity_date": "2026-04-02", "completed_date": "2026-04-02", "days_late": "17"},
+        {"order_id": "ORD-120", "current_stage": "WASHING", "last_activity_date": "2026-04-02"},
+        {"order_id": "ORD-108", "current_stage": "WASHING", "last_activity_date": "2026-04-02"}
+      ]
+    },
+    {
+      "version": "v2",
+      "date": "2026-04-03",
+      "label": "Scripted update · Fri 3 Apr",
+      "changes": [
+        {"order_id": "ORD-062", "current_stage": "ASSEMBLY", "last_activity_date": "2026-04-03"},
+        {"order_id": "ORD-002", "current_stage": "PACKING", "last_activity_date": "2026-04-03"},
+        {"order_id": "ORD-114", "status": "COMPLETE", "current_stage": "COMPLETE", "last_activity_date": "2026-04-03", "completed_date": "2026-04-03", "days_late": "11"},
+        {"order_id": "ORD-108", "current_stage": "PACKING", "last_activity_date": "2026-04-03"}
+      ]
+    }
+  ]
+}

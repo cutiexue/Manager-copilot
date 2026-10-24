@@ -1,10 +1,16 @@
 """Local HTTP adapter over the shared chat service; no public-user authentication.
 
 Every error response has one shape, {"detail": <message for people>, "code": <stable name for
-programs>}, so the frontend can always show `detail` and tests can check `code`."""
+programs>}, so the frontend can always show `detail` and tests can check `code`.
+
+Follow-ups: the agent can only create proposals; POST /actions/{id}/confirm, called when the
+manager presses Confirm, is the only way one is carried out. /dev/* routes are demo controls for
+the scripted watch snapshots and manual briefing runs.
+"""
 
 import logging
 import sqlite3
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -12,9 +18,12 @@ from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import watches
+from actions import ActionNotFoundError, ActionStateError, now_sg
 from briefing import get_briefing_payload
 from order_search import search_orders
 from rules import SNAPSHOT
+from scheduler import run_morning_briefing
 from service import AgentIncompleteError, ModelUnavailableError
 from storage import ConversationConflictError, SessionNotFoundError
 
@@ -33,8 +42,19 @@ def _error_response(status, code, message):
     return JSONResponse({'detail': message, 'code': code}, status_code=status)
 
 
-def create_app(service):
-    app = FastAPI(title='DSS5105 Factory Assistant')
+def create_app(service, scheduler=None):
+    @asynccontextmanager
+    async def lifespan(app):
+        if scheduler is not None:
+            scheduler.start()
+        try:
+            yield
+        finally:
+            if scheduler is not None:
+                scheduler.shutdown()
+
+    app = FastAPI(title='DSS5105 Factory Assistant', lifespan=lifespan)
+    actions = service.actions
 
     @app.exception_handler(ApiError)
     async def api_error(request, exc):
@@ -67,8 +87,12 @@ def create_app(service):
             return function(*args)
         except SessionNotFoundError:
             raise ApiError(404, 'SESSION_NOT_FOUND', 'Session not found.') from None
+        except ActionNotFoundError as exc:
+            raise ApiError(404, 'NOT_FOUND', str(exc)) from None
         except ConversationConflictError as exc:
             raise ApiError(409, 'CONFLICT', str(exc)) from None
+        except ActionStateError as exc:
+            raise ApiError(409, 'ACTION_STATE', str(exc)) from None
         except ValueError as exc:
             raise ApiError(400, 'INVALID_REQUEST', str(exc)) from None
         except AgentIncompleteError as exc:
@@ -85,6 +109,7 @@ def create_app(service):
             logger.exception('Unexpected error in %s', getattr(function, '__name__', function))
             raise ApiError(500, 'INTERNAL_ERROR', 'Internal error in the backend; see the backend log.') from None
 
+    # ---- conversations ---------------------------------------------------------------------------
     @app.get('/sessions')
     def sessions():
         return run(service.list_sessions)
@@ -103,10 +128,16 @@ def create_app(service):
         data = await body(request, ['message'])
         return await run_in_threadpool(run, service.send_message, session_id, data.get('message'))
 
+    # ---- briefing and orders ------------------------------------------------------------------------
     @app.get('/briefings/latest')
     def latest_briefing(as_of_date: str = SNAPSHOT):
-        # 没有调度器之前，“最新”就是按数据快照当场生成的晨报；不调用模型。
+        # Generated on request from the deterministic tools (no model call), so it never goes stale;
+        # the scheduler keeps a dated copy each morning (GET /briefings).
         return run(get_briefing_payload, as_of_date)
+
+    @app.get('/briefings')
+    def briefing_runs(limit: int = 30):
+        return run(actions.list_briefing_runs, max(1, min(limit, 100)))
 
     @app.get('/orders/search')
     def order_search(q: str = '', limit: int = 8):
@@ -114,5 +145,105 @@ def create_app(service):
         if result['status'] != 'ok':
             raise ApiError(400, 'INVALID_REQUEST', result['message'])
         return result
+
+    # ---- follow-ups: proposals and what confirming them creates --------------------------------------
+    @app.get('/actions')
+    def list_actions(status: str | None = None, session_id: str | None = None):
+        return run(actions.list_proposals, status, session_id)
+
+    @app.post('/actions/proposals', status_code=201)
+    async def create_proposal(request: Request):
+        data = await body(request, ['kind', 'payload', 'reason', 'session_id'])
+        return await run_in_threadpool(run, lambda: actions.propose(
+            data.get('kind'), data.get('payload'), 'ui', data.get('session_id'), data.get('reason')))
+
+    @app.post('/actions/{proposal_id}/confirm')
+    def confirm_action(proposal_id: str):
+        return run(actions.confirm, proposal_id)
+
+    @app.post('/actions/{proposal_id}/cancel')
+    def cancel_action(proposal_id: str):
+        return run(actions.cancel, proposal_id)
+
+    @app.get('/follow-ups/counts')
+    def follow_up_counts():
+        return run(actions.counts)
+
+    @app.get('/reminders')
+    def reminders(status: str | None = None):
+        return run(actions.list_reminders, status)
+
+    @app.post('/reminders/{reminder_id}/dismiss')
+    def dismiss_reminder(reminder_id: str):
+        return run(actions.dismiss_reminder, reminder_id)
+
+    @app.get('/notes')
+    def notes(order_id: str | None = None):
+        return run(actions.list_notes, order_id)
+
+    @app.get('/drafts')
+    def drafts():
+        return run(actions.list_drafts)
+
+    @app.get('/watches')
+    def list_watches(status: str | None = None):
+        return run(actions.list_watches, status)
+
+    @app.get('/watches/{watch_id}')
+    def watch_detail(watch_id: str):
+        return run(lambda: {**actions.get_watch(watch_id), 'checks': actions.watch_checks(watch_id)})
+
+    @app.post('/watches/{watch_id}/{change}')
+    def change_watch(watch_id: str, change: str):
+        if change not in ('pause', 'resume', 'cancel'):
+            raise ApiError(404, 'NOT_FOUND', 'Use pause, resume or cancel.')
+        return run(actions.set_watch_status, watch_id, change)
+
+    @app.get('/alerts')
+    def alerts(unread: bool = False):
+        return run(actions.list_alerts, unread)
+
+    @app.post('/alerts/{alert_id}/read')
+    def read_alert(alert_id: str):
+        return run(actions.mark_alert_read, alert_id)
+
+    @app.get('/audit')
+    def audit(limit: int = 100):
+        return run(actions.list_audit, max(1, min(limit, 500)))
+
+    # ---- data snapshots for watches, scheduler status and demo controls -------------------------------
+    def snapshot_state():
+        current = actions.data_version()
+        upcoming = watches.next_version(current)
+        return {'current': watches.version_info(current),
+                'next': watches.version_info(upcoming) if upcoming else None,
+                'versions': [watches.version_info(v['version']) for v in watches.load_snapshots()]}
+
+    @app.get('/data/snapshot')
+    def data_snapshot():
+        return run(snapshot_state)
+
+    @app.post('/dev/data/advance')
+    def advance_snapshot():
+        def advance():
+            upcoming = watches.next_version(actions.data_version())
+            if upcoming is None:
+                raise ActionStateError('This is the last scripted snapshot.')
+            actions.set_data_version(upcoming)
+            check = watches.check_watches(actions, now_sg())
+            return {**snapshot_state(), 'check': check}
+        return run(advance)
+
+    @app.post('/dev/data/reset')
+    def reset_snapshot():
+        return run(lambda: (actions.set_data_version(watches.BASE_VERSION), snapshot_state())[1])
+
+    @app.post('/dev/briefings/generate', status_code=201)
+    def generate_briefing():
+        return run(lambda: run_morning_briefing(actions, now_sg(), trigger='manual'))
+
+    @app.get('/scheduler')
+    def scheduler_status():
+        return scheduler.status() if scheduler is not None else {'running': False, 'jobs': []}
 
     return app
