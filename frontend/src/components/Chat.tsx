@@ -56,6 +56,8 @@ export default function Chat({
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
+  // The message whose send just failed; Retry sends it again.
+  const [failed, setFailed] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -75,6 +77,7 @@ export default function Chat({
     if (sessionId === null) {
       setMessages([]);
       setError(null);
+      setFailed(null);
       setStatus('idle');
       return;
     }
@@ -87,6 +90,7 @@ export default function Chat({
     let cancelled = false;
     setStatus('loading');
     setError(null);
+    setFailed(null);
     api.history(sessionId).then(
       (history) => {
         if (cancelled) return;
@@ -115,11 +119,12 @@ export default function Chat({
     if (messages.length > 0) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, status]);
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (again?: string) => {
+    const text = (again ?? input).trim();
     if (!text || status === 'sending') return;
     let id = sessionId;
     setError(null);
+    setFailed(null);
     setStatus('sending');
     setMessages((m) => [...m, { role: 'human', content: text }]);
     setInput('');
@@ -144,6 +149,7 @@ export default function Chat({
         // The backend keeps history unchanged on failure, so drop the optimistic message.
         setMessages((m) => m.slice(0, -1));
         setInput(text);
+        setFailed(text);
         fail(e);
       }
     } finally {
@@ -159,6 +165,10 @@ export default function Chat({
   };
 
   const retry = () => {
+    if (failed) {
+      void send(failed);
+      return;
+    }
     setError(null);
     setStatus('idle');
     setReload((n) => n + 1);
