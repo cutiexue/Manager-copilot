@@ -49,7 +49,9 @@ def test_order_detail_matches_the_agent_tool_in_any_spelling(setup):
     for key, row in body["evidence"]["rows"].items():
         source, line = key.split("#")
         assert row == csv_line(Path(source).name, int(line))
-    assert {"source": "track1/data/orders.csv", "row": 110, "key": "ORD-062"} in body["evidence"]["refs"]
+    assert {"source": "track1/data/orders.csv", "row": 110, "key": "ORD-062", "id": "orders.csv:110"} in body["evidence"]["refs"]
+    for ref in body["evidence"]["refs"]:  # every id resolves to the same row
+        assert client.get(f"/evidence/{ref['id']}").json()["data"] == body["evidence"]["rows"][f"{ref['source']}#{ref['row']}"]
 
 
 def test_order_detail_lists_its_saved_follow_ups(setup):

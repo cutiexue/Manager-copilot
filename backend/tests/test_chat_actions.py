@@ -52,7 +52,7 @@ def test_a_chat_turn_proposes_but_only_the_confirm_button_saves(tmp_path):
     reply = client.post(f"/sessions/{session_id}/messages", json={"message": "Remind me to chase ORD-002"}).json()
 
     assert [(c["name"], c["status"]) for c in reply["tool_calls"]] == [("trace_order", "ok"), ("propose_reminder", "proposed")]
-    assert {"source": "track1/data/orders.csv", "row": 86, "key": "ORD-002"} in reply["evidence"]["refs"]
+    assert {"source": "track1/data/orders.csv", "row": 86, "key": "ORD-002", "id": "orders.csv:86"} in reply["evidence"]["refs"]
     assert reply["evidence"]["rows"]["track1/data/orders.csv#86"]["customer"] == "Cotton Club"
     [proposal] = reply["proposals"]
     assert (proposal["kind"], proposal["status"], proposal["session_id"]) == ("reminder", "PROPOSED", session_id)

@@ -1,17 +1,18 @@
 """The source rows behind tool results, in one shape, plus the raw CSV rows they point to.
 
 Tools cite their rows in several shapes (see issue B-2): {source, row, key} references,
-`source_row` numbers on production or order records, workshop profiles and copied production
-records. collect() turns all of them into {source, row, key}; raw_rows() reads the rows so the
-evidence drawer can show them exactly as they appear in the CSV.
+`source_row` numbers on production or order records, copied production records, workshop entries
+and order entries in multi-order plans (an order ID with its pieces). collect() turns all of them
+into {source, row, key}; raw_rows() reads the rows so the evidence drawer can show them exactly as
+they appear in the CSV.
 """
 
 import csv
 from functools import lru_cache
 from pathlib import Path
 
-from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE, production_row_numbers,
-                         workshop_row_numbers)
+from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE, order_row_numbers,
+                         production_row_numbers, workshop_row_numbers)
 
 BACKEND_DIR = Path(__file__).resolve().parent
 _SOURCES = {ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE}
@@ -33,7 +34,13 @@ def _ref(node):
         row = production_row_numbers().get((node["date"], node["stage"]))
         if row:
             return PRODUCTION_SOURCE, row, f"{node['date']} {node['stage']}"
-    if {"workshop_id", "capacity_pieces_per_day"} <= set(node):
+    if {"order_id", "pieces"} <= set(node) and isinstance(node["order_id"], str):
+        # An order a plan or listing used, with the quantity read from its row.
+        row = order_row_numbers().get(node["order_id"])
+        if row:
+            return ORDERS_SOURCE, row, node["order_id"]
+    if isinstance(node.get("workshop_id"), str):
+        # A workshop profile, estimate or plan allocation: its capacity, cost and lead time come from this row.
         row = workshop_row_numbers().get(node["workshop_id"])
         if row:
             return WORKSHOPS_SOURCE, row, node["workshop_id"]
@@ -41,7 +48,8 @@ def _ref(node):
 
 
 def collect(node):
-    """Every citation in a tool result, deduplicated, in the order first seen."""
+    """Every citation in a tool result, deduplicated, in the order first seen; `id` is what
+    GET /evidence/{id} resolves."""
     seen, refs = set(), []
 
     def walk(value):
@@ -49,7 +57,7 @@ def collect(node):
             ref = _ref(value)
             if ref and ref[:2] not in seen:
                 seen.add(ref[:2])
-                refs.append({"source": ref[0], "row": ref[1], "key": ref[2]})
+                refs.append({"source": ref[0], "row": ref[1], "key": ref[2], "id": evidence_id(ref[0], ref[1])})
             for child in value.values():
                 walk(child)
         elif isinstance(value, list):

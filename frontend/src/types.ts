@@ -5,6 +5,8 @@ export interface SourceRef {
   source: string;
   row: number;
   key: string;
+  /** "<file>:<line>", e.g. "orders.csv:86"; GET /evidence/{id} returns that row. Chat answers carry it. */
+  id?: string;
 }
 
 export interface Evidence {
