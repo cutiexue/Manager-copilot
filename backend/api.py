@@ -1,7 +1,11 @@
 """Local HTTP adapter over the shared chat service; no public-user authentication.
 
 Every error response has one shape, {"detail": <message for people>, "code": <stable name for
-programs>}, so the frontend can always show `detail` and tests can check `code`.
+programs>}, so the frontend can always show `detail` and tests can check `code`. A NOT_FOUND for an
+order also lists `candidates`, the closest order IDs.
+
+Read-only views (an order, a stage's output, feasibility estimates, one cited CSV row) run the
+agent's own tools, so they give the same numbers as the chat.
 
 Follow-ups: the agent can only create proposals; POST /actions/{id}/confirm, called when the
 manager presses Confirm, is the only way one is carried out. /dev/* routes are demo controls for
@@ -18,6 +22,7 @@ from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import views
 import watches
 from actions import ActionNotFoundError, ActionStateError, now_sg
 from briefing import get_briefing_payload
@@ -33,13 +38,13 @@ logger = logging.getLogger('manager_copilot.api')
 class ApiError(Exception):
     """An error the client should see, with its HTTP status and a stable code."""
 
-    def __init__(self, status, code, message):
+    def __init__(self, status, code, message, **extra):
         super().__init__(message)
-        self.status, self.code, self.message = status, code, message
+        self.status, self.code, self.message, self.extra = status, code, message, extra
 
 
-def _error_response(status, code, message):
-    return JSONResponse({'detail': message, 'code': code}, status_code=status)
+def _error_response(status, code, message, extra=None):
+    return JSONResponse({'detail': message, 'code': code, **(extra or {})}, status_code=status)
 
 
 def create_app(service, scheduler=None):
@@ -58,7 +63,7 @@ def create_app(service, scheduler=None):
 
     @app.exception_handler(ApiError)
     async def api_error(request, exc):
-        return _error_response(exc.status, exc.code, exc.message)
+        return _error_response(exc.status, exc.code, exc.message, exc.extra)
 
     @app.exception_handler(RequestValidationError)
     async def invalid_parameters(request, exc):
@@ -87,6 +92,9 @@ def create_app(service, scheduler=None):
             return function(*args)
         except SessionNotFoundError:
             raise ApiError(404, 'SESSION_NOT_FOUND', 'Session not found.') from None
+        except views.NotFoundError as exc:
+            extra = {'candidates': exc.candidates} if exc.candidates else {}
+            raise ApiError(404, 'NOT_FOUND', str(exc), **extra) from None
         except ActionNotFoundError as exc:
             raise ApiError(404, 'NOT_FOUND', str(exc)) from None
         except ConversationConflictError as exc:
@@ -145,6 +153,27 @@ def create_app(service, scheduler=None):
         if result['status'] != 'ok':
             raise ApiError(400, 'INVALID_REQUEST', result['message'])
         return result
+
+    @app.get('/orders/{order_id}')
+    def order_detail(order_id: str):
+        return run(views.order_detail, order_id, actions)
+
+    @app.get('/production/stages/{stage}')
+    def stage_output(stage: str, date: str | None = None, baseline_days: int = 7, days: int = 10):
+        return run(views.stage_output, stage, date, baseline_days, days)
+
+    @app.get('/feasibility/estimators')
+    def feasibility_estimators():
+        return run(views.estimators)
+
+    @app.post('/feasibility/estimate')
+    async def feasibility_estimate(request: Request):
+        data = await body(request, ['estimator', 'arguments'])
+        return await run_in_threadpool(run, views.estimate, data.get('estimator'), data.get('arguments', {}))
+
+    @app.get('/evidence/{evidence_id}')
+    def evidence(evidence_id: str):
+        return run(views.evidence_row, evidence_id)
 
     # ---- follow-ups: proposals and what confirming them creates --------------------------------------
     @app.get('/actions')

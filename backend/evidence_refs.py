@@ -15,6 +15,7 @@ from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE, pro
 
 BACKEND_DIR = Path(__file__).resolve().parent
 _SOURCES = {ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE}
+_BY_FILE = {Path(source).name: source for source in _SOURCES}
 
 
 def _ref(node):
@@ -73,3 +74,17 @@ def raw_rows(refs):
         if 2 <= ref["row"] <= len(table):
             rows[f"{ref['source']}#{ref['row']}"] = dict(zip(table[0], table[ref["row"] - 1]))
     return rows
+
+
+def evidence_id(source, row):
+    """The short ID that GET /evidence/{id} resolves: file name and line, e.g. "orders.csv:12"."""
+    return f"{Path(source).name}:{row}"
+
+
+def lookup(file_name, row):
+    """One data row of a source file as {id, source, row, data}, or None if there is no such row."""
+    source = _BY_FILE.get(file_name)
+    if source is None:
+        return None
+    data = raw_rows([{"source": source, "row": row}]).get(f"{source}#{row}")
+    return None if data is None else {"id": evidence_id(source, row), "source": source, "row": row, "data": data}
