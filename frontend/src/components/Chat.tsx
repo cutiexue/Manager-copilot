@@ -1,7 +1,9 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { api } from '../api';
-import type { ChatMessage, Session } from '../types';
+import type { ChatMessage, EvidenceView, Proposal, Session } from '../types';
 import Icon from './Icon';
+import Markdown from './Markdown';
+import ProposalCard from './ProposalCard';
 
 interface Props {
   /** null = a new conversation, created on the first message */
@@ -18,6 +20,27 @@ interface Props {
   /** Shown above the chat box while the conversation is empty (the Home page) */
   welcome?: ReactNode;
   suggestions?: string[];
+  /** Opens the evidence drawer for an answer's cited rows */
+  onEvidence: (view: EvidenceView) => void;
+  /** A proposal was confirmed or cancelled, so follow-up counts may have changed */
+  onFollowUpsChanged: () => void;
+}
+
+const args = (values: Record<string, unknown>) =>
+  Object.entries(values)
+    .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+    .join(', ') || '—';
+
+/** What the evidence drawer shows for one answer: the tools it called and the rows they cited. */
+function evidenceFor(m: ChatMessage): EvidenceView {
+  const first = m.content.split('\n').find((line) => line.trim()) ?? '';
+  return {
+    title: 'this answer',
+    claim: first.replace(/[*`#|]/g, '').trim().slice(0, 240),
+    calculation: (m.tool_calls ?? []).map((c) => ({ label: c.name, value: `${args(c.arguments)}${c.status ? ` → ${c.status}` : ''}` })),
+    refs: m.evidence?.refs ?? [],
+    rows: m.evidence?.rows,
+  };
 }
 
 type Status = 'idle' | 'loading' | 'sending' | 'error';
@@ -27,6 +50,7 @@ const OFFLINE_PREFIX = 'Cannot reach';
 
 export default function Chat({
   sessionId, title, prefill, onPrefillUsed, backendError, onRetry, onSessionCreated, onTurnSettled, welcome, suggestions,
+  onEvidence, onFollowUpsChanged,
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -109,7 +133,10 @@ export default function Chat({
       }
       const res = await api.send(id, text);
       if (shown.current === id) {
-        setMessages((m) => [...m, { role: 'ai', content: res.answer }]);
+        setMessages((m) => [
+          ...m,
+          { role: 'ai', content: res.answer, tool_calls: res.tool_calls, evidence: res.evidence, proposals: res.proposals },
+        ]);
         setStatus('idle');
       }
     } catch (e) {
@@ -122,6 +149,13 @@ export default function Chat({
     } finally {
       onTurnSettled();
     }
+  };
+
+  const proposalChanged = (next: Proposal) => {
+    setMessages((list) =>
+      list.map((m) => (m.proposals ? { ...m, proposals: m.proposals.map((p) => (p.id === next.id ? next : p)) } : m)),
+    );
+    onFollowUpsChanged();
   };
 
   const retry = () => {
@@ -149,7 +183,19 @@ export default function Chat({
                 {messages.map((m, i) => (
                   <div key={i} className={`msg msg-${m.role}`}>
                     <span className="who">{m.role === 'human' ? 'You' : 'Co-Pilot'}</span>
-                    <div className="bubble">{m.content}</div>
+                    {m.role === 'ai' ? (
+                      <div className="bubble bubble-md">
+                        <Markdown text={m.content} />
+                      </div>
+                    ) : (
+                      <div className="bubble">{m.content}</div>
+                    )}
+                    {m.proposals?.map((p) => <ProposalCard key={p.id} proposal={p} onChanged={proposalChanged} />)}
+                    {m.evidence && m.evidence.refs.length > 0 && (
+                      <button className="btn btn-ghost btn-small sources" onClick={() => onEvidence(evidenceFor(m))}>
+                        <Icon name="evidence" size={14} /> Sources ({m.evidence.refs.length})
+                      </button>
+                    )}
                   </div>
                 ))}
                 {status === 'sending' && (

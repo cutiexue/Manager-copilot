@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { api } from '../api';
 import type { OrderHit } from '../types';
 import OrderPicker, { orderDetail } from './OrderPicker';
 
@@ -22,25 +23,40 @@ export interface ProposalDraft {
 
 interface Props {
   draft: ProposalDraft;
-  /** target: the order ID or subject the action is about */
-  onConfirm: (target: string, text: string) => void;
-  /** target is null when the dialog is closed before choosing what the action is about */
-  onCancel: (target: string | null, text: string) => void;
+  /** Called after the backend saved it, with a one-line confirmation to show */
+  onDone: (message: string) => void;
+  /** Cancel or Esc: nothing is saved */
+  onClose: () => void;
 }
 
 const textFor = (o: OrderChoice) => `Follow up on ${o.order_id}${o.customer ? ` (${o.customer})` : ''}.`;
+const pad = (n: number) => String(n).padStart(2, '0');
+const localInput = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function tomorrowNine() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(9, 0, 0, 0);
+  return localInput(d);
+}
+const readable = (value: string) =>
+  new Date(value).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
-// Plan §7.5: the agent/UI only proposes; nothing happens until the manager
-// explicitly confirms here.
-export default function ConfirmModal({ draft, onConfirm, onCancel }: Props) {
+// Plan §7.5: a proposal is carried out only when the manager confirms. Confirm here creates the
+// proposal and confirms it in one step; Cancel or Esc saves nothing.
+export default function ConfirmModal({ draft, onDone, onClose }: Props) {
   const [order, setOrder] = useState<OrderChoice | null>(draft.order ?? null);
-  const [subject, setSubject] = useState<string | null>(draft.subject ?? null);
+  const [subject, setSubject] = useState<string | null>(draft.kind === 'note' ? null : draft.subject ?? null);
   const [text, setText] = useState(draft.text);
   // The text the dialog filled in itself; it follows the chosen order until the manager edits it.
   const [defaultText, setDefaultText] = useState(draft.text);
+  const [when, setWhen] = useState(tomorrowNine);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const target = order?.order_id ?? subject;
+  const isReminder = draft.kind === 'reminder';
 
   useEffect(() => {
     // With the subject already chosen, start on Cancel so Enter cannot confirm by accident;
@@ -49,10 +65,10 @@ export default function ConfirmModal({ draft, onConfirm, onCancel }: Props) {
   }, [draft]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel(target, text);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !busy && onClose();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onCancel, target, text]);
+  }, [onClose, busy]);
 
   const pick = (o: OrderHit) => {
     const choice = { order_id: o.order_id, customer: o.customer, detail: orderDetail(o) };
@@ -62,6 +78,24 @@ export default function ConfirmModal({ draft, onConfirm, onCancel }: Props) {
       setDefaultText(textFor(choice));
     }
     window.setTimeout(() => textRef.current?.focus(), 0);
+  };
+
+  const confirm = async () => {
+    if (!target) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const payload: Record<string, unknown> = { text: text.trim() };
+      if (order) payload.order_id = order.order_id;
+      else payload.subject = subject;
+      if (isReminder) payload.when = when;
+      const proposal = await api.propose(draft.kind, payload, draft.reason);
+      await api.confirm(proposal.id);
+      onDone(isReminder ? `Reminder saved for ${readable(when)}` : `Note saved on ${target}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unexpected error.');
+      setBusy(false);
+    }
   };
 
   return (
@@ -98,32 +132,49 @@ export default function ConfirmModal({ draft, onConfirm, onCancel }: Props) {
         </div>
 
         <label className="field">
-          <span className="field-label">{draft.kind === 'note' ? 'Note' : 'Reminder'} text</span>
+          <span className="field-label">{isReminder ? 'Reminder' : 'Note'} text</span>
           <textarea ref={textRef} value={text} rows={3} onChange={(e) => setText(e.target.value)} />
         </label>
+
+        {isReminder && (
+          <label className="field">
+            <span className="field-label">When (Singapore time)</span>
+            <input className="input" type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
+          </label>
+        )}
 
         <p className="small" id="confirm-what">
           <strong>What will happen:</strong>{' '}
           {target ? (
-            <>
-              a {draft.kind} about <strong>{target}</strong> is added to the action log with the time you confirm. Nothing
-              is sent to anyone.
-            </>
+            isReminder ? (
+              <>
+                a reminder about <strong>{target}</strong> is saved and alerts you at {when ? readable(when) : '…'}. Nothing
+                is sent to anyone.
+              </>
+            ) : (
+              <>
+                a note is saved on <strong>{target}</strong> in this app. The order data is not changed.
+              </>
+            )
           ) : (
             <>choose the order this {draft.kind} is about.</>
           )}
         </p>
-        <p className="demo-note small">Demo mode: kept in this browser tab only until the backend action service exists.</p>
+        {error && (
+          <p className="picker-error small" role="alert">
+            {error}
+          </p>
+        )}
         <div className="modal-actions">
-          <button ref={cancelRef} className="btn" onClick={() => onCancel(target, text)}>
+          <button ref={cancelRef} className="btn" disabled={busy} onClick={onClose}>
             Cancel — do nothing
           </button>
           <button
             className="btn btn-primary"
-            disabled={!target || !text.trim()}
-            onClick={() => target && onConfirm(target, text.trim())}
+            disabled={!target || !text.trim() || (isReminder && !when) || busy}
+            onClick={() => void confirm()}
           >
-            ✓ Confirm {draft.kind}
+            {busy ? 'Saving…' : `✓ Confirm ${draft.kind}`}
           </button>
         </div>
       </div>

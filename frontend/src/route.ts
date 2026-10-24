@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 // Hash routes (#/briefing, #/chat/<id>) keep the current page on refresh and make the
 // browser back button work, without adding a router dependency.
 
-export type Page = 'home' | 'chat' | 'briefing' | 'orders' | 'actions';
+export type Page = 'home' | 'chat' | 'briefing' | 'orders' | 'actions' | 'watches';
 
 export interface Route {
   page: Page;
@@ -14,7 +14,7 @@ export interface Route {
 export function parseHash(hash: string): Route {
   const [, page = '', id] = hash.replace(/^#/, '').split('/');
   if (page === 'chat' && id) return { page: 'chat', sessionId: decodeURIComponent(id) };
-  if (page === 'briefing' || page === 'orders' || page === 'actions') return { page };
+  if (page === 'briefing' || page === 'orders' || page === 'actions' || page === 'watches') return { page };
   return { page: 'home' };
 }
 

@@ -169,14 +169,148 @@ export interface Session {
   has_messages?: boolean;
 }
 
+/** One tool the agent called in a turn, with the status its result reported */
+export interface ToolCall {
+  name: string;
+  arguments: Record<string, unknown>;
+  status: string | null;
+}
+
+/** The CSV rows the turn's tools cited, and those rows as they appear in the files */
+export interface TurnEvidence {
+  refs: SourceRef[];
+  rows: Record<string, Record<string, string>>;
+}
+
 export interface ChatMessage {
   role: 'human' | 'ai';
   content: string;
+  /** On answers that used tools */
+  tool_calls?: ToolCall[];
+  evidence?: TurnEvidence;
+  proposals?: Proposal[];
 }
 
 export interface SendMessageResponse {
   session_id: string;
   answer: string;
+  tool_calls: ToolCall[];
+  evidence: TurnEvidence;
+  proposals: Proposal[];
+  prompt_version: string;
+}
+
+// ---- Follow-ups (actions.py): proposals and what confirming them creates ----
+export type ProposalKind = 'reminder' | 'note' | 'chase_message' | 'watch';
+export type ProposalStatus = 'PROPOSED' | 'EXECUTED' | 'CANCELLED' | 'FAILED' | 'EXPIRED';
+
+export interface Proposal {
+  id: string;
+  kind: ProposalKind;
+  status: ProposalStatus;
+  source: 'chat' | 'ui';
+  session_id: string | null;
+  payload: Record<string, unknown>;
+  summary: string;
+  reason: string | null;
+  created_at: string;
+  expires_at: string;
+  decided_at: string | null;
+  result_kind: string | null;
+  result_id: string | null;
+  error: string | null;
+}
+
+export interface ConfirmResult {
+  proposal: Proposal;
+  result: Record<string, unknown> | null;
+  /** true when it had already been confirmed: nothing new was created */
+  already_done: boolean;
+}
+
+export interface Reminder {
+  id: string;
+  proposal_id: string;
+  order_id: string | null;
+  subject: string | null;
+  text: string;
+  remind_at: string;
+  status: 'SCHEDULED' | 'DUE' | 'DISMISSED';
+  created_at: string;
+  due_at: string | null;
+}
+
+export interface OrderNote {
+  id: string;
+  order_id: string;
+  text: string;
+  created_at: string;
+}
+
+export interface ChaseDraft {
+  id: string;
+  order_id: string;
+  customer: string;
+  text: string;
+  created_at: string;
+}
+
+export type WatchCondition = 'not_moved_by' | 'becomes_overdue' | 'completed' | 'reaches_stage';
+
+export interface Watch {
+  id: string;
+  order_id: string;
+  condition: WatchCondition;
+  deadline: string | null;
+  stage: string | null;
+  status: 'ACTIVE' | 'PAUSED' | 'TRIGGERED' | 'RESOLVED' | 'CANCELLED';
+  summary: string;
+  baseline: Record<string, string>;
+  created_at: string;
+  last_checked_at: string | null;
+  last_result: string | null;
+  outcome: string | null;
+}
+
+export interface Alert {
+  id: string;
+  kind: 'watch' | 'reminder' | 'briefing';
+  ref_id: string | null;
+  title: string;
+  body: string | null;
+  created_at: string;
+  read_at: string | null;
+}
+
+export interface AuditEvent {
+  id: number;
+  at: string;
+  actor: 'agent' | 'user' | 'system' | 'scheduler';
+  event: string;
+  proposal_id: string | null;
+  target_kind: string | null;
+  target_id: string | null;
+  detail: Record<string, unknown> | null;
+}
+
+export interface FollowUpCounts {
+  pending_proposals: number;
+  due_reminders: number;
+  active_watches: number;
+  unread_alerts: number;
+}
+
+/** A scripted data snapshot that watches are checked against */
+export interface DataSnapshot {
+  version: string;
+  date: string;
+  label: string;
+}
+
+export interface SnapshotState {
+  current: DataSnapshot;
+  next: DataSnapshot | null;
+  versions: DataSnapshot[];
 }
 
 // ---- Order search (GET /orders/search) ----
@@ -213,17 +347,6 @@ export interface EvidenceView {
   /** Calculation lines, copied from tool output fields (never computed here) */
   calculation: { label: string; value: string }[];
   refs: SourceRef[];
-}
-
-// ---- Locally proposed actions (no backend endpoint yet) ----
-export type ActionState = 'PROPOSED' | 'CONFIRMED' | 'CANCELLED';
-
-export interface ActionProposal {
-  id: string;
-  kind: 'reminder' | 'note';
-  target: string;
-  text: string;
-  state: ActionState;
-  created_at: string;
-  decided_at?: string;
+  /** Raw rows for these refs when they did not come with the briefing (e.g. a chat answer) */
+  rows?: Record<string, Record<string, string>>;
 }

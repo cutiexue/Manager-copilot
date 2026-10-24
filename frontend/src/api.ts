@@ -1,4 +1,7 @@
-import type { BriefingFixture, ChatMessage, OrderSearchResult, SendMessageResponse, Session } from './types';
+import type {
+  Alert, AuditEvent, BriefingFixture, ChaseDraft, ChatMessage, ConfirmResult, FollowUpCounts, OrderNote,
+  OrderSearchResult, Proposal, ProposalKind, Reminder, SendMessageResponse, Session, SnapshotState, Watch,
+} from './types';
 
 // All calls go through the Vite proxy (/api -> backend). See vite.config.ts.
 const BASE = '/api';
@@ -53,4 +56,25 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ message }),
     }),
+
+  // Follow-ups: a proposal is carried out only by confirm(), which runs when the manager presses Confirm.
+  proposals: (status?: string) => request<Proposal[]>(`/actions${status ? `?status=${status}` : ''}`),
+  propose: (kind: ProposalKind, payload: Record<string, unknown>, reason?: string) =>
+    request<Proposal>('/actions/proposals', { method: 'POST', body: JSON.stringify({ kind, payload, reason }) }),
+  confirm: (id: string) => request<ConfirmResult>(`/actions/${id}/confirm`, { method: 'POST' }),
+  cancel: (id: string) => request<Proposal>(`/actions/${id}/cancel`, { method: 'POST' }),
+  counts: () => request<FollowUpCounts>('/follow-ups/counts'),
+  reminders: () => request<Reminder[]>('/reminders'),
+  dismissReminder: (id: string) => request<Reminder>(`/reminders/${id}/dismiss`, { method: 'POST' }),
+  notes: () => request<OrderNote[]>('/notes'),
+  drafts: () => request<ChaseDraft[]>('/drafts'),
+  audit: (limit = 50) => request<AuditEvent[]>(`/audit?limit=${limit}`),
+  watches: () => request<Watch[]>('/watches'),
+  changeWatch: (id: string, change: 'pause' | 'resume' | 'cancel') =>
+    request<Watch>(`/watches/${id}/${change}`, { method: 'POST' }),
+  alerts: () => request<Alert[]>('/alerts'),
+  readAlert: (id: string) => request<Alert>(`/alerts/${id}/read`, { method: 'POST' }),
+  snapshot: () => request<SnapshotState>('/data/snapshot'),
+  advanceSnapshot: () => request<SnapshotState>('/dev/data/advance', { method: 'POST' }),
+  resetSnapshot: () => request<SnapshotState>('/dev/data/reset', { method: 'POST' }),
 };

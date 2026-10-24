@@ -14,7 +14,7 @@ interface Props {
   /** Where the briefing came from (generator, time, backend commit), shown on hover */
   briefingDetail: string;
   /** Badge numbers, copied from the briefing payload and the action log */
-  counts: { decisions: number; atRisk: number; actions: number };
+  counts: { decisions: number; atRisk: number; actions: number; alerts: number };
   /** Called on every link click, e.g. to close the menu on small screens */
   onPick: () => void;
 }
@@ -32,6 +32,7 @@ export default function Sidebar({
     { page: 'briefing', label: 'Briefing', icon: 'briefing', count: counts.decisions },
     { page: 'orders', label: 'Orders & output', icon: 'orders', count: counts.atRisk },
     { page: 'actions', label: 'Actions', icon: 'actions', count: counts.actions || undefined },
+    { page: 'watches', label: 'Watches & alerts', icon: 'watch', count: counts.alerts || undefined },
   ];
   // Conversations that never got a message are not worth listing.
   const recent = sessions.filter((s) => s.has_messages !== false);

@@ -19,6 +19,8 @@ export default function EvidenceDrawer({ view, rows, onClose }: Props) {
   }, [view, onClose]);
 
   if (!view) return null;
+  // A chat answer brings its own rows; briefing evidence uses the rows that came with the briefing.
+  const sourceRows = view.rows ?? rows;
 
   // Group cited rows by source file so each file renders as one table.
   const bySource = new Map<string, typeof view.refs>();
@@ -60,7 +62,7 @@ export default function EvidenceDrawer({ view, rows, onClose }: Props) {
         <h3>Source rows ({view.refs.length})</h3>
         {view.refs.length === 0 && <p className="empty">The tool returned no source rows for this claim.</p>}
         {[...bySource.entries()].map(([source, refs]) => {
-          const first = rows[`${source}#${refs[0].row}`];
+          const first = sourceRows[`${source}#${refs[0].row}`];
           const cols = first ? Object.keys(first) : [];
           return (
             <div key={source} className="source-block">
@@ -79,7 +81,7 @@ export default function EvidenceDrawer({ view, rows, onClose }: Props) {
                   </thead>
                   <tbody>
                     {refs.map((r) => {
-                      const raw = rows[`${source}#${r.row}`];
+                      const raw = sourceRows[`${source}#${r.row}`];
                       return (
                         <tr key={r.row}>
                           <td>{r.row}</td>
