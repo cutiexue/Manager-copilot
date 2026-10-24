@@ -44,6 +44,13 @@ ACT_NOW_LATE_DAYS = 7
 # Discovery returns at most this many findings, ranked by severity.
 MAX_FINDINGS = 5
 
+# Feasibility scenario limits: the largest new batch a scenario may ask about, the longest
+# in-house queue it may assume, and the most baseline workdays the production log can supply
+# (the 90 days before the snapshot minus 13 Sundays).
+MAX_SCENARIO_PIECES = 1_000_000
+MAX_QUEUE_WORKDAYS = 365
+MAX_BASELINE_WORKDAYS = 77
+
 
 def parse_date(value):
     return date.fromisoformat(value)

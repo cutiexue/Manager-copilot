@@ -10,6 +10,14 @@ from production_estimates import SNAPSHOT, _finish, estimate_in_house, estimate_
 from tools import query_orders
 
 
+class _InHouseUnavailable(Exception):
+    """The in-house estimate could not be made; carries its result so its status is not lost."""
+
+    def __init__(self, result):
+        super().__init__(result.get("message"))
+        self.result = result
+
+
 def _prepare(category, total_pieces, start_date, include_in_house, queue, baseline_days):
     if category not in ("TOPS", "ACCESSORIES"):
         raise ValueError("category must be TOPS or ACCESSORIES.")
@@ -32,7 +40,7 @@ def _prepare(category, total_pieces, start_date, include_in_house, queue, baseli
     if include_in_house:
         sample = estimate_in_house(1, start_date, queue, baseline_days)
         if sample["status"] != "ok":
-            raise ValueError(sample["message"])
+            raise _InHouseUnavailable(sample)
         totals = [sum(int(r["pieces_completed"]) for r in sample["baseline_records"]
                       if r["stage"] == stage["stage"]) for stage in sample["stages"]]
         producers.append({"id": "IN_HOUSE", "cost": Decimal(0), "limit": total_pieces,
@@ -122,6 +130,13 @@ def _optimize(category, total_pieces, start_date, include_in_house, queue, basel
             "This is not an existing-order forecast or an on-time probability estimate.",
         ]
         return result
+    except _InHouseUnavailable as exc:
+        # Keep the in-house status (e.g. insufficient_data) instead of reporting a generic error.
+        detail = exc.result
+        message = detail.get("message", "The in-house estimate is unavailable.")
+        if detail.get("status") == "insufficient_data":
+            message += " Use a later start date, or set include_in_house to false to plan with workshops only."
+        return {"status": detail.get("status", "error"), "message": message}
     except (ValueError, TypeError, OverflowError) as exc:
         return {"status": "error", "message": str(exc)}
 

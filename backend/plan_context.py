@@ -61,7 +61,13 @@ def revise_order_plan(extra_days, deadline_basis, status=None):
     basis = previous.get(deadline_basis)
     if not basis:
         return {'status': 'needs_clarification', 'message': 'The saved plan has no requested deadline. Specify whether to use its completion date.'}
-    days = (date.fromisoformat(basis) - date.fromisoformat(previous['start_date'])).days + 1 + extra_days
+    base_days = (date.fromisoformat(basis) - date.fromisoformat(previous['start_date'])).days + 1
+    days = base_days + extra_days
+    if days > 3650:
+        # Say it in the terms the request used; the optimizer's own limit is on deadline_days.
+        return {'status': 'error', 'message': f'extra_days is too large: the revised deadline would be {days} days '
+                                              f'after the plan start, beyond the 3650-day limit. Use at most '
+                                              f'{3650 - base_days} extra days for this plan.'}
     ids = [order['order_id'] for order in previous['orders']]
     if status is not None:
         matching = {order['order_id'] for order in load_orders() if order['status'] == status}

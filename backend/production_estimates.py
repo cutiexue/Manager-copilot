@@ -5,6 +5,7 @@ from decimal import Decimal
 from math import ceil, isfinite
 
 from data_loader import load_production, load_workshops
+from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES
 
 SNAPSHOT = "2026-04-01"
 STAGES = ("KNITTING", "ASSEMBLY", "WASHING", "PACKING")
@@ -24,8 +25,8 @@ def _error(message):
 
 
 def _validate(pieces, start_date):
-    if type(pieces) is not int or pieces < 0:
-        raise ValueError("pieces must be a nonnegative integer.")
+    if type(pieces) is not int or not 0 <= pieces <= MAX_SCENARIO_PIECES:
+        raise ValueError(f"pieces must be an integer from 0 to {MAX_SCENARIO_PIECES}.")
     return date.fromisoformat(start_date)
 
 
@@ -46,10 +47,12 @@ def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=0, baseline_da
     """Estimate sequential full-batch stages from recent observed workday output."""
     try:
         start = _validate(pieces, start_date)
-        if type(baseline_days) is not int or not 1 <= baseline_days <= 90:
-            raise ValueError("baseline_days must be an integer from 1 to 90.")
-        if type(queue_workdays) not in (int, float) or not isfinite(queue_workdays) or queue_workdays < 0:
-            raise ValueError("queue_workdays must be a finite nonnegative number.")
+        if type(baseline_days) is not int or not 1 <= baseline_days <= MAX_BASELINE_WORKDAYS:
+            raise ValueError(f"baseline_days must be an integer from 1 to {MAX_BASELINE_WORKDAYS} "
+                             "(the workdays in the production log).")
+        if (type(queue_workdays) not in (int, float) or not isfinite(queue_workdays)
+                or not 0 <= queue_workdays <= MAX_QUEUE_WORKDAYS):
+            raise ValueError(f"queue_workdays must be a number from 0 to {MAX_QUEUE_WORKDAYS}.")
     except (ValueError, TypeError) as exc:
         return _error(str(exc))
     assumptions = [
@@ -102,13 +105,13 @@ def _estimate_workshop(workshop_id, category, pieces, start_date=SNAPSHOT):
     workshop = next((r for r in load_workshops() if r["workshop_id"] == workshop_id), None)
     if workshop is None:
         return _error("Unknown workshop ID.")
-    if pieces:
-        if workshop["status"] != "ACTIVE":
-            return _error(f"{workshop_id} is not ACTIVE and cannot accept new work.")
-        if category not in workshop["makes"].split("+"):
-            return _error(f"{workshop_id} cannot make {category}.")
-        if workshop["max_batch_pieces"] and pieces > int(workshop["max_batch_pieces"]):
-            return _error(f"{workshop_id} exceeds its per-batch cap of {workshop['max_batch_pieces']}.")
+    # Eligibility applies to any quantity, so a 0-piece probe of W7 still learns it is suspended.
+    if workshop["status"] != "ACTIVE":
+        return _error(f"{workshop_id} is not ACTIVE and cannot accept new work.")
+    if category not in workshop["makes"].split("+"):
+        return _error(f"{workshop_id} cannot make {category}.")
+    if workshop["max_batch_pieces"] and pieces > int(workshop["max_batch_pieces"]):
+        return _error(f"{workshop_id} exceeds its per-batch cap of {workshop['max_batch_pieces']}.")
     capacity = Decimal(workshop["capacity_pieces_per_day"])
     production_days = Decimal(pieces) / capacity
     workdays = ceil(Decimal(workshop["current_queue_days"]) + production_days) if pieces else 0
@@ -199,11 +202,12 @@ def estimate_production_plan(category, total_pieces, in_house_pieces, allocation
                 "unallocated_pieces": total_pieces - assigned}
     branches = []
     for allocation in allocations:
+        if not allocation["pieces"]:
+            continue  # an unused row is not part of the plan, so its eligibility does not matter
         result = WORKSHOP_ESTIMATORS[allocation["workshop_id"]](category, allocation["pieces"], start_date)
         if result["status"] != "ok":
             return {"status": "infeasible", "producer": allocation["workshop_id"], "detail": result}
-        if allocation["pieces"]:
-            branches.append(result)
+        branches.append(result)
     if in_house_pieces:
         result = estimate_in_house(in_house_pieces, start_date, in_house_queue_workdays, baseline_days)
         if result["status"] != "ok":

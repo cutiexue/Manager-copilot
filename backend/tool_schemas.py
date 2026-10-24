@@ -9,6 +9,7 @@ from plan_context import get_current_plan, revise_order_plan
 from production_estimates import WORKSHOP_ESTIMATORS, estimate_in_house, estimate_production_plan
 from production_optimizer import (optimize_fastest_plan, optimize_cheapest_plan,
                                   optimize_orders_outsourced, optimize_orders_cheapest)
+from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES
 
 TOOLS = []
 TOOL_FUNCTIONS = {}
@@ -187,7 +188,7 @@ ESTIMATION_FUNCTIONS = {
     f.__name__: f for f in [estimate_in_house, estimate_production_plan, *WORKSHOP_ESTIMATORS.values()]
 }
 _common = {
-    "pieces": {"type": "integer", "minimum": 0},
+    "pieces": {"type": "integer", "minimum": 0, "maximum": MAX_SCENARIO_PIECES},
     "category": {"type": "string", "enum": ["TOPS", "ACCESSORIES"]},
     "start_date": {"type": "string", "description": "YYYY-MM-DD; default scenario date is 2026-04-01."},
 }
@@ -195,19 +196,19 @@ for _name, _function in ESTIMATION_FUNCTIONS.items():
     if _name == "estimate_in_house":
         _required = ["pieces"]
         _properties = {k: _common[k] for k in ("pieces", "start_date")}
-        _properties.update(queue_workdays={"type": "number", "minimum": 0},
-                           baseline_days={"type": "integer", "minimum": 1, "maximum": 90})
+        _properties.update(queue_workdays={"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS},
+                           baseline_days={"type": "integer", "minimum": 1, "maximum": MAX_BASELINE_WORKDAYS})
     elif _name == "estimate_production_plan":
         _required = ["category", "total_pieces", "in_house_pieces", "allocations"]
         _properties = {k: _common[k] for k in ("category", "start_date")}
         _properties.update(
-            total_pieces={"type": "integer", "minimum": 1},
-            in_house_pieces={"type": "integer", "minimum": 0},
-            in_house_queue_workdays={"type": "number", "minimum": 0},
-            baseline_days={"type": "integer", "minimum": 1, "maximum": 90},
+            total_pieces={"type": "integer", "minimum": 1, "maximum": MAX_SCENARIO_PIECES},
+            in_house_pieces={"type": "integer", "minimum": 0, "maximum": MAX_SCENARIO_PIECES},
+            in_house_queue_workdays={"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS},
+            baseline_days={"type": "integer", "minimum": 1, "maximum": MAX_BASELINE_WORKDAYS},
             allocations={"type": "array", "items": {"type": "object", "properties": {
                 "workshop_id": {"type": "string", "enum": list(WORKSHOP_ESTIMATORS)},
-                "pieces": {"type": "integer", "minimum": 0}},
+                "pieces": {"type": "integer", "minimum": 0, "maximum": MAX_SCENARIO_PIECES}},
                 "required": ["workshop_id", "pieces"], "additionalProperties": False}},
         )
     else:
@@ -223,8 +224,8 @@ for _function in (optimize_fastest_plan, optimize_cheapest_plan):
         "total_pieces": {"type": "integer", "minimum": 1, "maximum": 1000000},
         "start_date": _common["start_date"],
         "include_in_house": {"type": "boolean", "description": "Default true. In-house costs are excluded; immediate availability is assumed unless queue is supplied."},
-        "in_house_queue_workdays": {"type": "number", "minimum": 0},
-        "baseline_days": {"type": "integer", "minimum": 1, "maximum": 90},
+        "in_house_queue_workdays": {"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS},
+        "baseline_days": {"type": "integer", "minimum": 1, "maximum": MAX_BASELINE_WORKDAYS},
     }
     _required = ["category", "total_pieces"]
     if _function is optimize_cheapest_plan:
