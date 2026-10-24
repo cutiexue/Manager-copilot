@@ -100,14 +100,21 @@ def build_tools():
     return wrapped
 
 
+def model_options(config):
+    """ChatOpenAI settings for the configured provider."""
+    options = dict(model=config.model, api_key=config.api_key, base_url=config.base_url,
+                   timeout=60, max_retries=1)
+    if config.provider == "deepseek":
+        # DeepSeek documents neither parallel_tool_calls nor max_completion_tokens. Thinking stays
+        # off: with tools on, it needs reasoning_content sent back, which LangChain does not do.
+        options.update(max_tokens=2048, extra_body={"thinking": {"type": "disabled"}})
+    else:
+        options.update(max_completion_tokens=4096, model_kwargs={'parallel_tool_calls': False})
+    return options
+
+
 def build_agent(config):
     """Create one LangChain agent, powered by LangGraph's execution loop."""
     if not config.api_key:
         raise ValueError("Missing API key.")
-    options = dict(model=config.model, api_key=config.api_key, base_url=config.base_url,
-                   timeout=60, max_retries=1, model_kwargs={'parallel_tool_calls': False})
-    if config.provider == "deepseek":
-        options.update(max_tokens=2048, extra_body={"thinking": {"type": "disabled"}})
-    else:
-        options["max_completion_tokens"] = 4096
-    return create_agent(ChatOpenAI(**options), tools=build_tools(), system_prompt=SYSTEM_PROMPT)
+    return create_agent(ChatOpenAI(**model_options(config)), tools=build_tools(), system_prompt=SYSTEM_PROMPT)
