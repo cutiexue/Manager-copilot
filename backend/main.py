@@ -135,8 +135,12 @@ def run_chat(service):
                 print(f"Assistant: {service.send_message(session_id, question)['answer']}")
         except KeyError:
             print("Session not found. Use /sessions to select a saved conversation.")
-        except Exception:
-            print("Request failed. Completed messages remain saved; check database/model settings.")
+        except Exception as exc:
+            from service import AgentIncompleteError, ModelUnavailableError
+            if isinstance(exc, (AgentIncompleteError, ModelUnavailableError)):
+                print(f"Request failed: {exc} Completed messages remain saved.")
+            else:
+                print("Request failed. Completed messages remain saved; check database/model settings.")
 
 
 def main():

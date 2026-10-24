@@ -180,7 +180,7 @@ def discover_issues(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
                  "severity units differ per finding type (see severity_basis).",
         "warnings": [
             "Findings are signals to investigate, not diagnoses; the data cannot say why something dropped."
-        ] + ([] if as_of_date == SNAPSHOT else [
+        ] + ([] if ref.isoformat() == SNAPSHOT else [
             f"Uses order statuses from the {SNAPSHOT} snapshot; other dates are scenarios, not historical or future facts."
         ]),
     }

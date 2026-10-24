@@ -75,6 +75,19 @@ def test_checks_give_every_finding_a_level_and_state_the_rule():
     assert checks[2]["levels"][0]["rule"] == "2+ unfinished orders, all late or idle"
 
 
-def test_summary_on_a_day_after_sunday():
-    assert get_morning_briefing("2026-03-30")["summary"]["points"][-1]["text"] == (
-        "Yesterday (2026-03-29) was a scheduled rest day.")
+def test_monday_briefing_reports_the_last_workday():
+    # Sunday is a rest day, so a Monday briefing reports Saturday instead of an empty section.
+    briefing = get_morning_briefing("2026-03-30")
+    section = briefing["yesterday"]
+    assert (section["date"], section["label"], section["is_workday"], len(section["stages"])) == (
+        "2026-03-28", "Last workday", True, 4)
+    assert briefing["summary"]["points"][-1]["text"].startswith(
+        "Last workday (2026-03-28) ASSEMBLY completed 445 pieces")
+    # On any other day it is literally yesterday.
+    assert get_morning_briefing()["yesterday"]["label"] == "Yesterday"
+    assert get_morning_briefing("2026-03-29")["yesterday"]["date"] == "2026-03-28"
+
+
+def test_snapshot_date_in_another_spelling_is_not_a_scenario():
+    assert not any("scenario" in w for w in get_morning_briefing("20260401")["warnings"])
+    assert any("scenario" in w for w in get_morning_briefing("2026-03-30")["warnings"])

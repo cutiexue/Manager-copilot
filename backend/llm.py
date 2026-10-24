@@ -1,6 +1,7 @@
 """Build the framework agent while preserving the original JSON tool schemas."""
 
 import json
+import logging
 from math import isfinite
 from langchain.agents import create_agent
 from langchain_core.tools import StructuredTool
@@ -9,6 +10,8 @@ from data_loader import DataValidationError
 from tool_schemas import TOOLS, TOOL_FUNCTIONS
 from order_selection import remember_selection
 from plan_context import remember_plan
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """You are a factory manager's assistant. Reply in the user's language.
 Lead with the answer, normally 2-4 sentences and a short source citation. Expand for explicit
@@ -152,16 +155,25 @@ def execute_tool(name, arguments):
                   if tool["function"]["name"] == name)
     try:
         params = _validate_arguments(json.loads(arguments), schema)
+    except (ValueError, TypeError) as exc:
+        return {"status": "error", "message": f"Invalid tool arguments: {exc}"}
+    try:
         result = TOOL_FUNCTIONS[name](**params)
         remember_selection(name, result)
         remember_plan(name, result)
         return result
     except DataValidationError as exc:
         return {"status": "error", "message": str(exc)}
+    except OSError:
+        logger.exception("Tool %s could not read the factory data", name)
+        return {"status": "error", "message": "Could not read the factory data."}
     except (ValueError, TypeError, OverflowError) as exc:
         return {"status": "error", "message": f"Invalid tool arguments or data: {exc}"}
-    except (OSError, KeyError):
-        return {"status": "error", "message": "Could not read the factory data."}
+    except Exception:
+        # A bug in the tool, not a data problem: keep the traceback and say so plainly.
+        logger.exception("Tool %s failed", name)
+        return {"status": "error", "message": "Internal tool error: this lookup did not run. "
+                                              "Tell the user it failed; do not guess an answer."}
 
 
 

@@ -117,8 +117,11 @@ export interface Briefing {
   status: 'ok';
   as_of_date: string;
   snapshot_date: string;
+  /** The last workday before the briefing date (Saturday on a Monday) */
   yesterday: {
     date: string;
+    /** "Yesterday" or "Last workday"; missing from briefings produced before 10/24 */
+    label?: string;
     is_workday: boolean;
     message?: string;
     stages: YesterdayStage[];

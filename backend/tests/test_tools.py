@@ -3,7 +3,7 @@
 import pytest
 
 from tools import (compare_stage_output, get_customer_orders, get_order_status,
-                   get_orders_at_risk, get_stage_output, trace_order)
+                   get_orders_at_risk, get_overdue_orders, get_stage_output, trace_order)
 
 AT_RISK_IDS = ["ORD-120", "ORD-107", "ORD-114", "ORD-002", "ORD-083", "ORD-020",
                "ORD-103", "ORD-029", "ORD-093", "ORD-055", "ORD-108", "ORD-005"]
@@ -66,3 +66,14 @@ def test_customer_lookup_ignores_case_and_spaces():
 @pytest.mark.xfail(strict=True, reason="Known gap: order IDs match case-sensitively (README).")
 def test_order_id_lookup_ignores_case():
     assert get_order_status("ord-002")["status"] == "ok"
+
+
+def test_risk_result_states_its_thresholds_as_numbers():
+    rules = get_orders_at_risk("2026-04-01")["rules"]
+    assert (rules["quiet_order_days"], rules["due_within_days"]) == (7, 3)
+
+
+def test_snapshot_date_spelled_differently_is_not_a_scenario():
+    assert get_overdue_orders("20260401")["warnings"] == []
+    assert get_orders_at_risk("20260401")["warnings"] == []
+    assert get_overdue_orders("2026-03-30")["warnings"]

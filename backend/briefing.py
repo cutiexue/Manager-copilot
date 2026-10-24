@@ -16,7 +16,7 @@ from data_loader import PRODUCTION_SOURCE, STAGES, source_ref
 from discovery import discover_issues
 from rules import (ACT_NOW_LATE_DAYS, BASELINE_WORKDAYS, CUSTOMER_SLIPPING_MIN_ORDERS, DUE_SOON_DAYS,
                    MAX_FINDINGS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, STAGE_DROP_PERCENT,
-                   is_due_soon, is_overdue, is_workday)
+                   is_due_soon, is_overdue, is_workday, previous_workdays)
 from tools import compare_stage_output, get_orders_at_risk, get_stage_output
 
 # Each finding type maps to one fixed decision prompt; these are prompts for
@@ -28,19 +28,24 @@ _DECISION_PROMPTS = {
 }
 
 
-def _yesterday_section(yesterday):
-    """Per-stage output for yesterday with its baseline comparison."""
-    if not is_workday(yesterday):
+def _yesterday_section(day, ref):
+    """Per-stage output for one day with its baseline comparison.
+
+    The briefing passes the last workday before its date, so a Monday briefing reports Saturday
+    rather than the Sunday rest day; `label` says whether that is literally yesterday."""
+    label = "Yesterday" if day == ref - timedelta(days=1) else "Last workday"
+    if not is_workday(day):
         return {
-            "date": yesterday.isoformat(),
+            "date": day.isoformat(),
+            "label": label,
             "is_workday": False,
-            "message": "Yesterday was a scheduled rest day; actual output was not checked.",
+            "message": f"{day.isoformat()} was a scheduled rest day; actual output was not checked.",
             "stages": [],
         }
     stages = []
     for stage in STAGES:
-        output = get_stage_output(stage, yesterday.isoformat())
-        comparison = compare_stage_output(stage, yesterday.isoformat())
+        output = get_stage_output(stage, day.isoformat())
+        comparison = compare_stage_output(stage, day.isoformat())
         entry = {"stage": stage}
         if output["status"] == "ok":
             entry["pieces_completed"] = output["data"]["pieces_completed"]
@@ -56,7 +61,7 @@ def _yesterday_section(yesterday):
         else:
             entry["comparison_status"] = comparison["status"]
         stages.append(entry)
-    return {"date": yesterday.isoformat(), "is_workday": True, "stages": stages}
+    return {"date": day.isoformat(), "label": label, "is_workday": True, "stages": stages}
 
 
 def _join(parts):
@@ -122,10 +127,11 @@ def _summary(ref, yesterday, risk_orders, risk_rows, findings, data_gaps):
         add("customer_slipping", f"{'Both' if count == 2 else f'All {count}'} unfinished {d['customer']} orders "
                                  "are overdue or quiet.", finding["evidence"]["source_rows"], customer=d["customer"])
 
-    # 5. Yesterday's output against each stage's own recent average.
+    # 5. The last workday's output against each stage's own recent average.
     compared = [s for s in yesterday["stages"] if s.get("change_percent") is not None]
+    when = f"{yesterday.get('label', 'Yesterday')} ({yesterday['date']})"
     if not yesterday["is_workday"]:
-        add("yesterday", f"Yesterday ({yesterday['date']}) was a scheduled rest day.")
+        add("yesterday", f"{when} was a scheduled rest day.")
     elif compared:
         lowest = min(compared, key=lambda s: s["change_percent"])
         rows = [row for s in compared for row in s.get("source_rows", [])] + [
@@ -133,11 +139,11 @@ def _summary(ref, yesterday, risk_orders, risk_rows, findings, data_gaps):
             for s in compared for r in s.get("baseline_records", [])]
         if lowest["change_percent"] < 0:
             others = [abs(s["change_percent"]) for s in compared if s is not lowest]
-            text = (f"Yesterday ({yesterday['date']}) {lowest['stage']} completed {lowest['pieces_completed']} pieces, "
+            text = (f"{when} {lowest['stage']} completed {lowest['pieces_completed']} pieces, "
                     f"{abs(lowest['change_percent']):.1f}% below its {lowest['baseline_workdays']}-workday average")
             text += f"; the other stages were within {max(others):.1f}% of theirs." if others else "."
         else:
-            text = f"Yesterday ({yesterday['date']}) every stage was at or above its {lowest['baseline_workdays']}-workday average."
+            text = f"{when} every stage was at or above its {lowest['baseline_workdays']}-workday average."
         add("yesterday", text, rows)
 
     if data_gaps:
@@ -255,7 +261,7 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
     if type(max_findings) is not int or max_findings <= 0:
         return {"status": "error", "message": "max_findings must be a positive integer."}
 
-    yesterday = _yesterday_section(ref - timedelta(days=1))
+    yesterday = _yesterday_section(previous_workdays(ref, 1)[0], ref)
     risk = get_orders_at_risk(as_of_date)
     findings_result = discover_issues(as_of_date, max_findings)
     findings = findings_result["findings"]
@@ -315,7 +321,7 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
         "warnings": [
             "This briefing is assembled deterministically from tool outputs; "
             "findings are signals to investigate, not diagnoses."
-        ] + (["Some checks could not be completed; see data_gaps."] if data_gaps else []) + ([] if as_of_date == SNAPSHOT else [
+        ] + (["Some checks could not be completed; see data_gaps."] if data_gaps else []) + ([] if ref.isoformat() == SNAPSHOT else [
             f"Uses order statuses from the {SNAPSHOT} snapshot; other dates are scenarios, not historical or future facts."
         ]),
     }
@@ -331,6 +337,7 @@ def render_briefing_text(briefing):
         lines += [briefing["summary"]["text"], ""]
 
     yesterday = briefing["yesterday"]
+    label = yesterday.get("label", "Yesterday")
     if yesterday["is_workday"]:
         parts = []
         for entry in yesterday["stages"]:
@@ -340,9 +347,9 @@ def render_briefing_text(briefing):
                 parts.append(f"{entry['stage']} {entry['pieces_completed']}{suffix}")
             else:
                 parts.append(f"{entry['stage']} {entry.get('output_status', 'unknown')}")
-        lines.append(f"Yesterday ({yesterday['date']}): " + "; ".join(parts))
+        lines.append(f"{label} ({yesterday['date']}): " + "; ".join(parts))
     else:
-        lines.append(f"Yesterday ({yesterday['date']}): scheduled rest day, no output expected.")
+        lines.append(f"{label} ({yesterday['date']}): scheduled rest day, no output expected.")
 
     at_risk = briefing["at_risk"]
     lines.append(f"Orders at risk: {at_risk['count']} | "
@@ -356,7 +363,7 @@ def render_briefing_text(briefing):
 
     if yesterday["is_workday"]:
         lines.append("")
-        lines.append("Yesterday vs baseline:")
+        lines.append(f"{label} vs baseline:")
         for entry in yesterday["stages"]:
             if "change_percent" in entry and entry["change_percent"] is not None:
                 lines.append(

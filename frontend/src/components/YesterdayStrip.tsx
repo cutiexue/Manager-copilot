@@ -72,8 +72,9 @@ function StageTile({ stage, date, onEvidence }: { stage: YesterdayStage; date: s
   );
 }
 
-// Yesterday's output per stage, the way a daily production report opens: a figure, the change
-// against the usual level, and the recent trend. Each tile opens the rows behind it.
+// The last workday's output per stage (yesterday, or Saturday on a Monday), the way a daily
+// production report opens: a figure, the change against the usual level, and the recent trend.
+// Each tile opens the rows behind it.
 export default function YesterdayStrip({ briefing, onEvidence }: Props) {
   const y = briefing.yesterday;
   const workdays = y.stages.find((s) => s.baseline_workdays)?.baseline_workdays;
@@ -82,7 +83,8 @@ export default function YesterdayStrip({ briefing, onEvidence }: Props) {
     <div className="strip">
       <div className="strip-head">
         <span className="strip-title">
-          Yesterday<span className="strip-date">{shortDate(y.date)}</span>
+          {y.label ?? 'Yesterday'}
+          <span className="strip-date">{shortDate(y.date)}</span>
         </span>
         {y.is_workday && workdays && <span className="strip-note">pieces · vs {workdays}-workday avg</span>}
       </div>

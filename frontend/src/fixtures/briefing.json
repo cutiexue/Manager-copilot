@@ -1,13 +1,14 @@
 {
- "generated_at": "2026-10-23T11:52:12+00:00",
+ "generated_at": "2026-10-24T05:02:13+00:00",
  "generator": "briefing.get_morning_briefing()",
- "backend_commit": "dc55b9d",
+ "backend_commit": "7ad53ac",
  "briefing": {
   "status": "ok",
   "as_of_date": "2026-04-01",
   "snapshot_date": "2026-04-01",
   "yesterday": {
    "date": "2026-03-31",
+   "label": "Yesterday",
    "is_workday": true,
    "stages": [
     {

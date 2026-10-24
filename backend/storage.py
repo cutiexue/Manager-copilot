@@ -12,6 +12,14 @@ from config import read_env
 DEFAULT_DB = Path(__file__).resolve().with_name('manager_copilot.db')
 
 
+class SessionNotFoundError(KeyError):
+    """No conversation has this ID. A KeyError subclass, so older callers keep working."""
+
+
+class ConversationConflictError(ValueError):
+    """The conversation changed while this turn was generated; nothing was saved."""
+
+
 class SQLiteStore:
     def __init__(self, path=None):
         values = read_env(Path(__file__).with_name('.env'))
@@ -81,7 +89,7 @@ class SQLiteStore:
             row = conn.execute('SELECT messages FROM assistant_sessions WHERE id=?',
                                (session_id,)).fetchone()
             if row is None:
-                raise KeyError('Session not found.')
+                raise SessionNotFoundError('Session not found.')
             return json.loads(row['messages'])
 
     def update_turn(self, session_id, generate):
@@ -91,7 +99,7 @@ class SQLiteStore:
             row = conn.execute('SELECT title,messages,version FROM assistant_sessions WHERE id=?',
                                (session_id,)).fetchone()
         if row is None:
-            raise KeyError('Session not found.')
+            raise SessionNotFoundError('Session not found.')
         messages, answer = generate(json.loads(row['messages']))
         title = self._title(messages) if row['title'] == 'New conversation' else row['title']
         with self.connection() as conn:
@@ -101,5 +109,5 @@ class SQLiteStore:
                 (json.dumps(messages, ensure_ascii=False, allow_nan=False), title, session_id,
                  row['version']))
             if updated.rowcount != 1:
-                raise ValueError('This conversation changed during the request; send the message again.')
+                raise ConversationConflictError('This conversation changed during the request; send the message again.')
         return answer

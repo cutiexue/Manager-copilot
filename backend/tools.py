@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, load_orders,
                          load_production, order_row_numbers,
                          production_row_numbers, source_ref)
-from rules import (DUE_SOON_DAYS, RECENT_WORKDAYS, SNAPSHOT, is_overdue,
+from rules import (DUE_SOON_DAYS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, is_overdue,
                    previous_workdays, risk_reasons)
 from order_selection import current_selection
 
@@ -275,7 +275,7 @@ def get_overdue_orders(as_of_date=SNAPSHOT):
         "data": overdue_orders,
         "source": ORDERS_SOURCE,
         "source_rows": _order_refs(overdue_orders),
-        "warnings": [] if as_of_date == SNAPSHOT else [
+        "warnings": [] if reference_date.isoformat() == SNAPSHOT else [
             f"Uses order statuses from the {SNAPSHOT} snapshot; other dates are scenarios, not historical or future facts."
         ],
     }
@@ -307,11 +307,13 @@ def get_orders_at_risk(as_of_date=SNAPSHOT, due_within_days=DUE_SOON_DAYS):
         "data": at_risk,
         "source": ORDERS_SOURCE,
         "source_rows": _order_refs(at_risk),
+        # The thresholds behind each reason, as numbers the answer can quote.
         "rules": {
-            "quiet_order_days": "see rules.py QUIET_ORDER_DAYS",
+            "overdue": "IN_PROGRESS and due date before as_of_date",
             "due_within_days": due_within_days,
+            "quiet_order_days": QUIET_ORDER_DAYS,
         },
-        "warnings": [] if as_of_date == SNAPSHOT else [
+        "warnings": [] if reference_date.isoformat() == SNAPSHOT else [
             f"Uses order statuses from the {SNAPSHOT} snapshot; other dates are scenarios, not historical or future facts."
         ],
     }

@@ -3,10 +3,14 @@
 import json
 from pathlib import Path
 
+import httpx
+import openai
 import pytest
 from fastapi.testclient import TestClient
 from langchain_core.messages import AIMessage
+from langgraph.errors import GraphRecursionError
 
+import api
 from api import create_app
 from service import ChatService
 from storage import SQLiteStore
@@ -39,11 +43,77 @@ def test_multi_turn_chat_is_persisted(client):
     assert [s["id"] for s in client.get("/sessions").json()] == [session["id"]]
 
 
+def error(response):
+    """Every error has the same shape: a readable detail and a stable code."""
+    body = response.json()
+    assert set(body) == {"detail", "code"} and isinstance(body["detail"], str)
+    return response.status_code, body["code"]
+
+
 def test_errors_map_to_http_status(client):
-    assert client.get("/sessions/missing/messages").status_code == 404
-    assert client.post("/sessions", json={"title": "x", "admin": True}).status_code == 400
+    assert error(client.get("/sessions/missing/messages")) == (404, "SESSION_NOT_FOUND")
+    assert error(client.post("/sessions", json={"title": "x", "admin": True})) == (400, "INVALID_REQUEST")
     session_id = client.post("/sessions", json={}).json()["id"]
-    assert client.post(f"/sessions/{session_id}/messages", json={"message": "  "}).status_code == 400
+    assert error(client.post(f"/sessions/{session_id}/messages", json={"message": "  "})) == (400, "INVALID_REQUEST")
+    assert error(client.get("/no-such-route")) == (404, "NOT_FOUND")
+
+
+def make_client(tmp_path, agent):
+    store = SQLiteStore(tmp_path / "errors.db")
+    store.setup()
+    return TestClient(create_app(ChatService(store, agent=agent))), store
+
+
+def test_a_bug_is_an_internal_error_not_a_missing_session(tmp_path, monkeypatch, caplog):
+    def broken(as_of_date):
+        return {}["missing"]
+
+    monkeypatch.setattr(api, "get_briefing_payload", broken)
+    client, _ = make_client(tmp_path, FakeAgent())
+    with caplog.at_level("ERROR", logger="manager_copilot.api"):
+        assert error(client.get("/briefings/latest")) == (500, "INTERNAL_ERROR")
+    assert "Unexpected error" in caplog.text
+
+
+class StuckAgent:
+    def invoke(self, state, config):
+        raise GraphRecursionError("Recursion limit of 16 reached")
+
+
+class OfflineModelAgent:
+    def invoke(self, state, config):
+        raise openai.APIConnectionError(request=httpx.Request("POST", "https://api.example.test/v1/chat"))
+
+
+def test_agent_and_model_failures_say_what_happened(tmp_path):
+    client, _ = make_client(tmp_path, StuckAgent())
+    session_id = client.post("/sessions", json={}).json()["id"]
+    response = client.post(f"/sessions/{session_id}/messages", json={"message": "hi"})
+    assert error(response) == (502, "AGENT_INCOMPLETE")
+    assert "too many steps" in response.json()["detail"]
+
+    client, _ = make_client(tmp_path, OfflineModelAgent())
+    session_id = client.post("/sessions", json={}).json()["id"]
+    response = client.post(f"/sessions/{session_id}/messages", json={"message": "hi"})
+    assert error(response) == (503, "MODEL_UNAVAILABLE")
+    assert response.json()["detail"] == "Cannot reach the model API. Check the network connection."
+    # A failed turn saves nothing.
+    assert client.get(f"/sessions/{session_id}/messages").json() == []
+
+
+def test_a_conversation_changed_mid_turn_is_a_conflict(tmp_path):
+    state = {}
+
+    class InterruptedAgent:
+        def invoke(self, agent_state, config):
+            # Another request finishes a turn on the same conversation while this one is thinking.
+            state["store"].update_turn(state["session"], lambda saved: (saved, "other turn"))
+            return {"messages": agent_state["messages"] + [AIMessage(content="late answer")]}
+
+    client, store = make_client(tmp_path, InterruptedAgent())
+    state["store"] = store
+    state["session"] = client.post("/sessions", json={}).json()["id"]
+    assert error(client.post(f"/sessions/{state['session']}/messages", json={"message": "hi"})) == (409, "CONFLICT")
 
 
 FIXTURE = Path(__file__).resolve().parents[2] / "frontend" / "src" / "fixtures" / "briefing.json"
@@ -64,13 +134,17 @@ def test_latest_briefing_matches_the_frontend_snapshot(client):
 
 
 def test_latest_briefing_for_another_date_and_bad_date(client):
-    rest_day = client.get("/briefings/latest", params={"as_of_date": "2026-03-30"}).json()
-    assert rest_day["briefing"]["yesterday"]["is_workday"] is False
-    assert client.get("/briefings/latest", params={"as_of_date": "2026-13-01"}).status_code == 400
+    monday = client.get("/briefings/latest", params={"as_of_date": "2026-03-30"}).json()
+    assert (monday["briefing"]["yesterday"]["date"], monday["briefing"]["yesterday"]["label"]) == (
+        "2026-03-28", "Last workday")
+    assert error(client.get("/briefings/latest", params={"as_of_date": "2026-13-01"})) == (400, "INVALID_REQUEST")
 
 
 def test_order_search_endpoint(client):
     result = client.get("/orders/search", params={"q": "maple", "limit": 5}).json()
     assert (result["total"], result["count"]) == (19, 5)
-    assert client.get("/orders/search", params={"limit": 0}).status_code == 400
-    assert client.get("/orders/search", params={"limit": "many"}).status_code == 422
+    assert error(client.get("/orders/search", params={"limit": 0})) == (400, "INVALID_REQUEST")
+    # FastAPI's own type errors use the same shape, with a readable sentence instead of a list.
+    response = client.get("/orders/search", params={"limit": "many"})
+    assert error(response) == (400, "INVALID_REQUEST")
+    assert response.json()["detail"].startswith("limit:")
