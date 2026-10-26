@@ -3,10 +3,10 @@
 from collections import deque
 from datetime import date, timedelta
 from decimal import Decimal
-from math import ceil
+from math import ceil, isfinite
 
 from data_loader import load_orders, load_workshops
-from production_estimates import SNAPSHOT, _finish, estimate_in_house, estimate_production_plan
+from production_estimates import SNAPSHOT, _finish, estimate_in_house, estimate_production_plan, in_house_workdays
 from tools import query_orders
 
 
@@ -18,7 +18,7 @@ class _InHouseUnavailable(Exception):
         self.result = result
 
 
-def _prepare(category, total_pieces, start_date, include_in_house, queue, baseline_days):
+def _prepare(category, total_pieces, start_date, include_in_house, queue, baseline_days, in_house_cost=None):
     if category not in ("TOPS", "ACCESSORIES"):
         raise ValueError("category must be TOPS or ACCESSORIES.")
     if type(total_pieces) is not int or not 1 <= total_pieces <= 1000000:
@@ -43,8 +43,12 @@ def _prepare(category, total_pieces, start_date, include_in_house, queue, baseli
             raise _InHouseUnavailable(sample)
         totals = [sum(int(r["pieces_completed"]) for r in sample["baseline_records"]
                       if r["stage"] == stage["stage"]) for stage in sample["stages"]]
-        producers.append({"id": "IN_HOUSE", "cost": Decimal(0), "limit": total_pieces,
-                          "totals": totals, "baseline_days": baseline_days, "queue": ceil(queue)})
+        # The same queue as estimate_in_house: behind the unfinished orders, or a flat one if given.
+        waits = ([stage["open_order_workdays"] for stage in sample["stages"]]
+                 if sample.get("queue_basis") == "open_orders" else None)
+        producers.append({"id": "IN_HOUSE", "cost": Decimal(str(in_house_cost or 0)), "limit": total_pieces,
+                          "totals": totals, "baseline_days": baseline_days, "queue": queue or 0,
+                          "stage_waits": waits})
     return start, producers
 
 
@@ -58,9 +62,8 @@ def _capacity(producer, start, deadline):
 
     def duration(quantity):
         if "totals" in producer:
-            return producer["queue"] + sum(
-                (quantity * producer["baseline_days"] + total - 1) // total
-                for total in producer["totals"])
+            return in_house_workdays(quantity, producer["totals"], producer["baseline_days"],
+                                     producer["queue"], producer["stage_waits"])
         return ceil(producer["queue"] + Decimal(quantity) / producer["rate"])
 
     low, high = 0, producer["limit"]
@@ -84,19 +87,23 @@ def _allocate(producers, start, deadline, quantity):
     return assignments, quantity
 
 
-def _optimize(category, total_pieces, start_date, include_in_house, queue, baseline_days, days):
+def _optimize(category, total_pieces, start_date, include_in_house, queue, baseline_days, days, in_house_cost=None):
     try:
-        start, producers = _prepare(category, total_pieces, start_date, include_in_house, queue, baseline_days)
+        start, producers = _prepare(category, total_pieces, start_date, include_in_house, queue, baseline_days,
+                                    in_house_cost)
         if days is not None and (type(days) is not int or not 1 <= days <= 3650):
             raise ValueError("deadline_days must be an integer from 1 to 3650.")
         # 第一天包含开始日期，10 天内即开始日期加 9 天。
         horizon = start + timedelta(days=(days or 3650) - 1)
         allocations, missing = _allocate(producers, start, horizon, total_pieces)
         if missing:
-            return {"status": "infeasible" if days else "search_limit",
-                    "message": "Insufficient modeled capacity within the requested horizon.",
+            message = "Insufficient modeled capacity within the requested horizon."
+            if days and not include_in_house:
+                message += (" Outside workshops only were compared; the fastest plan, which can add in-house "
+                            "capacity, gives the earliest possible date.")
+            return {"status": "infeasible" if days else "search_limit", "message": message,
                     "deadline_date": horizon.isoformat(), "unallocated_pieces": missing,
-                    "maximum_deliverable_pieces": total_pieces - missing}
+                    "maximum_deliverable_pieces": total_pieces - missing, "include_in_house": include_in_house}
         if days is None:
             # 可行性随日期单调变化，二分寻找最早可交付日期。
             low, high = 0, (horizon - start).days
@@ -122,9 +129,20 @@ def _optimize(category, total_pieces, start_date, include_in_house, queue, basel
             calendar_days_inclusive=result["elapsed_calendar_days"] + 1,
             allocations=external, in_house_pieces=in_house, include_in_house=include_in_house,
         )
+        if not include_in_house:
+            cost_note = ("In-house production is left out: its cost is not in the data, so only outside "
+                         "workshops are compared. Give an in-house cost per piece to include it.")
+        elif in_house_cost is not None:
+            cost_note = (f"In-house production is priced at an assumed {in_house_cost} per piece (given, not "
+                         "data); external charges and that assumed cost are minimized together.")
+            assumed = Decimal(str(in_house_cost)) * in_house
+            result.update(in_house_cost_per_piece_assumed=in_house_cost, in_house_cost_assumed=float(assumed),
+                          total_cost_with_assumed_in_house=float(Decimal(str(result["external_processing_cost"])) + assumed))
+        else:
+            cost_note = "In-house processing contributes zero to the external-charge objective, not zero real cost."
         result["assumptions"] = result["assumptions"] + [
             "One batch per producer; arbitrary numbers of eligible workshops may run in parallel.",
-            "In-house processing contributes zero to the external-charge objective, not zero real cost.",
+            cost_note,
             "No shared-resource contention, split fees or quality-risk optimization is modeled.",
             "Deadline days are inclusive calendar days; the start date is day one.",
             "This is not an existing-order forecast or an on-time probability estimate.",
@@ -142,19 +160,33 @@ def _optimize(category, total_pieces, start_date, include_in_house, queue, basel
 
 
 def optimize_fastest_plan(category, total_pieces, start_date=SNAPSHOT,
-                          include_in_house=True, in_house_queue_workdays=0, baseline_days=7):
+                          include_in_house=True, in_house_queue_workdays=None, baseline_days=7):
     """Find earliest full delivery; break date ties by external processing cost."""
     return _optimize(category, total_pieces, start_date, include_in_house,
                      in_house_queue_workdays, baseline_days, None)
 
 
 def optimize_cheapest_plan(category, total_pieces, deadline_days, start_date=SNAPSHOT,
-                           include_in_house=True, in_house_queue_workdays=0, baseline_days=7):
-    """Minimize external processing charges within inclusive calendar deadline_days."""
+                           include_in_house=None, in_house_queue_workdays=None, baseline_days=7,
+                           in_house_cost_per_piece=None):
+    """Cheapest plan within inclusive calendar deadline_days; outside workshops only unless an in-house cost per piece is given."""
+    # In-house cost is not in the data, so it cannot simply count as zero (C-2).
     if deadline_days is None:
         return {"status": "error", "message": "deadline_days is required."}
-    return _optimize(category, total_pieces, start_date, include_in_house,
-                     in_house_queue_workdays, baseline_days, deadline_days)
+    if in_house_cost_per_piece is not None and (
+            type(in_house_cost_per_piece) not in (int, float) or not isfinite(in_house_cost_per_piece)
+            or not 0 <= in_house_cost_per_piece <= 1000):
+        return {"status": "error", "message": "in_house_cost_per_piece must be a number from 0 to 1000."}
+    if include_in_house is not None and type(include_in_house) is not bool:
+        return {"status": "error", "message": "include_in_house must be a boolean."}
+    if include_in_house and in_house_cost_per_piece is None:
+        return {"status": "needs_assumption",
+                "message": "In-house cost is not in the data, so the cheapest plan compares outside workshops "
+                           "only. To include in-house production, give in_house_cost_per_piece (same unspecified "
+                           "currency as the workshop charges)."}
+    use_in_house = in_house_cost_per_piece is not None and include_in_house is not False
+    return _optimize(category, total_pieces, start_date, use_in_house, in_house_queue_workdays, baseline_days,
+                     deadline_days, in_house_cost_per_piece if use_in_house else None)
 
 
 def _flow(demands, producers, start, deadline, minimize_cost=False):

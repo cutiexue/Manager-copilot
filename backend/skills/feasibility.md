@@ -33,8 +33,14 @@ tools: estimate_in_house, estimate_production_plan, estimate_quickstitch, estima
 - Use estimate_production_plan for a specified allocation, optimize_fastest_plan for earliest
   delivery, and optimize_cheapest_plan for minimum external charges within a requested deadline.
   Deadline days include the start date and are calendar days. Ask for a missing required deadline.
-- Defaults: start on the reference date; include in-house production, zero in-house queue.
-  Historical throughput and immediate availability are assumptions, not verified free capacity.
+- Current load: by default in-house work queues behind the unfinished orders at each stage. That
+  load counts every unfinished order in full from its current stage, so it is an upper bound and
+  the in-house date is a late estimate; say so. Leave the queue parameters out unless the manager
+  states a queue; never pass 0 to make the line look free.
+- Cheapest plans compare outside workshops only, because in-house cost is not in the data. Say
+  that in-house was left out. Pass in_house_cost_per_piece only when the manager states one.
+- Defaults: start on the reference date; the fastest plan may use in-house production.
+  Historical throughput is a scenario rate, not verified free capacity.
   In-house whole-batch stages are sequential; eligible producers may work in parallel.
 - Never silently fill allocation gaps unless the user assigns the remainder in-house. Resolve
   ambiguous workshop names; A/B/C are not known IDs. W1 QuickStitch, W2 SteadyHands, W3 BudgetWorks,

@@ -117,7 +117,8 @@ def test_feasibility_runs_the_agents_estimators(setup):
     arguments = {"pieces": 500}
     body = client.post("/feasibility/estimate", json={"estimator": "estimate_in_house", "arguments": arguments}).json()
     assert body["result"] == execute_tool("estimate_in_house", json.dumps(arguments))
-    assert body["result"]["completion_date"] == "2026-04-06"
+    assert body["result"]["completion_date"] == "2026-05-30"  # behind the unfinished orders (C-1)
+    assert body["result"]["queue_basis"] == "open_orders"
     assert body["evidence"]["refs"]  # the baseline rows behind the estimate
 
 

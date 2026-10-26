@@ -192,6 +192,9 @@ register_tool(
 ESTIMATION_FUNCTIONS = {
     f.__name__: f for f in [estimate_in_house, estimate_production_plan, *WORKSHOP_ESTIMATORS.values()]
 }
+_QUEUE = ("Omit (default) to queue in-house work behind the unfinished orders, stage by stage; that "
+          "load counts each order in full from its current stage, so it is an upper bound. A number "
+          "replaces it with one flat queue in workdays; give 0 only if the manager says the line is free.")
 _common = {
     "pieces": {"type": "integer", "minimum": 0, "maximum": MAX_SCENARIO_PIECES},
     "category": {"type": "string", "enum": ["TOPS", "ACCESSORIES"]},
@@ -201,7 +204,8 @@ for _name, _function in ESTIMATION_FUNCTIONS.items():
     if _name == "estimate_in_house":
         _required = ["pieces"]
         _properties = {k: _common[k] for k in ("pieces", "start_date")}
-        _properties.update(queue_workdays={"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS},
+        _properties.update(queue_workdays={"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS,
+                                           "description": _QUEUE},
                            baseline_days={"type": "integer", "minimum": 1, "maximum": MAX_BASELINE_WORKDAYS})
     elif _name == "estimate_production_plan":
         _required = ["category", "total_pieces", "in_house_pieces", "allocations"]
@@ -209,7 +213,8 @@ for _name, _function in ESTIMATION_FUNCTIONS.items():
         _properties.update(
             total_pieces={"type": "integer", "minimum": 1, "maximum": MAX_SCENARIO_PIECES},
             in_house_pieces={"type": "integer", "minimum": 0, "maximum": MAX_SCENARIO_PIECES},
-            in_house_queue_workdays={"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS},
+            in_house_queue_workdays={"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS,
+                                     "description": _QUEUE},
             baseline_days={"type": "integer", "minimum": 1, "maximum": MAX_BASELINE_WORKDAYS},
             allocations={"type": "array", "items": {"type": "object", "properties": {
                 "workshop_id": {"type": "string", "enum": list(WORKSHOP_ESTIMATORS)},
@@ -228,14 +233,23 @@ for _function in (optimize_fastest_plan, optimize_cheapest_plan):
         "category": _common["category"],
         "total_pieces": {"type": "integer", "minimum": 1, "maximum": 1000000},
         "start_date": _common["start_date"],
-        "include_in_house": {"type": "boolean", "description": "Default true. In-house costs are excluded; immediate availability is assumed unless queue is supplied."},
-        "in_house_queue_workdays": {"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS},
+        "include_in_house": {"type": "boolean", "description": "Default true. In-house costs are excluded; in-house work queues behind the unfinished orders."},
+        "in_house_queue_workdays": {"type": "number", "minimum": 0, "maximum": MAX_QUEUE_WORKDAYS,
+                                    "description": _QUEUE},
         "baseline_days": {"type": "integer", "minimum": 1, "maximum": MAX_BASELINE_WORKDAYS},
     }
     _required = ["category", "total_pieces"]
     if _function is optimize_cheapest_plan:
         _properties["deadline_days"] = {"type": "integer", "minimum": 1, "maximum": 3650,
                                         "description": "Inclusive calendar days: start date is day one."}
+        _properties["include_in_house"] = {
+            "type": "boolean",
+            "description": "Default: outside workshops only, because in-house cost is not in the data. "
+                           "In-house is compared only when in_house_cost_per_piece is given."}
+        _properties["in_house_cost_per_piece"] = {
+            "type": "number", "minimum": 0, "maximum": 1000,
+            "description": "An in-house cost per piece the manager states (same unspecified currency as the "
+                           "workshop charges). Never invent one."}
         _required.append("deadline_days")
     register_tool(_function, _function.__doc__ + " Read-only new-batch scenario. Report assumptions; not total real cost or guaranteed delivery.", _properties, _required)
 

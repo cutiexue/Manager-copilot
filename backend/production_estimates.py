@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from math import ceil, isfinite
 
-from data_loader import load_production, load_workshops
+from data_loader import ORDERS_SOURCE, load_orders, load_production, load_workshops, order_row_numbers, source_ref
 from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES
 
 SNAPSHOT = "2026-04-01"
@@ -43,26 +43,81 @@ def _finish(start, workdays):
         current += timedelta(days=1)
 
 
-def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=0, baseline_days=7):
-    """Estimate sequential full-batch stages from recent observed workday output."""
+def _workdays_between(first, last):
+    """Workdays from `first` (inclusive) up to `last` (exclusive)."""
+    count, day = 0, first
+    while day < last:
+        count += day.weekday() != 6
+        day += timedelta(days=1)
+    return count
+
+
+def open_order_load():
+    """What the unfinished orders still have to put through each stage, as of the snapshot (C-1).
+
+    Every unfinished order counts with its full pieces at its current stage and at each later one:
+    progress inside a stage is not recorded, so the load is an upper bound. Returns the orders, the
+    pieces per stage and the order rows behind them."""
+    orders = [o for o in load_orders() if o["status"] == "IN_PROGRESS"]
+    rows = order_row_numbers()
+    by_stage = {stage: sum(int(o["pieces"]) for o in orders if STAGES.index(o["current_stage"]) <= index)
+                for index, stage in enumerate(STAGES)}
+    return orders, by_stage, [source_ref(ORDERS_SOURCE, rows[o["order_id"]], o["order_id"]) for o in orders]
+
+
+def in_house_workdays(pieces, totals, baseline_days, flat_queue=0, stage_waits=None):
+    """Whole workdays for an in-house batch. Stage by stage, the batch starts once it has left the
+    stage before and that stage has finished the work queued ahead of it (stage_waits, in workdays
+    from the start); without stage_waits, one flat queue comes first. `totals` are each stage's
+    output summed over the baseline workdays."""
+    if not pieces:
+        return 0
+    if stage_waits is None:
+        return ceil(flat_queue) + sum((pieces * baseline_days + total - 1) // total for total in totals)
+    end = 0
+    for total, wait in zip(totals, stage_waits):
+        end = max(end, wait) + (pieces * baseline_days + total - 1) // total
+    return end
+
+
+def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=None, baseline_days=7):
+    """Estimate an in-house batch from recent output, queued behind the unfinished orders at each stage (an upper bound)."""
+    # A number in queue_workdays replaces that queue with one flat queue (C-1).
     try:
         start = _validate(pieces, start_date)
         if type(baseline_days) is not int or not 1 <= baseline_days <= MAX_BASELINE_WORKDAYS:
             raise ValueError(f"baseline_days must be an integer from 1 to {MAX_BASELINE_WORKDAYS} "
                              "(the workdays in the production log).")
-        if (type(queue_workdays) not in (int, float) or not isfinite(queue_workdays)
+        if queue_workdays is not None and (
+                type(queue_workdays) not in (int, float) or not isfinite(queue_workdays)
                 or not 0 <= queue_workdays <= MAX_QUEUE_WORKDAYS):
             raise ValueError(f"queue_workdays must be a number from 0 to {MAX_QUEUE_WORKDAYS}.")
     except (ValueError, TypeError) as exc:
         return _error(str(exc))
+    snapshot = date.fromisoformat(SNAPSHOT)
+    if queue_workdays is not None:
+        basis = "given"
+        queue_note = (f"In-house queue is given as {queue_workdays} workdays before the batch starts; "
+                      "the unfinished orders are not modeled separately.")
+    elif start >= snapshot:
+        basis = "open_orders"
+        queue_note = ("The unfinished orders go first. At each stage, every unfinished order that still has "
+                      "to pass through it counts with its full pieces, including the stage it is in now "
+                      "(progress within a stage is not recorded), so this load is an upper bound and the "
+                      "date is a late estimate. Each stage clears that load at its recent average output "
+                      "before working on this batch; no new orders arrive meanwhile.")
+    else:
+        basis = "not_applied_before_snapshot"
+        queue_note = (f"Unfinished-order load is known only at the {SNAPSHOT} snapshot, so it is not applied "
+                      "to an earlier start date; the line is assumed free.")
     assumptions = [
         "In-house cost is excluded by request.",
-        "The batch receives the full historical average stage throughput; this is not verified free capacity.",
         "Each whole batch finishes one stage before starting the next; no within-batch overlap.",
-        f"In-house queue is assumed to be {queue_workdays} workdays; zero means immediate availability.",
+        queue_note,
         "Historical means are scenario rates, not fixed daily capacity or a guaranteed completion date.",
     ]
     stage_results = []
+    totals = []
     evidence = []
     if pieces:
         cursor = min(start, date.fromisoformat(SNAPSHOT)) - timedelta(days=1)
@@ -86,13 +141,35 @@ def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=0, baseline_da
             total = sum(values)
             if total == 0:
                 return {"status": "insufficient_data", "message": f"Zero historical throughput for {stage}."}
+            totals.append(total)
             stage_results.append({"stage": stage, "average_pieces_per_workday": total / baseline_days,
                                   "production_workdays": (pieces * baseline_days + total - 1) // total})
-    duration = ceil(queue_workdays) + sum(s["production_workdays"] for s in stage_results) if pieces else 0
-    return {"status": "ok", "producer": "IN_HOUSE", "pieces": pieces,
-            "workdays_including_queue": duration, "completion_date": _finish(start, duration).isoformat(),
-            "cost_included": False, "stages": stage_results, "baseline_records": evidence,
-            "assumptions": ASSUMPTIONS + assumptions, "source": "track1/data/production_log.csv"}
+    result = {"status": "ok", "producer": "IN_HOUSE", "pieces": pieces, "queue_basis": basis}
+    waits = None
+    if basis == "open_orders" and pieces:
+        orders, load, refs = open_order_load()
+        elapsed = _workdays_between(snapshot, start)  # workdays the line has already spent on that load
+        waits = []
+        for entry, total in zip(stage_results, totals):
+            clear = (load[entry["stage"]] * baseline_days + total - 1) // total
+            entry["open_order_pieces"] = load[entry["stage"]]
+            entry["open_order_workdays"] = max(0, clear - elapsed)
+            waits.append(entry["open_order_workdays"])
+        result["open_order_load"] = {
+            "as_of_date": SNAPSHOT, "orders": len(orders),
+            "original_pieces": sum(int(o["pieces"]) for o in orders), "upper_bound": True,
+            "source": ORDERS_SOURCE, "source_rows": refs}
+    if waits is not None:
+        end = 0
+        for entry, total, wait in zip(stage_results, totals, waits):
+            end = max(end, wait) + entry["production_workdays"]
+            entry["finished_after_workdays"] = end
+    duration = in_house_workdays(pieces, totals, baseline_days, queue_workdays or 0, waits)
+    result.update({
+        "workdays_including_queue": duration, "completion_date": _finish(start, duration).isoformat(),
+        "cost_included": False, "stages": stage_results, "baseline_records": evidence,
+        "assumptions": ASSUMPTIONS + assumptions, "source": "track1/data/production_log.csv"})
+    return result
 
 
 def _estimate_workshop(workshop_id, category, pieces, start_date=SNAPSHOT):
@@ -174,7 +251,7 @@ WORKSHOP_ESTIMATORS = dict(zip(
 
 
 def estimate_production_plan(category, total_pieces, in_house_pieces, allocations,
-                             start_date=SNAPSHOT, in_house_queue_workdays=0, baseline_days=7):
+                             start_date=SNAPSHOT, in_house_queue_workdays=None, baseline_days=7):
     """Summarize an explicit allocation; reject gaps rather than allocating them."""
     try:
         start = _validate(total_pieces, start_date)
