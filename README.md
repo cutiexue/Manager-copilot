@@ -4,7 +4,62 @@ DSS5105 Capstone Project — **Track 1: The General Manager's Co-Pilot**
 
 Manager Co-Pilot is an AI-assisted decision-support system for factory general managers. It helps users understand current operations, identify risks, estimate feasibility, and take controlled actions based on traceable production data.
 
-> **Current phase:** Planning and repository setup
+> **Current phase:** Sprint 2 — read-only tools, chat with evidence, confirmed follow-ups (reminders, notes, chase-up drafts, watches), the scheduler and static Skills are integrated on the local integration branch; the evaluation set is a draft for team review (see [Implementation Status](#implementation-status)).
+
+## Quick Start
+
+Requires Python 3.12 and Node.js 18+.
+
+```text
+Manager-copilot/
+├── backend/                 # FastAPI + LangChain agent + deterministic tools (flat modules)
+│   ├── skills/              # static Skills (Markdown), composed into the system prompt
+│   ├── track1/data/         # read-only course CSVs (orders, production_log, workshops)
+│   ├── track1/scenarios/    # scripted, versioned data snapshots for standing watches
+│   └── tests/               # pytest suite, no API key needed
+├── evaluation/              # question sets and the evaluation runner
+├── frontend/                # React + TypeScript + Vite
+└── TRACK1_IMPLEMENTATION_PLAN.md
+```
+
+Backend and tests:
+
+```bash
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+python -m pytest          # tools, SQLite store, chat + briefing API with a fake agent
+python main.py --local    # one order lookup, no LLM call
+python main.py            # terminal menu: conversations, history, on-demand briefing
+python main.py --api      # serves 127.0.0.1:8000 for the frontend and starts the scheduler
+python demo_backend.py    # same API without an API key: a keyword demo model drives the real tools
+```
+
+Both `main.py` modes use the provider and API key saved in `backend/.env` (see `backend/.env.example`) or the environment, and only ask for the key when none is set. `--provider deepseek|openai` overrides `LLM_PROVIDER`.
+
+Frontend (second terminal):
+
+```bash
+cd frontend
+npm ci                    # installs exactly what package-lock.json pins
+npm run dev               # http://localhost:5173, proxies /api/* to the backend
+```
+
+Chat sessions, follow-ups, watches, alerts and the audit log are stored in `backend/manager_copilot.db` (SQLite, git-ignored). Never commit `.env`. While the backend runs, the API is described at http://127.0.0.1:8000/docs.
+
+## Implementation Status
+
+| Workflow / layer | Status | Where |
+|---|---|---|
+| Retrieval, judgement, tracing, discovery tools | Built, read-only, tested; order IDs in any spelling, partial customer names, close candidates when nothing matches | `backend/tools.py`, `rules.py`, `discovery.py`, `order_search.py` |
+| Morning briefing | Built deterministically; `GET /briefings/latest` serves it live and the scheduler saves a dated copy at 07:00 (`GET /briefings`) | `backend/briefing.py`, `scheduler.py` |
+| Multi-turn Q&A | One LangChain agent, 32 tools, SQLite sessions; each answer returns its tool calls, cited source rows and proposals | `backend/llm.py`, `service.py`, `evidence_refs.py` |
+| Feasibility estimates | Single batch (in-house, per workshop, fastest/cheapest) and multi-order plans with revision; in-house work queues behind the unfinished orders (an upper bound), and the cheapest plan leaves in-house out unless its cost is given; also `POST /feasibility/estimate` | `backend/production_estimates.py`, `production_optimizer.py`, `views.py` |
+| Confirmed actions + audit | Built: the agent or the UI proposes, and only Confirm in the app carries it out; 24 h expiry, confirming twice does nothing more, append-only audit log | `backend/actions.py`, `action_tools.py`; UI `FollowUps.tsx`, `ProposalCard.tsx` |
+| Standing watches / alerts | Built: 4 order conditions checked against scripted, versioned data snapshots; one alert per trigger | `backend/watches.py`, `track1/scenarios/watch_snapshots.json`; UI `Watches.tsx` |
+| APScheduler | Built: 07:00 briefing, due reminders, watch checks, proposal expiry; restarts do not repeat a run | `backend/scheduler.py` |
+| Static Skills | Built: 8 Markdown Skills, each with its tools; `prompt_version` is returned with every answer | `backend/skills/`, `skills.py` |
+| Evaluation set and runner | Draft: 30 held-out and 17 development cases, every fact rechecked against the CSVs; not yet reviewed by a second member; offline plumbing run passes, first real-model run pending an API key | `evaluation/` (see its README) |
 
 ## Project Overview
 
@@ -119,22 +174,23 @@ Evaluation results will be reported by category rather than only as a single ove
 - [x] Track 1 selected
 - [x] MVP scope and architecture defined
 - [x] Initial implementation plan created
-- [ ] Repository structure and development environment
-- [ ] Data access layer and deterministic tools
-- [ ] Agent workflow and static skills
-- [ ] SQLite application state
-- [ ] Scheduler and standing watches
-- [ ] React user interface
-- [ ] End-to-end system integration
-- [ ] Evaluation and failure analysis
+- [x] Repository structure and development environment
+- [x] Data access layer and deterministic tools (read-only)
+- [x] Agent workflow and static skills
+- [x] SQLite application state (sessions, follow-ups, watches, alerts, audit)
+- [x] Scheduler and standing watches
+- [x] React user interface (chat, briefing, orders, actions, watches and alerts)
+- [ ] End-to-end system integration (local integration branch, not pushed; first run with a real model pending)
+- [ ] Evaluation and failure analysis (draft cases and runner ready; team review and the first real-model run pending)
 - [ ] Final documentation and demonstration
 
 ## Documentation
 
+- [Sprint 2 Changes](./SPRINT2_CHANGES.md) — everything changed on the integration branch, how it was checked, and what is open
 - [Track 1 Implementation Plan](./TRACK1_IMPLEMENTATION_PLAN.md)
 - Contribution guidelines — to be added
-- API documentation — to be added
-- Evaluation report — to be added
+- API documentation — generated by FastAPI at `/docs` while the backend runs
+- [Evaluation](./evaluation/README.md) — case format, running, scoring and its limits; reports go to `evaluation/reports/`
 
 ## Repository Workflow
 

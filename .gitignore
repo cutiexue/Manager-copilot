@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Files synced in by the Claude app
+Claude outputs/
+
+# Secrets
+.env
+api.txt
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Local application state (SQLite)
+*.db
+*.db-journal

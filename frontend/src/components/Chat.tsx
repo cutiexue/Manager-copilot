@@ -1,0 +1,286 @@
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { api } from '../api';
+import type { ChatMessage, EvidenceView, Proposal, Session } from '../types';
+import Icon from './Icon';
+import Markdown from './Markdown';
+import ProposalCard from './ProposalCard';
+
+interface Props {
+  /** null = a new conversation, created on the first message */
+  sessionId: string | null;
+  title?: string;
+  prefill: { text: string; nonce: number } | null;
+  onPrefillUsed: () => void;
+  /** Error from loading the conversation list, e.g. the backend is offline */
+  backendError: string | null;
+  onRetry: () => void;
+  onSessionCreated: (session: Session) => void;
+  /** Called after every send, successful or not, so the conversation list can refresh */
+  onTurnSettled: () => void;
+  /** Shown above the chat box while the conversation is empty (the Home page) */
+  welcome?: ReactNode;
+  suggestions?: string[];
+  /** Opens the evidence drawer for an answer's cited rows */
+  onEvidence: (view: EvidenceView) => void;
+  /** A proposal was confirmed or cancelled, so follow-up counts may have changed */
+  onFollowUpsChanged: () => void;
+}
+
+const args = (values: Record<string, unknown>) =>
+  Object.entries(values)
+    .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+    .join(', ') || '—';
+
+/** What the evidence drawer shows for one answer: the tools it called and the rows they cited. */
+function evidenceFor(m: ChatMessage): EvidenceView {
+  const first = m.content.split('\n').find((line) => line.trim()) ?? '';
+  return {
+    title: 'this answer',
+    claim: first.replace(/[*`#|]/g, '').trim().slice(0, 240),
+    calculation: (m.tool_calls ?? []).map((c) => ({ label: c.name, value: `${args(c.arguments)}${c.status ? ` → ${c.status}` : ''}` })),
+    refs: m.evidence?.refs ?? [],
+    rows: m.evidence?.rows,
+  };
+}
+
+type Status = 'idle' | 'loading' | 'sending' | 'error';
+
+// api.ts uses this wording when the backend process cannot be reached.
+const OFFLINE_PREFIX = 'Cannot reach';
+
+export default function Chat({
+  sessionId, title, prefill, onPrefillUsed, backendError, onRetry, onSessionCreated, onTurnSettled, welcome, suggestions,
+  onEvidence, onFollowUpsChanged,
+}: Props) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [status, setStatus] = useState<Status>('idle');
+  const [error, setError] = useState<string | null>(null);
+  // The message whose send just failed; Retry sends it again.
+  const [failed, setFailed] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  // The conversation on screen; an answer that arrives after switching away is dropped.
+  const shown = useRef<string | null>(sessionId);
+  // A conversation this component just created already has its first message on screen,
+  // so the history request for its new address is skipped once.
+  const createdHere = useRef<string | null>(null);
+
+  const fail = (e: unknown) => {
+    setError(e instanceof Error ? e.message : 'Unexpected error.');
+    setStatus('error');
+  };
+
+  useEffect(() => {
+    shown.current = sessionId;
+    if (sessionId === null) {
+      setMessages([]);
+      setError(null);
+      setFailed(null);
+      setStatus('idle');
+      return;
+    }
+    if (sessionId === createdHere.current) {
+      // Only the switch to the address of the just-created conversation is skipped;
+      // coming back to it later loads its history like any other conversation.
+      createdHere.current = null;
+      return;
+    }
+    let cancelled = false;
+    setStatus('loading');
+    setError(null);
+    setFailed(null);
+    api.history(sessionId).then(
+      (history) => {
+        if (cancelled) return;
+        setMessages(history);
+        setStatus('idle');
+      },
+      (e) => {
+        if (cancelled) return;
+        setMessages([]);
+        fail(e);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, reload]);
+
+  useEffect(() => {
+    if (!prefill) return;
+    setInput(prefill.text);
+    inputRef.current?.focus();
+    onPrefillUsed();
+  }, [prefill, onPrefillUsed]);
+
+  useEffect(() => {
+    if (messages.length > 0) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, status]);
+
+  const send = async (again?: string) => {
+    const text = (again ?? input).trim();
+    if (!text || status === 'sending') return;
+    let id = sessionId;
+    setError(null);
+    setFailed(null);
+    setStatus('sending');
+    setMessages((m) => [...m, { role: 'human', content: text }]);
+    setInput('');
+    try {
+      if (!id) {
+        const created = await api.createSession(text.slice(0, 60));
+        id = created.id;
+        createdHere.current = id;
+        shown.current = id;
+        onSessionCreated(created);
+      }
+      const res = await api.send(id, text);
+      if (shown.current === id) {
+        setMessages((m) => [
+          ...m,
+          { role: 'ai', content: res.answer, tool_calls: res.tool_calls, evidence: res.evidence, proposals: res.proposals },
+        ]);
+        setStatus('idle');
+      }
+    } catch (e) {
+      if (shown.current === id) {
+        // The backend keeps history unchanged on failure, so drop the optimistic message.
+        setMessages((m) => m.slice(0, -1));
+        setInput(text);
+        setFailed(text);
+        fail(e);
+      }
+    } finally {
+      onTurnSettled();
+    }
+  };
+
+  const proposalChanged = (next: Proposal) => {
+    setMessages((list) =>
+      list.map((m) => (m.proposals ? { ...m, proposals: m.proposals.map((p) => (p.id === next.id ? next : p)) } : m)),
+    );
+    onFollowUpsChanged();
+  };
+
+  const retry = () => {
+    if (failed) {
+      void send(failed);
+      return;
+    }
+    setError(null);
+    setStatus('idle');
+    setReload((n) => n + 1);
+    onRetry();
+  };
+
+  const empty = messages.length === 0 && status !== 'loading';
+  const problem = error ?? backendError;
+  const offline = problem?.startsWith(OFFLINE_PREFIX) ?? false;
+
+  return (
+    <section className={`chat ${empty ? 'chat-empty' : 'chat-thread'}`} aria-label="Chat with Co-Pilot">
+      <div className="chat-scroll">
+        <div className="chat-column">
+          {empty ? (
+            welcome ?? <p className="empty">No messages in this conversation yet.</p>
+          ) : (
+            <>
+              {title && <h2 className="chat-title">{title}</h2>}
+              {status === 'loading' && <p className="muted">Loading…</p>}
+              <div className="messages" aria-live="polite">
+                {messages.map((m, i) => (
+                  <div key={i} className={`msg msg-${m.role}`}>
+                    <span className="who">{m.role === 'human' ? 'You' : 'Co-Pilot'}</span>
+                    {m.role === 'ai' ? (
+                      <div className="bubble bubble-md">
+                        <Markdown text={m.content} />
+                      </div>
+                    ) : (
+                      <div className="bubble">{m.content}</div>
+                    )}
+                    {m.proposals?.map((p) => <ProposalCard key={p.id} proposal={p} onChanged={proposalChanged} />)}
+                    {m.evidence && m.evidence.refs.length > 0 && (
+                      <button className="btn btn-ghost btn-small sources" onClick={() => onEvidence(evidenceFor(m))}>
+                        <Icon name="evidence" size={14} /> Sources ({m.evidence.refs.length})
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {status === 'sending' && (
+                  <div className="msg msg-ai">
+                    <span className="who">Co-Pilot</span>
+                    <div className="bubble muted">Looking up the data…</div>
+                  </div>
+                )}
+                <div ref={endRef} />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="chat-dock">
+        <div className="chat-column">
+          {problem && (
+            <div className="alert" role="alert">
+              <strong>{offline ? 'Backend offline.' : 'Request failed.'}</strong> {problem}
+              <button className="btn btn-small" onClick={retry}>
+                <Icon name="refresh" size={14} /> Retry
+              </button>
+            </div>
+          )}
+
+          <form
+            className="composer"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void send();
+            }}
+          >
+            <textarea
+              ref={inputRef}
+              value={input}
+              rows={empty ? 3 : 2}
+              maxLength={20000}
+              placeholder={empty ? 'Ask about orders, customers or production…' : 'Ask a follow-up…'}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  void send();
+                }
+              }}
+              aria-label="Message"
+            />
+            <button className="btn btn-primary" type="submit" disabled={!input.trim() || status === 'sending'}>
+              Send
+            </button>
+          </form>
+
+          {empty && suggestions && suggestions.length > 0 && (
+            <div className="chips" aria-label="Suggested questions">
+              {suggestions.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="chip"
+                  onClick={() => {
+                    setInput(s);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="hint small muted">
+            Every answer is looked up fresh from the data. Enter to send, Shift+Enter for a new line.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
