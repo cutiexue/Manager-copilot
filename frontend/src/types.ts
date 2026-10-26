@@ -74,6 +74,18 @@ export interface BriefingSummaryData {
   points: SummaryPoint[];
 }
 
+/** One sentence of the briefing narrative (yesterday, at risk, today), with its source rows. */
+export interface NarrativeSentence {
+  topic: 'yesterday' | 'at_risk' | 'today';
+  text: string;
+  evidence: Evidence | null;
+}
+
+export interface BriefingNarrative {
+  text: string;
+  sentences: NarrativeSentence[];
+}
+
 /** How urgent a briefing item is: act on it now, or keep watching it. */
 export type Level = 'act' | 'watch';
 
@@ -131,6 +143,8 @@ export interface Briefing {
   at_risk: { count: number; orders: AtRiskOrder[]; source_rows: SourceRef[] };
   /** Missing from briefings produced before the summary existed */
   summary?: BriefingSummaryData;
+  /** The briefing in three sentences; missing from briefings produced before it existed */
+  narrative?: BriefingNarrative;
   /** Missing from briefings produced before review flags existed */
   checks?: Check[];
   /** Items at each level across all checks */

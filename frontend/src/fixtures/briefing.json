@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-24T05:02:13+00:00",
+ "generated_at": "2026-10-26T03:32:21+00:00",
  "generator": "briefing.get_morning_briefing()",
- "backend_commit": "7ad53ac",
+ "backend_commit": "be265f1",
  "briefing": {
   "status": "ok",
   "as_of_date": "2026-04-01",
@@ -741,6 +741,343 @@
         "source": "track1/data/production_log.csv",
         "row": 357,
         "key": "2026-03-30 PACKING"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "narrative": {
+   "text": "Yesterday assembly made 455 pieces, 11.8% below its 7-workday average; knitting was next lowest, 3.6% below. 12 orders are at risk (8 overdue, 3 due within 3 days, 1 idle 7+ days); ORD-107 for Northwind Apparel is the furthest behind at 16 days late. 8 items need action today: 6 orders late or idle 7+ days, the 29.3% drop in assembly output over the last 3 workdays and customer Maple & Co (both open orders slipping).",
+   "sentences": [
+    {
+     "topic": "yesterday",
+     "text": "Yesterday assembly made 455 pieces, 11.8% below its 7-workday average; knitting was next lowest, 3.6% below.",
+     "evidence": {
+      "source": "track1/data/production_log.csv",
+      "source_rows": [
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 358,
+        "key": "2026-03-31 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 359,
+        "key": "2026-03-31 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 360,
+        "key": "2026-03-31 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 361,
+        "key": "2026-03-31 PACKING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 326,
+        "key": "2026-03-23 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 330,
+        "key": "2026-03-24 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 334,
+        "key": "2026-03-25 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 338,
+        "key": "2026-03-26 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 342,
+        "key": "2026-03-27 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 346,
+        "key": "2026-03-28 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 354,
+        "key": "2026-03-30 KNITTING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 327,
+        "key": "2026-03-23 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 331,
+        "key": "2026-03-24 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 335,
+        "key": "2026-03-25 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 339,
+        "key": "2026-03-26 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 343,
+        "key": "2026-03-27 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 347,
+        "key": "2026-03-28 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 355,
+        "key": "2026-03-30 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 328,
+        "key": "2026-03-23 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 332,
+        "key": "2026-03-24 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 336,
+        "key": "2026-03-25 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 340,
+        "key": "2026-03-26 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 344,
+        "key": "2026-03-27 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 348,
+        "key": "2026-03-28 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 356,
+        "key": "2026-03-30 WASHING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 329,
+        "key": "2026-03-23 PACKING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 333,
+        "key": "2026-03-24 PACKING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 337,
+        "key": "2026-03-25 PACKING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 341,
+        "key": "2026-03-26 PACKING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 345,
+        "key": "2026-03-27 PACKING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 349,
+        "key": "2026-03-28 PACKING"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 357,
+        "key": "2026-03-30 PACKING"
+       }
+      ]
+     }
+    },
+    {
+     "topic": "at_risk",
+     "text": "12 orders are at risk (8 overdue, 3 due within 3 days, 1 idle 7+ days); ORD-107 for Northwind Apparel is the furthest behind at 16 days late.",
+     "evidence": {
+      "source": "track1/data/orders.csv",
+      "source_rows": [
+       {
+        "source": "track1/data/orders.csv",
+        "row": 76,
+        "key": "ORD-120"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 81,
+        "key": "ORD-107"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 85,
+        "key": "ORD-114"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 86,
+        "key": "ORD-002"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 88,
+        "key": "ORD-083"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 90,
+        "key": "ORD-020"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 91,
+        "key": "ORD-103"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 92,
+        "key": "ORD-029"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 99,
+        "key": "ORD-093"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 100,
+        "key": "ORD-055"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 101,
+        "key": "ORD-108"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 105,
+        "key": "ORD-005"
+       }
+      ]
+     }
+    },
+    {
+     "topic": "today",
+     "text": "8 items need action today: 6 orders late or idle 7+ days, the 29.3% drop in assembly output over the last 3 workdays and customer Maple & Co (both open orders slipping).",
+     "evidence": {
+      "source": "track1/data/orders.csv",
+      "source_rows": [
+       {
+        "source": "track1/data/orders.csv",
+        "row": 81,
+        "key": "ORD-107"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 76,
+        "key": "ORD-120"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 85,
+        "key": "ORD-114"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 88,
+        "key": "ORD-083"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 86,
+        "key": "ORD-002"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 105,
+        "key": "ORD-005"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 359,
+        "key": "2026-03-31 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 355,
+        "key": "2026-03-30 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 347,
+        "key": "2026-03-28 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 343,
+        "key": "2026-03-27 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 339,
+        "key": "2026-03-26 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 335,
+        "key": "2026-03-25 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 331,
+        "key": "2026-03-24 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 327,
+        "key": "2026-03-23 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 319,
+        "key": "2026-03-21 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/production_log.csv",
+        "row": 315,
+        "key": "2026-03-20 ASSEMBLY"
+       },
+       {
+        "source": "track1/data/orders.csv",
+        "row": 99,
+        "key": "ORD-093"
        }
       ]
      }

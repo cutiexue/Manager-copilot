@@ -40,7 +40,11 @@ def main():
     sys.path.insert(0, str(backend))
     import briefing  # noqa: E402  (imported from the backend directory)
 
-    result = briefing.get_morning_briefing(as_of) if as_of else briefing.get_morning_briefing()
+    args = (as_of,) if as_of else ()
+    try:  # the page's version, with the narrative's source rows (as GET /briefings/latest)
+        result = briefing.get_morning_briefing(*args, narrative_rows=True)
+    except TypeError:  # a backend from before the narrative
+        result = briefing.get_morning_briefing(*args)
 
     refs = set()
     collect_refs(result, refs)

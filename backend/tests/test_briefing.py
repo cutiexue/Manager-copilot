@@ -31,7 +31,7 @@ def test_briefing_summary_figures():
 def test_frontend_fixture_matches_backend_output():
     # 前端目前读取的是晨报快照；后端规则一改，这里会提醒重新生成 fixture。
     fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
-    assert fixture["briefing"] == json.loads(json.dumps(get_morning_briefing()))
+    assert fixture["briefing"] == json.loads(json.dumps(get_morning_briefing(narrative_rows=True)))
 
 
 def test_summary_comes_first_and_every_sentence_has_sources():
@@ -91,3 +91,38 @@ def test_monday_briefing_reports_the_last_workday():
 def test_snapshot_date_in_another_spelling_is_not_a_scenario():
     assert not any("scenario" in w for w in get_morning_briefing("20260401")["warnings"])
     assert any("scenario" in w for w in get_morning_briefing("2026-03-30")["warnings"])
+
+
+def test_narrative_tells_yesterday_risk_and_today_in_three_sentences():
+    """The track asks for a briefing that is structured *and* prose: yesterday, at risk, today."""
+    briefing = get_morning_briefing(narrative_rows=True)
+    narrative = briefing["narrative"]
+    assert [s["topic"] for s in narrative["sentences"]] == ["yesterday", "at_risk", "today"]
+    assert narrative["text"] == (
+        "Yesterday assembly made 455 pieces, 11.8% below its 7-workday average; knitting was next "
+        "lowest, 3.6% below. 12 orders are at risk (8 overdue, 3 due within 3 days, 1 idle 7+ days); "
+        "ORD-107 for Northwind Apparel is the furthest behind at 16 days late. 8 items need action "
+        "today: 6 orders late or idle 7+ days, the 29.3% drop in assembly output over the last 3 "
+        "workdays and customer Maple & Co (both open orders slipping).")
+    # The prose adds no numbers of its own: each one is in the structured briefing.
+    assert briefing["at_risk"]["count"] == 12 and briefing["act_count"] == 8
+    act = [i for c in briefing["checks"] for i in c["items"] if i["level"] == "act"]
+    today_rows = {(r["source"], r["row"]) for r in narrative["sentences"][2]["evidence"]["source_rows"]}
+    assert today_rows == {(r["source"], r["row"]) for i in act for r in i["finding"]["evidence"]["source_rows"]}
+    assert narrative["sentences"][1]["evidence"]["source_rows"] == briefing["at_risk"]["source_rows"]
+
+
+def test_narrative_on_a_monday_and_on_a_quiet_day():
+    monday = get_morning_briefing("2026-03-30")["narrative"]["sentences"][0]["text"]
+    assert monday.startswith("On Sat 28 Mar, the last workday, assembly made 445 pieces")
+    quiet = get_morning_briefing("2026-02-02", narrative_rows=True)["narrative"]["sentences"]
+    assert quiet[1]["text"] == "No order is overdue, due within 3 days or idle 7+ days."
+    assert quiet[2]["text"] == "Nothing needs action today."
+    assert quiet[1]["evidence"] is None and quiet[2]["evidence"] is None
+
+
+def test_agent_gets_the_narrative_without_repeating_its_rows():
+    tool = get_morning_briefing()["narrative"]
+    page = get_morning_briefing(narrative_rows=True)["narrative"]
+    assert tool["text"] == page["text"]
+    assert all(set(s) == {"topic", "text"} for s in tool["sentences"])

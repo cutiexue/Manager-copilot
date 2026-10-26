@@ -8,6 +8,7 @@ import type { ProposalDraft } from './ConfirmModal';
 import Headline from './Headline';
 import Icon from './Icon';
 import LevelMark, { LEVEL_LABEL } from './LevelMark';
+import Narrative from './Narrative';
 import YesterdayStrip from './YesterdayStrip';
 
 interface Props {
@@ -179,8 +180,8 @@ function Section({ id, title, tip, children }: { id: string; title: string; tip?
   );
 }
 
-// The page reads like a daily production report: one headline, yesterday's output, then what to
-// act on today, by check. Production comes first, as in the backend's own text briefing.
+// The page reads like a daily production report: one headline, three sentences of prose, yesterday's
+// output, then what to act on today, by check. Production comes first, as in the backend's own text briefing.
 export default function BriefingSummary({ fixture, source, error, onRefresh, onEvidence, onAsk, onPropose }: Props) {
   const { briefing } = fixture;
   const checks = checksFor(briefing);
@@ -214,6 +215,7 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
       </div>
 
       <Headline briefing={briefing} />
+      <Narrative briefing={briefing} onEvidence={onEvidence} />
 
       <Section id="check-production" title="Production" tip={tipFor(production)}>
         <YesterdayStrip briefing={briefing} onEvidence={onEvidence} />

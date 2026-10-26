@@ -157,6 +157,104 @@ def _plural(count, noun):
     return f"{count} {noun}{'' if count == 1 else 's'}"
 
 
+def _rows_of(*evidence):
+    """Source rows from several evidence blocks, each row once, in order."""
+    seen, rows = set(), []
+    for block in evidence:
+        for row in (block or {}).get("source_rows", []):
+            if (row["source"], row["row"]) not in seen:
+                seen.add((row["source"], row["row"]))
+                rows.append(row)
+    return rows
+
+
+def _narrative(ref, yesterday, risk_orders, risk_rows, checks):
+    """The briefing in three sentences, in the order the track asks for: what happened yesterday,
+    what is at risk, what needs action today. Built from the same tool outputs and level rules as
+    the rest of the page; every sentence keeps the source rows behind it."""
+    sentences = []
+
+    def add(topic, text, rows):
+        evidence = {"source": rows[0]["source"], "source_rows": rows} if rows else None
+        sentences.append({"topic": topic, "text": text, "evidence": evidence})
+
+    # 1. What happened on the last workday, against each stage's own recent average.
+    day = date.fromisoformat(yesterday["date"])
+    when = "Yesterday" if yesterday.get("label", "Yesterday") == "Yesterday" else \
+        f"On {day:%a} {day.day} {day:%b}, the last workday,"
+    compared = [s for s in yesterday["stages"] if s.get("change_percent") is not None]
+    if not yesterday["is_workday"]:
+        add("yesterday", f"{when} was a scheduled rest day.", [])
+    elif not compared:
+        add("yesterday", f"{when}'s output could not be compared: records are missing.", [])
+    else:
+        rows = [row for s in compared for row in s.get("source_rows", [])] + [
+            source_ref(PRODUCTION_SOURCE, r["source_row"], f"{r['date']} {r['stage']}")
+            for s in compared for r in s.get("baseline_records", [])]
+        lowest = min(compared, key=lambda s: s["change_percent"])
+        window = f"{lowest['baseline_workdays']}-workday average"
+        if lowest["change_percent"] < 0:
+            text = (f"{when} {lowest['stage'].lower()} made {lowest['pieces_completed']:,} pieces, "
+                    f"{abs(lowest['change_percent']):.1f}% below its {window}")
+            others = [s for s in compared if s is not lowest]
+            nxt = min(others, key=lambda s: s["change_percent"]) if others else None
+            if nxt is None:
+                text += "."
+            elif nxt["change_percent"] < 0:
+                text += f"; {nxt['stage'].lower()} was next lowest, {abs(nxt['change_percent']):.1f}% below."
+            else:
+                text += "; the other stages were at or above theirs."
+        else:
+            text = f"{when} every stage was at or above its {window}."
+        add("yesterday", text[0].upper() + text[1:], rows)
+
+    # 2. What is at risk: the same three reasons as get_orders_at_risk, counted without overlap.
+    overdue = [o for o in risk_orders if is_overdue(o, ref)]
+    due_soon = [o for o in risk_orders if not is_overdue(o, ref) and is_due_soon(o, ref)]
+    idle_only = [o for o in risk_orders if not is_overdue(o, ref) and not is_due_soon(o, ref)]
+    if risk_orders:
+        parts = [f"{len(overdue)} overdue"] if overdue else []
+        parts += [f"{len(due_soon)} due within {_plural(DUE_SOON_DAYS, 'day')}"] if due_soon else []
+        parts += [f"{len(idle_only)} idle {QUIET_ORDER_DAYS}+ days"] if idle_only else []
+        count = len(risk_orders)
+        text = f"{count} {'order is' if count == 1 else 'orders are'} at risk ({', '.join(parts)})"
+        if overdue:
+            worst = min(overdue, key=lambda o: (o["due_date"], o["order_id"]))
+            days = (ref - date.fromisoformat(worst["due_date"])).days
+            text += (f"; {worst['order_id']} for {worst['customer']} is the furthest behind at "
+                     f"{_plural(days, 'day')} late.")
+        else:
+            text += "."
+        add("at_risk", text, risk_rows)
+    else:
+        add("at_risk", f"No order is overdue, due within {_plural(DUE_SOON_DAYS, 'day')} or idle "
+                       f"{QUIET_ORDER_DAYS}+ days.", [])
+
+    # 3. What needs action today: the Act now items of every check, named by check.
+    by_type = {check["type"]: [i for i in check["items"] if i["level"] == "act"] for check in checks}
+    parts = []
+    orders = by_type.get("order_at_risk", [])
+    if orders:
+        rule = _level_rules()["order_at_risk"]["act"]
+        parts.append(f"{_plural(len(orders), 'order')} {rule[0].lower()}{rule[1:]}")
+    for item in by_type.get("stage_output_drop", []):
+        d = item["finding"]["details"]
+        parts.append(f"the {abs(d['change_percent']):.1f}% drop in {d['stage'].lower()} output over the "
+                     f"last {d['recent_workdays']} workdays")
+    for item in by_type.get("customer_slipping", []):
+        n = len(item["finding"]["details"]["order_ids"])
+        parts.append(f"customer {item['name']} ({'both' if n == 2 else f'all {n}'} open orders slipping)")
+    act = [i for items in by_type.values() for i in items]
+    if act:
+        add("today", f"{len(act)} {'item needs' if len(act) == 1 else 'items need'} action today: {_join(parts)}.",
+            _rows_of(*(i["finding"]["evidence"] for i in act)))
+    else:
+        watch = _level_count(checks, "watch")
+        add("today", "Nothing needs action today" + (f"; {_plural(watch, 'item')} to watch." if watch else "."), [])
+
+    return {"text": " ".join(s["text"] for s in sentences), "sentences": sentences}
+
+
 _LEVEL_LABELS = {"act": "Act now", "watch": "Watch"}
 
 
@@ -252,8 +350,12 @@ def _level_count(checks, level):
     return sum(entry["count"] for check in checks for entry in check["levels"] if entry["level"] == level)
 
 
-def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
-    """Structured morning briefing: yesterday, what is at risk, what needs a decision."""
+def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS, narrative_rows=False):
+    """Structured morning briefing: yesterday, what is at risk, what needs a decision.
+
+    The agent gets the narrative as text only: its source rows are already in the sections above
+    it, so repeating them would only lengthen the tool result. The page (narrative_rows=True)
+    keeps them so each sentence opens its rows."""
     try:
         ref = date.fromisoformat(as_of_date)
     except (TypeError, ValueError):
@@ -268,6 +370,7 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
     # The summary and the review lists cover every finding, not only the ones selected for decisions.
     all_findings = discover_issues(as_of_date, max(findings_result["total_findings"], 1))["findings"]
     checks = _checks(ref, all_findings)
+    narrative = _narrative(ref, yesterday, risk["data"], risk["source_rows"], checks)
     data_gaps = list(findings_result["data_gaps"])
     for entry in yesterday["stages"]:
         for field in ("output_status", "comparison_status"):
@@ -306,6 +409,9 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS):
             "source_rows": risk["source_rows"],
         },
         "summary": _summary(ref, yesterday, risk["data"], risk["source_rows"], all_findings, data_gaps),
+        "narrative": narrative if narrative_rows else {
+            "text": narrative["text"],
+            "sentences": [{"topic": n["topic"], "text": n["text"]} for n in narrative["sentences"]]},
         "checks": checks,
         "act_count": _level_count(checks, "act"),
         "watch_count": _level_count(checks, "watch"),
@@ -410,7 +516,7 @@ def _backend_commit():
 
 def get_briefing_payload(as_of_date=SNAPSHOT):
     """Briefing plus the raw CSV rows it cites, in the shape of the frontend fixture."""
-    briefing = get_morning_briefing(as_of_date)
+    briefing = get_morning_briefing(as_of_date, narrative_rows=True)
     if briefing.get("status") != "ok":
         raise ValueError(briefing.get("message", "Briefing could not be generated."))
     refs = set()

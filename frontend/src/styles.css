@@ -145,6 +145,12 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 .headline { margin: 8px 0 0; font-size: 19px; line-height: 1.26; letter-spacing: 0.1px; color: var(--hero-muted); }
 .briefing > .headline { margin-top: 20px; }
 .headline strong { color: var(--hero-text); font-weight: 600; }
+/* The briefing as prose, under the headline: quiet body text; each sentence opens its source rows */
+.narrative { margin: 10px 0 0; max-width: 68ch; font-size: 16px; line-height: 1.55; letter-spacing: -0.2px; color: var(--text-2); }
+.narrative-line { display: block; }
+.narrative-line + .narrative-line { margin-top: 6px; }
+.narrative-s { cursor: pointer; border-radius: 3px; text-decoration: underline 1px transparent; text-underline-offset: 4px; transition: text-decoration-color 0.15s; }
+.narrative-s:hover, .narrative-s:focus-visible { text-decoration-color: var(--muted); }
 .notice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; padding: 6px 6px 6px 12px; border-radius: 10px; background: var(--fill); color: var(--text-2); }
 
 /* Status marks: red circle = act now, amber triangle = watch; the label is always beside them */
@@ -429,6 +435,7 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 }
 @media (max-width: 560px) {
   .digest { padding: 18px 16px 14px; }
+  .narrative { font-size: 15px; }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* Rows become two lines: name, then the reason; icons stay on the right */
   .review, .review tbody { display: block; }
