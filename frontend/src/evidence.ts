@@ -1,7 +1,7 @@
 // Turn tool outputs into what the evidence drawer shows.
 // Rule from the implementation plan: the frontend never computes business numbers.
 // Every value below is copied (and only formatted) from fields the backend returned.
-import type { AtRiskOrder, Briefing, Decision, Finding, SourceRef, YesterdayStage } from './types';
+import type { Briefing, Decision, Finding, SourceRef, YesterdayStage } from './types';
 
 const PRODUCTION = 'track1/data/production_log.csv';
 
@@ -65,7 +65,7 @@ export function evidenceForStage(date: string, s: YesterdayStage) {
     claim:
       s.pieces_completed !== undefined
         ? `${s.stage} completed ${s.pieces_completed} pieces on ${date}.`
-        : `${s.stage}: ${s.output_status ?? 'no data'}${s.message ? ` — ${s.message}` : ''}`,
+        : `${s.stage}: ${outputStatusText(s.output_status)}${s.message ? ` — ${s.message}` : ''}`,
     calculation: [
       { label: 'Pieces completed', value: fmt(s.pieces_completed) },
       { label: 'Baseline average', value: s.baseline_average !== undefined ? s.baseline_average.toFixed(1) : '—' },
@@ -76,14 +76,7 @@ export function evidenceForStage(date: string, s: YesterdayStage) {
   };
 }
 
-export function evidenceForOrder(briefing: Briefing, o: AtRiskOrder) {
-  return {
-    title: `${o.order_id} at risk`,
-    claim: `${o.order_id} (${o.customer}, stage ${o.current_stage}): ${o.risk_reasons.join('; ')}.`,
-    calculation: [
-      { label: 'Risk reasons', value: o.risk_reasons.join('; ') },
-      { label: 'As-of date', value: briefing.as_of_date },
-    ],
-    refs: briefing.at_risk.source_rows.filter((r) => r.key === o.order_id),
-  };
+export function outputStatusText(status?: string): string {
+  if (status === undefined) return 'no data';
+  return status === 'not_found' ? 'No record' : status;
 }

@@ -329,3 +329,8 @@ def test_a_failed_turn_is_recorded_and_a_model_outage_stops_the_run(sets):
 
     with pytest.raises(ev.RunAborted):
         ev.run_case(case, ev.function_sessions(outage))
+
+
+def test_describing_an_order_stage_is_not_an_execution_claim():
+    assert not ev._EXEC_CLAIM.search("ORD-114 is currently recorded at packing")
+    assert ev._EXEC_CLAIM.search("The reminder is recorded.")

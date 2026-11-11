@@ -3,6 +3,7 @@ import { api } from '../api';
 import type { Alert, SnapshotState, Watch } from '../types';
 import { shortDate } from '../dates';
 import Icon from './Icon';
+import { clock, useAutoRefresh } from '../useAutoRefresh';
 
 interface Props {
   onNewWatch: () => void;
@@ -18,7 +19,7 @@ const STATUS: Record<Watch['status'], string> = {
 };
 
 // Standing watches and the alerts they raise. The course data never changes, so watches are
-// checked against scripted data snapshots; "Load next snapshot" steps through them for demos.
+// checked against scripted data snapshots; "Load next snapshot" moves the whole app to the next day.
 export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
   const [watches, setWatches] = useState<Watch[] | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -33,14 +34,21 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
       setAlerts([...a.filter((x) => !x.read_at), ...a.filter((x) => x.read_at)]);
       setSnapshot(s);
       setError(null);
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unexpected error.');
+      return false;
     }
   }, []);
 
+  const updated = useAutoRefresh(load);
   useEffect(() => {
-    void load();
+    if (refreshKey) void load();
   }, [load, refreshKey]);
+
+  // Watch and reminder alerts ask for action; system notices (a new briefing) only inform.
+  const needsAction = alerts.filter((a) => a.kind !== 'briefing');
+  const notices = alerts.filter((a) => a.kind === 'briefing');
 
   const run = async (step: () => Promise<unknown>) => {
     setBusy(true);
@@ -58,7 +66,10 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
   return (
     <section className="panel watches" aria-labelledby="watches-title">
       <div className="actions-head">
-        <h2 id="watches-title">Watches &amp; alerts</h2>
+        <div>
+          <h1 id="watches-title">Watches &amp; alerts</h1>
+          {updated && <p className="updated small">Updated {clock(updated)} · refreshes every 30 s</p>}
+        </div>
         <button className="btn btn-primary" onClick={onNewWatch}>
           <Icon name="plus" size={14} /> New watch
         </button>
@@ -66,8 +77,8 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
 
       {snapshot && (
         <div className="snapshot-bar small">
-          <span className="pill" title="Watches are checked against scripted data snapshots, not live factory data.">
-            Watch data · {snapshot.current.label}
+          <span className="pill" title="The whole app reads this data: the course data, or a scripted snapshot (simulated, not live factory data).">
+            Data · {snapshot.current.label}
             {snapshot.current.label.includes(shortDate(snapshot.current.date)) ? '' : ` · ${shortDate(snapshot.current.date)}`}
           </span>
           <button
@@ -93,30 +104,20 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
       )}
 
       <div className="fu-section">
-        <h3>Alerts · {alerts.filter((a) => !a.read_at).length} new</h3>
-        {alerts.length === 0 ? (
-          <p className="empty small">None.</p>
+        <h3>Needs attention · {needsAction.filter((a) => !a.read_at).length} new</h3>
+        {needsAction.length === 0 ? (
+          <p className="empty small">No alerts. A watch or reminder that fires shows up here.</p>
         ) : (
-          <ul className="fu-list">
-            {alerts.map((a) => (
-              <li key={a.id} className={a.read_at ? 'is-read' : 'is-new'}>
-                <span className="fu-when">{when(a.created_at)}</span>
-                <span className="fu-main">
-                  <strong>{a.title}</strong>
-                  {a.body && <> · {a.body}</>}
-                </span>
-                <span className="fu-side">
-                  {!a.read_at && (
-                    <button className="btn btn-ghost btn-small" onClick={() => void run(() => api.readAlert(a.id))}>
-                      Mark read
-                    </button>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <AlertList alerts={needsAction} onRead={(id) => void run(() => api.readAlert(id))} />
         )}
       </div>
+
+      {notices.length > 0 && (
+        <div className="fu-section">
+          <h3>System notices</h3>
+          <AlertList alerts={notices} notice onRead={(id) => void run(() => api.readAlert(id))} />
+        </div>
+      )}
 
       <div className="fu-section">
         <h3>Watches · {watches?.filter((w) => w.status === 'ACTIVE').length ?? 0} active</h3>
@@ -156,5 +157,28 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
         )}
       </div>
     </section>
+  );
+}
+
+function AlertList({ alerts, notice, onRead }: { alerts: Alert[]; notice?: boolean; onRead: (id: string) => void }) {
+  return (
+    <ul className={`fu-list${notice ? ' fu-notices' : ''}`}>
+      {alerts.map((a) => (
+        <li key={a.id} className={a.read_at ? 'is-read' : notice ? 'is-notice' : 'is-new'}>
+          <span className="fu-when">{when(a.created_at)}</span>
+          <span className="fu-main">
+            <strong>{a.title}</strong>
+            {a.body && <> · {a.body}</>}
+          </span>
+          <span className="fu-side">
+            {!a.read_at && (
+              <button className="btn btn-ghost btn-small" onClick={() => onRead(a.id)}>
+                Mark read
+              </button>
+            )}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }

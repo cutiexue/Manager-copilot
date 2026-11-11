@@ -1,4 +1,4 @@
-import { useTheme, type ThemeChoice } from '../theme';
+import type { ThemeChoice } from '../theme';
 import Icon, { type IconName } from './Icon';
 
 const OPTIONS: { value: ThemeChoice; label: string; icon: IconName }[] = [
@@ -7,10 +7,8 @@ const OPTIONS: { value: ThemeChoice; label: string; icon: IconName }[] = [
   { value: 'system', label: 'Match system', icon: 'monitor' },
 ];
 
-// Three-way theme switch for the sidebar footer: icons, with the name on hover and for screen readers.
-export default function ThemeSwitch() {
-  const [choice, setChoice] = useTheme();
-
+// Three-way theme switch for the top bar: icons, with the name on hover and for screen readers.
+export default function ThemeSwitch({ choice, setChoice }: { choice: ThemeChoice; setChoice: (c: ThemeChoice) => void }) {
   return (
     <div className="theme-switch" role="group" aria-label="Theme">
       {OPTIONS.map((option) => (

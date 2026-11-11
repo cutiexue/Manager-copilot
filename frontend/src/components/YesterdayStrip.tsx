@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { Briefing, EvidenceView, YesterdayStage } from '../types';
-import { evidenceForStage } from '../evidence';
+import { evidenceForStage, outputStatusText } from '../evidence';
 import { shortDate } from '../dates';
 
 interface Props {
@@ -37,6 +37,17 @@ function Sparkline({ stage, date }: { stage: YesterdayStage; date: string }) {
 
   return (
     <svg className="spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden>
+      <defs>
+        <linearGradient id={`spark-fill-${stage.stage}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" style={{ stopColor: "var(--chart-a)", stopOpacity: 0.55 }} />
+          <stop offset="100%" style={{ stopColor: "var(--chart-b)", stopOpacity: 0.05 }} />
+        </linearGradient>
+      </defs>
+      <polygon
+        className="spark-area"
+        style={{ fill: `url(#spark-fill-${stage.stage})` }}
+        points={`${x(0)},${H - PAD} ${days.map((d, i) => `${x(i)},${y(d.value)}`).join(' ')} ${x(days.length - 1)},${H - PAD}`}
+      />
       {stage.baseline_average !== undefined && (
         <line className="spark-avg" x1={PAD} x2={W - PAD} y1={y(stage.baseline_average)} y2={y(stage.baseline_average)} />
       )}
@@ -57,7 +68,7 @@ function StageTile({ stage, date, onEvidence }: { stage: YesterdayStage; date: s
   const delta = change != null ? signedPercent(change) : null;
   const spoken =
     pieces === undefined
-      ? `${stage.stage}: ${stage.output_status ?? 'no data'}`
+      ? `${stage.stage}: ${outputStatusText(stage.output_status)}`
       : `${stage.stage} ${pieces} pieces${delta ? `, ${delta} vs ${stage.baseline_workdays}-workday average` : ''}`;
 
   return (
@@ -65,7 +76,7 @@ function StageTile({ stage, date, onEvidence }: { stage: YesterdayStage; date: s
       <span className="tile-label">{stage.stage}</span>
       <span className="tile-figures">
         <span className="tile-value">{pieces?.toLocaleString('en-US') ?? '—'}</span>
-        <span className="tile-delta">{delta ?? stage.output_status ?? ''}</span>
+        <span className="tile-delta">{delta ?? (stage.output_status ? outputStatusText(stage.output_status) : '')}</span>
       </span>
       <Sparkline stage={stage} date={date} />
     </button>

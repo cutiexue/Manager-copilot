@@ -1,6 +1,5 @@
 """Chat turns return their tool calls, cited rows and proposals; only the API confirms a proposal."""
 
-import pytest
 from fastapi.testclient import TestClient
 from langchain.agents import create_agent
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -97,14 +96,18 @@ def test_watches_alert_on_the_next_scripted_snapshot(tmp_path):
     advanced = client.post("/dev/data/advance").json()
     assert advanced["current"]["date"] == "2026-04-02"
     assert advanced["check"]["outcomes"][0]["result"] == "met"
-    [alert] = client.get("/alerts", params={"unread": True}).json()
+    unread = client.get("/alerts", params={"unread": True}).json()
+    [alert] = [a for a in unread if a["kind"] == "watch"]
     assert alert["title"] == "Watch · ORD-062"
+    # The new data day also saves its briefing and says so.
+    [ready] = [a for a in unread if a["kind"] == "briefing"]
+    assert ready["body"] == "Data as of 2026-04-02"
     assert client.get(f"/watches/{watch_id}").json()["status"] == "TRIGGERED"
     paused = client.post(f"/watches/{watch_id}/pause")
     assert (paused.status_code, paused.json()["code"]) == (409, "ACTION_STATE")
-    assert client.get("/follow-ups/counts").json()["unread_alerts"] == 1
+    assert client.get("/follow-ups/counts").json()["unread_alerts"] == 2
     client.post(f"/alerts/{alert['id']}/read")
-    assert client.get("/follow-ups/counts").json()["unread_alerts"] == 0
+    assert client.get("/follow-ups/counts").json()["unread_alerts"] == 1
 
     client.post("/dev/data/advance")
     last = client.post("/dev/data/advance")

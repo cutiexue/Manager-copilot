@@ -1,12 +1,15 @@
 """Shared Python interface used by both the CLI and HTTP adapter."""
 
 import json
+from datetime import date
 
 import openai
-from langchain_core.messages import AIMessage, HumanMessage, messages_from_dict, messages_to_dict
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, messages_from_dict, messages_to_dict
 from langgraph.errors import GraphRecursionError
 
+import answer_check
 import evidence_refs
+import rules
 from action_tools import action_context
 from actions import ActionNotFoundError, ActionStore
 from llm import PROMPT_VERSION, build_agent
@@ -15,6 +18,38 @@ from plan_context import plan_context
 
 # Cap on raw CSV rows returned with one answer (a full order list cites all 120).
 MAX_EVIDENCE_ROWS = 200
+
+
+STATUS_WORDS = {'PROPOSED': 'waiting for Confirm', 'EXECUTED': 'confirmed and saved',
+                'CANCELLED': 'cancelled', 'EXPIRED': 'expired unconfirmed'}
+
+
+def today_note(actions=None, session_id=None):
+    """Today's data date and the current state of this conversation's proposals; sent with each turn,
+    never saved in the history. Proposal cards in the history show the state at creation, and the
+    manager may have confirmed or cancelled them since (evaluation Q32)."""
+    day = rules.today_iso()
+    loaded = ('the course data' if rules.current_version() == 'v0'
+              else f'scripted snapshot {rules.current_version()}, simulated data, not real events')
+    return SystemMessage(content=f'Today is {date.fromisoformat(day):%A} {day}, the date of the data loaded ({loaded}). '
+                                 'Use it for every business fact; reminders still use the real calendar.'
+                                 + _proposal_states(actions, session_id),
+                         name='data_date')
+
+
+def _proposal_states(actions, session_id):
+    if actions is None or session_id is None:
+        return ''
+    proposals = actions.list_proposals(session_id=session_id, limit=10)
+    if not proposals:
+        return ''
+    lines = [f"{p['id']} ({p['summary']}): {STATUS_WORDS.get(p['status'], p['status'].lower())}" for p in proposals]
+    return ('\nCurrent state of the proposals in this conversation (newer than any card in the history): '
+            + '; '.join(lines) + '.')
+
+
+def _saved(messages):
+    return [m for m in messages if not (m.type == 'system' and getattr(m, 'name', None) == 'data_date')]
 
 
 class AgentIncompleteError(RuntimeError):
@@ -43,6 +78,28 @@ def _result(message):
     except (TypeError, ValueError):
         return {}
     return value if isinstance(value, dict) else {}
+
+
+def tool_results(messages):
+    """The parsed results of every tool call in one turn."""
+    return [_result(m) for m in messages if m.type == 'tool']
+
+
+def checked(answer, messages, question, earlier=()):
+    """Which order IDs, dates and figures in the answer the turn's tool results do not contain."""
+    return answer_check.check(answer, tool_results(messages), question, rules.today_iso(), tool_results(earlier))
+
+
+RETRY_NOTE = ('Your last draft stated figures or order IDs without looking anything up in this turn. Figures '
+              'must come from a fresh tool call, never from earlier turns: call the matching tool now, then '
+              'answer again.')
+
+
+def needs_lookup(answer, messages, question, earlier):
+    """An answer that states unverified figures while calling no tool at all is answered again once."""
+    if any(m.type == 'tool' for m in messages):
+        return False
+    return bool(checked(answer, messages, question, earlier)['unverified'])
 
 
 def turn_details(messages, actions=None):
@@ -88,10 +145,11 @@ class ChatService:
     def get_history(self, session_id):
         """Questions and answers; each answer that used tools carries its evidence and proposals."""
         messages = messages_from_dict(self.store.get_history(session_id))
-        history, turn = [], []
+        history, turn, question, earlier = [], [], '', []
         for message in messages:
             if message.type == 'human':
-                turn = []
+                earlier += turn
+                turn, question = [], message.content
                 if message.content:
                     history.append({'role': 'human', 'content': message.content})
                 continue
@@ -101,6 +159,7 @@ class ChatService:
                 details = turn_details(turn, self.actions)
                 if details['tool_calls']:
                     item.update(details)
+                item['answer_check'] = checked(message.content, turn, question, earlier)
                 history.append(item)
         return history
 
@@ -109,8 +168,13 @@ class ChatService:
             raise ValueError('Message must contain 1 to 20000 characters.')
         turn = {}
 
-        def generate(saved):
-            messages = messages_from_dict(saved) + [HumanMessage(content=message.strip())]
+        question = message.strip()
+
+        def ask(history, retry=False):
+            note = today_note(self.actions, session_id)
+            if retry:
+                note = SystemMessage(content=f'{note.content}\n{RETRY_NOTE}', name='data_date')
+            messages = history + [note, HumanMessage(content=question)]
             try:
                 with selection_context(messages), plan_context(messages), action_context(self.actions, session_id):
                     result = self.agent.invoke({'messages': messages}, {'recursion_limit': 16})
@@ -126,12 +190,23 @@ class ChatService:
                 content = ''.join(block.get('text', '') for block in content if isinstance(block, dict))
             if not isinstance(content, str) or not content.strip():
                 raise AgentIncompleteError('The assistant returned an empty answer.')
-            turn['messages'] = result['messages'][len(messages):]
-            return messages_to_dict(result['messages']), content
+            return result['messages'], result['messages'][len(messages):], content
+
+        def generate(saved):
+            history = messages_from_dict(saved)
+            everything, new, content = ask(history)
+            # Figures stated with no lookup at all this turn: ask once more, telling the model to look them up.
+            turn['retried'] = needs_lookup(content, new, question, history)
+            if turn['retried']:
+                everything, new, content = ask(history, retry=True)
+            turn['messages'], turn['earlier'] = new, history
+            return messages_to_dict(_saved(everything)), content
 
         answer = self.store.update_turn(session_id, generate)
-        return {'session_id': session_id, 'answer': answer,
-                **turn_details(turn.get('messages', []), self.actions), 'prompt_version': PROMPT_VERSION}
+        messages = turn.get('messages', [])
+        check = {**checked(answer, messages, question, turn.get('earlier', [])), 'retried': turn.get('retried', False)}
+        return {'session_id': session_id, 'answer': answer, **turn_details(messages, self.actions),
+                'answer_check': check, 'prompt_version': PROMPT_VERSION}
 
     def morning_briefing(self, session_id):
         """Generate an on-demand briefing locally and persist it in the conversation."""

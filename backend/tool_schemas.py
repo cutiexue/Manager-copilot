@@ -3,13 +3,14 @@
 from tools import (get_order_status, get_customer_orders, get_overdue_orders,
                    get_orders_at_risk, get_stage_output, compare_stage_output,
                    trace_order, query_orders)
-from discovery import discover_issues
+from discovery import FINDING_TYPES, discover_issues
+from period_output import compare_stage_periods, summarize_stage_output
 from briefing import get_morning_briefing
 from plan_context import get_current_plan, revise_order_plan
 from production_estimates import WORKSHOP_ESTIMATORS, estimate_in_house, estimate_production_plan
 from production_optimizer import (optimize_fastest_plan, optimize_cheapest_plan,
                                   optimize_orders_outsourced, optimize_orders_cheapest)
-from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES
+from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES, today_iso
 from action_tools import (draft_chase_message, list_follow_ups, propose_order_note, propose_reminder,
                           propose_watch)
 from data_loader import STAGES
@@ -31,6 +32,27 @@ def register_tool(function, description, properties, required):
 
 
 # 基础查询工具：每项只写用途、参数和必填字段。
+# 带 as_of_date 的工具默认用数据日期；其他日期必须同时传 scenario=true，防止模型把现实日期当作“今天”。
+_AS_OF_HELP = ('YYYY-MM-DD. Omit for today (the data date, 2026-04-01 for the course data). Another date only with '
+               'scenario=true, when the manager explicitly asks about that date.')
+_SCENARIO = {'type': 'boolean',
+             'description': 'True only when the manager explicitly asks about a date other than today; the '
+                            'result then uses unchanged snapshot statuses, not real events.'}
+
+
+def _dated(function):
+    """Default as_of_date to the dataset date and refuse any other date unless it is an explicit scenario."""
+    def run(as_of_date=None, scenario=False, **kwargs):
+        today = today_iso()
+        as_of_date = as_of_date or today
+        if as_of_date != today and not scenario:
+            return {'status': 'error', 'message': f'Today is the data date {today}; omit as_of_date for today. '
+                    f'{as_of_date} is only allowed with scenario=true, when the manager asked about that date.'}
+        return function(as_of_date=as_of_date, **kwargs)
+    run.__name__, run.__doc__ = function.__name__, function.__doc__
+    return run
+
+
 register_tool(get_current_plan,
               'Read the last successful multi-order plan in this conversation, including allocations, '
               'dates, quantities and charges. Failed revisions do not replace it. Not a fresh quote.', {}, [])
@@ -48,7 +70,8 @@ register_tool(
     'Minimize external processing charges for multiple orders within deadline_days, sharing '
     'workshop capacity across categories. Original quantities manufactured anew, not remaining work. '
     'Use selected for these orders or all plus explicit order_ids. Infeasible means no complete '
-    'plan fits the deadline. No in-house production. Read-only; currency unspecified.',
+    'plan fits the deadline. No in-house production. Returns `risk` (defect and deadline risk per '
+    'workshop and for the plan). Read-only; currency unspecified.',
     {'quantity_basis': {'type': 'string', 'enum': ['original_order_pieces']},
      'deadline_days': {'type': 'integer', 'minimum': 1, 'maximum': 3650,
                        'description': 'Required inclusive calendar days; start date is day one.'},
@@ -63,7 +86,8 @@ register_tool(
     'Find the fastest all-outsourced plan for a set of orders, sharing workshop capacity across '
     'both categories. Original quantities manufactured anew only, not remaining-order forecasting. '
     'Use selected for these orders, all for all orders, or all plus explicit order_ids. '
-    'Report the quantity basis prominently. Cost is reported but not minimized. Read-only.',
+    'Report the quantity basis prominently. Cost is reported but not minimized. Returns `risk` '
+    '(defect risk per workshop and for the plan). Read-only.',
     {'quantity_basis': {'type': 'string', 'enum': ['original_order_pieces']},
      'scope': {'type': 'string', 'enum': ['selected', 'all']},
      'order_ids': {'type': 'array', 'items': {'type': 'string'}},
@@ -110,12 +134,10 @@ register_tool(
 )
 
 register_tool(
-    get_overdue_orders,
+    _dated(get_overdue_orders),
     'Find all IN_PROGRESS orders with due dates strictly before the reference date. Returns calendar days overdue. Read-only snapshot query.',
-    {'as_of_date': {'type': 'string',
-                    'description': 'YYYY-MM-DD. Use 2026-04-01 for today. Other dates are '
-                                   'scenarios using unchanged snapshot statuses.'}},
-    ['as_of_date'],
+    {'as_of_date': {'type': 'string', 'description': _AS_OF_HELP}, 'scenario': _SCENARIO},
+    [],
 )
 
 register_tool(
@@ -125,8 +147,8 @@ register_tool(
                'enum': ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING'],
                'description': 'The production stage.'},
      'production_date': {'type': 'string',
-                         'description': 'YYYY-MM-DD. Yesterday means 2026-03-31 relative to the '
-                                        'dataset reference date. Records cover 2026-01-01 through '
+                         'description': 'YYYY-MM-DD. Yesterday means the workday before today\'s data date '
+                                        '(2026-03-31 for the course data). Records cover 2026-01-01 through '
                                         '2026-03-31.'}},
     ['stage', 'production_date'],
 )
@@ -136,7 +158,8 @@ register_tool(
     "Compare a stage's daily output with the requested number of previous workdays (default 7), excluding Sundays and the target day. Returns evidence and percentage change, not an anomaly diagnosis or forecast.",
     {'stage': {'type': 'string', 'enum': ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING']},
      'production_date': {'type': 'string',
-                         'description': 'YYYY-MM-DD. Yesterday means 2026-03-31.'},
+                         'description': 'YYYY-MM-DD. Yesterday means the workday before today\'s data date '
+                                        '(2026-03-31 for the course data).'},
      'baseline_days': {'type': 'integer',
                        'minimum': 1,
                        'description': 'Number of previous workdays requested by the user, for '
@@ -145,16 +168,41 @@ register_tool(
 )
 
 register_tool(
-    get_orders_at_risk,
+    summarize_stage_output,
+    'Total and per-workday average output of one stage (or all four) over a date range, for questions '
+    'about a month, a week or any period. Lists the workdays counted and any missing. Use this instead of '
+    'adding daily figures yourself. Factory-wide output, not order progress. Read-only.',
+    {'date_from': {'type': 'string', 'description': 'YYYY-MM-DD, inclusive.'},
+     'date_to': {'type': 'string', 'description': 'YYYY-MM-DD, inclusive. Records end 2026-03-31.'},
+     'stage': {'type': 'string', 'enum': ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING'],
+               'description': 'Omit for all four stages.'}},
+    ['date_from', 'date_to'],
+)
+
+register_tool(
+    compare_stage_periods,
+    'Compare stage output totals between two periods and name the largest decline and increase. Omit '
+    'all four dates for the two most recent complete calendar weeks (Monday to Sunday) before today. Use '
+    'this, not compare_stage_output, for week-on-week or period comparisons. Read-only.',
+    {'first_from': {'type': 'string', 'description': 'YYYY-MM-DD, the earlier period.'},
+     'first_to': {'type': 'string'},
+     'second_from': {'type': 'string', 'description': 'YYYY-MM-DD, the later period.'},
+     'second_to': {'type': 'string'},
+     'stage': {'type': 'string', 'enum': ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING'],
+               'description': 'Omit for all four stages.'}},
+    [],
+)
+
+register_tool(
+    _dated(get_orders_at_risk),
     'List unfinished orders that are overdue, due soon, or have gone quiet, with the reason for each. Read-only snapshot query; thresholds are defined in rules.py.',
-    {'as_of_date': {'type': 'string',
-                    'description': 'YYYY-MM-DD. Use 2026-04-01 for today. Other dates are '
-                                   'scenarios using unchanged snapshot statuses.'},
+    {'as_of_date': {'type': 'string', 'description': _AS_OF_HELP},
+     'scenario': _SCENARIO,
      'due_within_days': {'type': 'integer',
                          'minimum': 1,
                          'description': 'Orders due within this many calendar days count as '
                                         'at risk. Omit to use 3.'}},
-    ['as_of_date'],
+    [],
 )
 
 register_tool(
@@ -165,25 +213,28 @@ register_tool(
 )
 
 register_tool(
-    discover_issues,
+    _dated(discover_issues),
     'Proactively scan the snapshot for stage output drops, overdue or quiet orders, and customers whose unfinished orders are all slipping. Returns findings grouped by type with source-row evidence for the morning briefing or "did anything go wrong?" questions. Read-only.',
-    {'as_of_date': {'type': 'string',
-                    'description': 'YYYY-MM-DD. Use 2026-04-01 for today.'},
+    {'as_of_date': {'type': 'string', 'description': _AS_OF_HELP},
+     'scenario': _SCENARIO,
      'max_findings': {'type': 'integer',
                       'minimum': 1,
-                      'description': 'Maximum findings to return, selected across issue types. Omit to use 5.'}},
-    ['as_of_date'],
+                      'description': 'Maximum findings to return, selected across issue types. Omit to use 5.'},
+     'finding_type': {'type': 'string', 'enum': list(FINDING_TYPES),
+                      'description': 'Only this kind of finding, ranked by its own severity: use order_at_risk '
+                                     'with max_findings=N for "the N orders that need the most attention".'}},
+    [],
 )
 
 register_tool(
-    get_morning_briefing,
+    _dated(get_morning_briefing),
     "Assemble the structured morning briefing: yesterday's stage output versus baseline, orders at risk, and grouped findings each paired with a suggested follow-up check. Use for the 7 a.m. briefing or 'what do I need to know today?' questions. Read-only; every number comes from the underlying tools with source rows.",
-    {'as_of_date': {'type': 'string',
-                    'description': 'YYYY-MM-DD. Use 2026-04-01 for today.'},
+    {'as_of_date': {'type': 'string', 'description': _AS_OF_HELP},
+     'scenario': _SCENARIO,
      'max_findings': {'type': 'integer',
                       'minimum': 1,
                       'description': 'Maximum findings to include. Omit to use 5.'}},
-    ['as_of_date'],
+    [],
 )
 
 
@@ -251,7 +302,9 @@ for _function in (optimize_fastest_plan, optimize_cheapest_plan):
             "description": "An in-house cost per piece the manager states (same unspecified currency as the "
                            "workshop charges). Never invent one."}
         _required.append("deadline_days")
-    register_tool(_function, _function.__doc__ + " Read-only new-batch scenario. Report assumptions; not total real cost or guaranteed delivery.", _properties, _required)
+    register_tool(_function, _function.__doc__ + " Read-only new-batch scenario. Returns `risk`: each workshop's defect rate, "
+                  "dispatcher note and flags, and the plan's defect and deadline risk. Report assumptions; not total "
+                  "real cost or guaranteed delivery.", _properties, _required)
 
 
 # Order search and follow-up actions. The action tools only create proposals; the manager

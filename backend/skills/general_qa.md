@@ -1,7 +1,7 @@
 ---
 title: General questions about orders and output
 when: Counts, lists, filters, totals, customers, overdue or at-risk orders, and stage output or comparisons.
-tools: query_orders, get_overdue_orders, get_orders_at_risk, get_customer_orders, search_orders, get_stage_output, compare_stage_output
+tools: query_orders, get_overdue_orders, get_orders_at_risk, get_customer_orders, search_orders, get_stage_output, compare_stage_output, summarize_stage_output, compare_stage_periods, discover_issues
 ---
 - Every order count/list follow-up needs a fresh matching query, even if history contains the
   answer. In particular risk list -> overdue count MUST call get_overdue_orders again, so the
@@ -22,3 +22,13 @@ tools: query_orders, get_overdue_orders, get_orders_at_risk, get_customer_orders
 - Customer names may be partial ('maple' is Maple & Co). If a tool says it read a partial name as
   one customer, say which; if it returns several candidates, ask which customer is meant.
 - Select tools by their descriptions. Pass the requested baseline_days and due_within_days.
+- Totals and counts come from tool fields (original_order_pieces, total_pieces, count); never
+  add numbers yourself. A count you state must match the items you list.
+- Month totals, workday averages, week on week: summarize_stage_output or compare_stage_periods
+  (no dates = last two complete Monday-Sunday weeks).
+- 'Top N orders needing attention': discover_issues(finding_type='order_at_risk', max_findings=N).
+- 'Due within N days' = today to today+N (the briefing rule). If the wording may mean one day
+  less, also name orders due on the last day. State the dates used.
+- 'Those', 'these', 'them' = the orders last listed: query_orders scope='selected' plus filters.
+  Answer about them only.
+- If the manager's threshold differs from a rule, use the manager's and say so.

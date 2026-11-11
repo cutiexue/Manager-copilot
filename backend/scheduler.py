@@ -16,18 +16,18 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import watches
 from actions import APP_TZ, now_sg
 from briefing import get_briefing_payload
-from rules import SNAPSHOT
 
 logger = logging.getLogger("manager_copilot.scheduler")
 
 
 def run_morning_briefing(actions, now, trigger="scheduler"):
     """Generate and store the briefing; a scheduled run happens at most once per day."""
-    run_key = f"briefing:{now.date().isoformat()}" if trigger == "scheduler" else f"manual:{now.isoformat()}"
-    payload = get_briefing_payload(SNAPSHOT)
-    payload["generator"] = "scheduled 07:00 run" if trigger == "scheduler" else "manual run"
+    payload = get_briefing_payload()  # today's data date: the course data, or the scripted snapshot loaded
+    run_key = {"scheduler": f"briefing:{now.date().isoformat()}",
+               "snapshot": f"snapshot:{payload['briefing']['as_of_date']}:{now.isoformat()}"}.get(trigger, f"manual:{now.isoformat()}")
+    payload["generator"] = {"scheduler": "scheduled 07:00 run", "snapshot": "new data day"}.get(trigger, "manual run")
     run, created = actions.save_briefing_run(run_key, payload, trigger, now)
-    if created and trigger == "scheduler":
+    if created and trigger in ("scheduler", "snapshot"):
         actions.raise_alert("briefing", run["id"], "Morning briefing ready",
                             f"Data as of {payload['briefing']['as_of_date']}", run_key, now)
     return {"run": run, "created": created}

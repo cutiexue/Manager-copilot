@@ -7,6 +7,8 @@ tools: none
   a drop, machine or worker capacity, prices charged to customers, revenue, or contact details.
   Say plainly that the data does not record it, then offer the nearest thing it does show (an
   order's trace, factory-wide stage output, the at-risk rules).
+- Cost data is incomplete, not absent: only workshop charges per piece exist, so profit cannot be
+  computed. Never say there is no cost data.
 - The app does not send messages, change orders or the course data, commit delivery dates, or
   book workshops. Offer a chase-up draft, a note or a reminder instead, as a proposal.
 - Never fill a gap with an estimate that is not from a tool, and never present a scenario as a

@@ -4,7 +4,8 @@ from datetime import date, timedelta
 from decimal import Decimal
 from math import ceil, isfinite
 
-from data_loader import ORDERS_SOURCE, load_orders, load_production, load_workshops, order_row_numbers, source_ref
+from outsourcing_risk import plan_risk, workshop_profile
+from data_loader import ORDERS_SOURCE, load_course_orders, load_production, load_workshops, order_row_numbers, source_ref
 from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES
 
 SNAPSHOT = "2026-04-01"
@@ -14,7 +15,8 @@ ASSUMPTIONS = [
     "Monday to Saturday are workdays for all producers; no holidays are modeled.",
     "The start date is inclusive: one workday starting Monday finishes Monday.",
     "External queue and production are rounded up together to whole workdays; transport is added once as calendar days after production.",
-    "No rework is modeled; defect probability alone does not specify rework duration or cost.",
+    "Dates assume every outsourced batch comes back clean; `risk` gives, batch by batch, the chance of "
+    "rework and how late each reworked batch could arrive (an upper bound).",
     "Reported cost includes external per-piece processing charges only. In-house cost is excluded by request; transport and rework charges are not supplied.",
     "Currency is unspecified in the source data.",
 ]
@@ -58,7 +60,8 @@ def open_order_load():
     Every unfinished order counts with its full pieces at its current stage and at each later one:
     progress inside a stage is not recorded, so the load is an upper bound. Returns the orders, the
     pieces per stage and the order rows behind them."""
-    orders = [o for o in load_orders() if o["status"] == "IN_PROGRESS"]
+    # 可行性估算固定在课程快照（产量记录只到 3 月 31 日），因此读原始订单，不叠加脚本快照。
+    orders = [o for o in load_course_orders() if o["status"] == "IN_PROGRESS"]
     rows = order_row_numbers()
     by_stage = {stage: sum(int(o["pieces"]) for o in orders if STAGES.index(o["current_stage"]) <= index)
                 for index, stage in enumerate(STAGES)}
@@ -199,6 +202,8 @@ def _estimate_workshop(workshop_id, category, pieces, start_date=SNAPSHOT):
             "production_workdays_unrounded": float(production_days), "workdays_including_queue": workdays,
             "transport_calendar_days": transport, "completion_date": completion.isoformat(),
             "external_processing_cost": float(cost), "currency": None, "profile": workshop.copy(),
+            "risk": plan_risk([{"workshop_id": workshop_id, "pieces": pieces, "completion_date": completion.isoformat()}])
+            if pieces else {"status": "no_outsourcing", **workshop_profile(workshop)},
             "snapshot_date": SNAPSHOT, "source": "track1/data/workshops.csv",
             "assumptions": ASSUMPTIONS + ["Queue and profile values use the 2026-04-01 snapshot even for other scenario dates."]}
 
@@ -296,4 +301,5 @@ def estimate_production_plan(category, total_pieces, in_house_pieces, allocation
             "elapsed_calendar_days": (date.fromisoformat(completion) - start).days,
             "external_processing_cost": float(cost), "in_house_cost_excluded": True, "currency": None,
             "total_pieces": total_pieces, "branches": branches, "assumptions": ASSUMPTIONS,
+            "risk": plan_risk([b for b in branches if b["producer"] != "IN_HOUSE"]),
             "snapshot_date": SNAPSHOT}

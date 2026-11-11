@@ -10,7 +10,25 @@ scenarios, not facts.
 
 from datetime import date, timedelta
 
-SNAPSHOT = "2026-04-01"
+SNAPSHOT = "2026-04-01"  # the course data date (snapshot v0)
+
+# The data the app is looking at now: the course data (v0) until the manager loads a scripted snapshot
+# (track1/scenarios/watch_snapshots.json), then that snapshot. ActionStore keeps this in step with the
+# version saved in SQLite; every business rule reads "today" from here.
+_current = {"version": "v0", "date": SNAPSHOT}
+
+
+def set_current_data(version, day):
+    _current.update(version=version, date=day)
+
+
+def current_version():
+    return _current["version"]
+
+
+def today_iso():
+    """Today for business facts: the date of the data currently loaded (2026-04-01 for the course data)."""
+    return _current["date"]
 
 # The factory works Monday to Saturday and is closed on Sundays.
 REST_WEEKDAY = 6
@@ -41,6 +59,17 @@ CUSTOMER_SLIPPING_MIN_ORDERS = 2
 # Each check is judged on its own.
 ACT_NOW_LATE_DAYS = 7
 
+# Outsourcing risk (outsourcing_risk.py). A workshop is flagged for quality when its defect rate is at
+# least HIGH_DEFECT_RATE, for slow logistics when its pickup lead is at least SLOW_PICKUP_DAYS, and as
+# busy when its current queue is at least BUSY_QUEUE_DAYS. A plan's risk level comes from its chance of
+# missing the deadline (or, without a deadline, of any batch coming back defective): low below
+# RISK_MEDIUM_FROM, high from RISK_HIGH_FROM. Provisional project choices, like the thresholds above.
+HIGH_DEFECT_RATE = 0.08
+SLOW_PICKUP_DAYS = 3
+BUSY_QUEUE_DAYS = 4.0
+RISK_MEDIUM_FROM = 0.05
+RISK_HIGH_FROM = 0.20
+
 # Discovery returns at most this many findings, ranked by severity.
 MAX_FINDINGS = 5
 
@@ -56,8 +85,8 @@ def parse_date(value):
     return date.fromisoformat(value)
 
 
-def reference_date(as_of_date=SNAPSHOT):
-    return parse_date(as_of_date)
+def reference_date(as_of_date=None):
+    return parse_date(as_of_date or today_iso())
 
 
 def is_workday(day):

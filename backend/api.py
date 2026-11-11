@@ -26,8 +26,7 @@ import views
 import watches
 from actions import ActionNotFoundError, ActionStateError, now_sg
 from briefing import get_briefing_payload
-from order_search import search_orders
-from rules import SNAPSHOT
+from order_search import list_orders, search_orders
 from scheduler import run_morning_briefing
 from service import AgentIncompleteError, ModelUnavailableError
 from storage import ConversationConflictError, SessionNotFoundError
@@ -138,7 +137,7 @@ def create_app(service, scheduler=None):
 
     # ---- briefing and orders ------------------------------------------------------------------------
     @app.get('/briefings/latest')
-    def latest_briefing(as_of_date: str = SNAPSHOT):
+    def latest_briefing(as_of_date: str | None = None):
         # Generated on request from the deterministic tools (no model call), so it never goes stale;
         # the scheduler keeps a dated copy each morning (GET /briefings).
         return run(get_briefing_payload, as_of_date)
@@ -150,6 +149,13 @@ def create_app(service, scheduler=None):
     @app.get('/orders/search')
     def order_search(q: str = '', limit: int = 8):
         result = run(search_orders, q, limit)
+        if result['status'] != 'ok':
+            raise ApiError(400, 'INVALID_REQUEST', result['message'])
+        return result
+
+    @app.get('/orders')
+    def orders_list(status: str = 'all', due: str = 'all', stage: str = '', customer: str = '', q: str = ''):
+        result = run(list_orders, status, due, stage, customer, q)
         if result['status'] != 'ok':
             raise ApiError(400, 'INVALID_REQUEST', result['message'])
         return result
@@ -260,7 +266,9 @@ def create_app(service, scheduler=None):
                 raise ActionStateError('This is the last scripted snapshot.')
             actions.set_data_version(upcoming)
             check = watches.check_watches(actions, now_sg())
-            return {**snapshot_state(), 'check': check}
+            # A new data day: save that day's briefing and raise the 'briefing ready' alert.
+            briefing = run_morning_briefing(actions, now_sg(), trigger='snapshot')
+            return {**snapshot_state(), 'check': check, 'briefing_run': briefing['run']}
         return run(advance)
 
     @app.post('/dev/data/reset')

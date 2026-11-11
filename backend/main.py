@@ -4,9 +4,9 @@ import argparse
 import getpass
 import os
 from dataclasses import replace
-from pathlib import Path
 
 from config import load_config, read_env
+from paths import ENV_FILE
 from tools import get_order_status
 
 
@@ -188,7 +188,7 @@ def main():
         import uvicorn
         from api import create_app
         from scheduler import AppScheduler
-        settings = read_env(Path(__file__).with_name(".env"))
+        settings = read_env(ENV_FILE)
         settings.update(os.environ)
         scheduler = AppScheduler(service.actions, briefing_time=settings.get("BRIEFING_TIME", "07:00"),
                                  watch_minutes=int(settings.get("WATCH_CHECK_MINUTES", "1")))

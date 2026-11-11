@@ -11,10 +11,11 @@ import csv
 from functools import lru_cache
 from pathlib import Path
 
+from paths import source_path
+from rules import current_version
 from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE, order_row_numbers,
-                         production_row_numbers, workshop_row_numbers)
+                         production_row_numbers, scripted_changes, workshop_row_numbers)
 
-BACKEND_DIR = Path(__file__).resolve().parent
 _SOURCES = {ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE}
 _BY_FILE = {Path(source).name: source for source in _SOURCES}
 
@@ -68,10 +69,27 @@ def collect(node):
     return refs
 
 
-@lru_cache(maxsize=None)
 def _table(source):
-    with (BACKEND_DIR / source).open(encoding="utf-8-sig", newline="") as handle:
+    # Keyed by the file's modification time and size, so an updated CSV is read again (evaluation Q18).
+    stat = source_path(source).stat()
+    return _read_table(source, stat.st_mtime_ns, stat.st_size)
+
+
+@lru_cache(maxsize=8)
+def _read_table(source, mtime_ns, size):
+    with source_path(source).open(encoding="utf-8-sig", newline="") as handle:
         return tuple(csv.reader(handle))
+
+
+def with_snapshot(source, data):
+    """An orders.csv row as the app sees it now: a scripted snapshot's changes are applied and named, so
+    the evidence matches the answer while saying which values are simulated."""
+    version = current_version()
+    change = scripted_changes(version).get(data.get("order_id")) if source == ORDERS_SOURCE else None
+    if not change:
+        return data
+    return {**data, **change, "scripted_change": f"{', '.join(change)} from snapshot {version} "
+                                                "(track1/scenarios/watch_snapshots.json)"}
 
 
 def raw_rows(refs):
@@ -80,7 +98,7 @@ def raw_rows(refs):
     for ref in refs:
         table = _table(ref["source"])
         if 2 <= ref["row"] <= len(table):
-            rows[f"{ref['source']}#{ref['row']}"] = dict(zip(table[0], table[ref["row"] - 1]))
+            rows[f"{ref['source']}#{ref['row']}"] = with_snapshot(ref["source"], dict(zip(table[0], table[ref["row"] - 1])))
     return rows
 
 

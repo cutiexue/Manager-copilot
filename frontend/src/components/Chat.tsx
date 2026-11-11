@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { api } from '../api';
-import type { ChatMessage, EvidenceView, Proposal, Session } from '../types';
+import type { AnswerCheck, ChatMessage, EvidenceView, Proposal, Session } from '../types';
 import Icon from './Icon';
 import Markdown from './Markdown';
 import ProposalCard from './ProposalCard';
@@ -140,7 +140,8 @@ export default function Chat({
       if (shown.current === id) {
         setMessages((m) => [
           ...m,
-          { role: 'ai', content: res.answer, tool_calls: res.tool_calls, evidence: res.evidence, proposals: res.proposals },
+          { role: 'ai', content: res.answer, tool_calls: res.tool_calls, evidence: res.evidence, proposals: res.proposals,
+            answer_check: res.answer_check },
         ]);
         setStatus('idle');
       }
@@ -206,6 +207,7 @@ export default function Chat({
                         <Icon name="evidence" size={14} /> Sources ({m.evidence.refs.length})
                       </button>
                     )}
+                    {m.role === 'ai' && <CheckNote check={m.answer_check} />}
                   </div>
                 ))}
                 {status === 'sending' && (
@@ -282,5 +284,19 @@ export default function Chat({
         </div>
       </div>
     </section>
+  );
+}
+
+// Whether every order ID, date and figure in the answer was found in the data the turn looked up.
+function CheckNote({ check }: { check?: AnswerCheck }) {
+  if (!check || check.checked === 0) return null;
+  if (check.unverified.length === 0) {
+    return <p className="check-note small">All {check.checked} figures, dates and order IDs match the data looked up.</p>;
+  }
+  return (
+    <p className="check-note check-warn small" role="note">
+      Not found in the data looked up for this answer: {check.unverified.map((u) => u.text).join(', ')}. Treat these
+      with care.
+    </p>
   );
 }

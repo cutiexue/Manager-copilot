@@ -62,13 +62,21 @@ export default function EvidenceDrawer({ view, rows, onClose }: Props) {
         <h3>Source rows ({view.refs.length})</h3>
         {view.refs.length === 0 && <p className="empty">The tool returned no source rows for this claim.</p>}
         {[...bySource.entries()].map(([source, refs]) => {
-          const first = sourceRows[`${source}#${refs[0].row}`];
-          const cols = first ? Object.keys(first) : [];
+          const present = refs.map((r) => sourceRows[`${source}#${r.row}`]).filter((raw) => raw !== undefined);
+          // Columns from every row, so a row with an extra column (a scripted change) still shows it.
+          const cols = [...new Set(present.flatMap((raw) => Object.keys(raw)))];
+          const simulated = present.filter((raw) => raw.scripted_change);
           return (
             <div key={source} className="source-block">
               <p className="small">
                 <code>{source}</code>
               </p>
+              {simulated.length > 0 && (
+                <p className="small scripted-note">
+                  Simulated values from a scripted snapshot, not in the course file:{' '}
+                  {simulated.map((raw) => `${raw.order_id} (${raw.scripted_change})`).join('; ')}
+                </p>
+              )}
               <div className="table-scroll">
                 <table className="table small">
                   <thead>

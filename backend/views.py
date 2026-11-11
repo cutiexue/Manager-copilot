@@ -10,7 +10,7 @@ from datetime import date
 import evidence_refs
 from data_loader import STAGES, load_production, production_row_numbers
 from llm import execute_tool
-from rules import MAX_BASELINE_WORKDAYS, SNAPSHOT, is_workday, previous_workdays
+from rules import MAX_BASELINE_WORKDAYS, is_workday, previous_workdays, today_iso
 from tool_schemas import ESTIMATION_FUNCTIONS, TOOLS
 from tools import compare_stage_output, trace_order
 
@@ -56,8 +56,8 @@ def _bounded(name, value, highest):
 
 
 def latest_production_day():
-    """The last workday before the snapshot date: the newest day with recorded output."""
-    return previous_workdays(date.fromisoformat(SNAPSHOT), 1)[0]
+    """The newest day before today's data date with recorded output (scripted snapshots add no output)."""
+    return date.fromisoformat(max(row["date"] for row in load_production() if row["date"] < today_iso()))
 
 
 def stage_output(stage, on=None, baseline_days=7, days=10):

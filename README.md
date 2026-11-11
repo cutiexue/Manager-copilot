@@ -4,29 +4,35 @@ DSS5105 Capstone Project — **Track 1: The General Manager's Co-Pilot**
 
 Manager Co-Pilot is an AI-assisted decision-support system for factory general managers. It helps users understand current operations, identify risks, estimate feasibility, and take controlled actions based on traceable production data.
 
-> **Current phase:** Sprint 2 — read-only tools, chat with evidence, confirmed follow-ups (reminders, notes, chase-up drafts, watches), the scheduler and static Skills are integrated on the local integration branch; the evaluation set is a draft for team review (see [Implementation Status](#implementation-status)).
+> **Current phase:** Sprint 3 — all six workflows are built. With the real DeepSeek model the latest run passed 29/30 held-out and 15/17 development cases, with every checked answer and figure correct (see [Evaluation](./evaluation/README.md) and [Sprint 3 changes](./docs/SPRINT3_CHANGES.md)).
 
 ## Quick Start
 
 Requires Python 3.12 and Node.js 18+.
 
+**Windows, one click:** double-click `start_app.bat`. It sets things up on the first run, starts the
+backend and the frontend in two windows and opens http://localhost:5173. Close the two windows to stop.
+The manual steps are below.
+
 ```text
 Manager-copilot/
-├── backend/                 # FastAPI + LangChain agent + deterministic tools (flat modules)
+├── start_app.bat            # Windows: set up on first run, start backend + frontend, open the browser
+├── run_evaluation.bat       # Windows: tests, then both evaluation sets with the real model
+├── backend/                 # FastAPI + LangChain agent + deterministic tools (module map: backend/README.md)
 │   ├── skills/              # static Skills (Markdown), composed into the system prompt
-│   ├── track1/data/         # read-only course CSVs (orders, production_log, workshops)
-│   ├── track1/scenarios/    # scripted, versioned data snapshots for standing watches
+│   ├── track1/data/         # read-only course CSVs (orders, production_log, workshops) and their data dictionary
+│   ├── track1/scenarios/    # scripted, versioned data snapshots for standing watches and demos
 │   └── tests/               # pytest suite, no API key needed
-├── evaluation/              # question sets and the evaluation runner
-├── frontend/                # React + TypeScript + Vite
-└── TRACK1_IMPLEMENTATION_PLAN.md
+├── frontend/                # React + TypeScript + Vite (see frontend/README.md)
+├── evaluation/              # question sets, runner, failure ledger and real-model reports
+└── docs/                    # implementation plan and sprint change logs
 ```
 
 Backend and tests:
 
 ```bash
 cd backend
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 python -m pytest          # tools, SQLite store, chat + briefing API with a fake agent
 python main.py --local    # one order lookup, no LLM call
@@ -53,13 +59,15 @@ Chat sessions, follow-ups, watches, alerts and the audit log are stored in `back
 |---|---|---|
 | Retrieval, judgement, tracing, discovery tools | Built, read-only, tested; order IDs in any spelling, partial customer names, close candidates when nothing matches | `backend/tools.py`, `rules.py`, `discovery.py`, `order_search.py` |
 | Morning briefing | Built deterministically; `GET /briefings/latest` serves it live and the scheduler saves a dated copy at 07:00 (`GET /briefings`) | `backend/briefing.py`, `scheduler.py` |
-| Multi-turn Q&A | One LangChain agent, 32 tools, SQLite sessions; each answer returns its tool calls, cited source rows and proposals | `backend/llm.py`, `service.py`, `evidence_refs.py` |
-| Feasibility estimates | Single batch (in-house, per workshop, fastest/cheapest) and multi-order plans with revision; in-house work queues behind the unfinished orders (an upper bound), and the cheapest plan leaves in-house out unless its cost is given; also `POST /feasibility/estimate` | `backend/production_estimates.py`, `production_optimizer.py`, `views.py` |
+| Multi-turn Q&A | One LangChain agent, 34 tools (including period totals and week-on-week comparisons), SQLite sessions; each answer returns its tool calls, cited source rows and proposals | `backend/llm.py`, `service.py`, `evidence_refs.py` |
+| Feasibility estimates | Single batch (in-house, per workshop, fastest/cheapest) and multi-order plans with revision; in-house work queues behind the unfinished orders (an upper bound), and the cheapest plan leaves in-house out unless its cost is given; every outsourcing plan reports its risk from `workshops.csv`: each workshop's defect rate, dispatcher note and flags, the chance a batch comes back defective and, with a deadline, the chance a redo makes the plan late; also `POST /feasibility/estimate` | `backend/production_estimates.py`, `production_optimizer.py`, `outsourcing_risk.py`, `views.py` |
 | Confirmed actions + audit | Built: the agent or the UI proposes, and only Confirm in the app carries it out; 24 h expiry, confirming twice does nothing more, append-only audit log | `backend/actions.py`, `action_tools.py`; UI `FollowUps.tsx`, `ProposalCard.tsx` |
-| Standing watches / alerts | Built: 4 order conditions checked against scripted, versioned data snapshots; one alert per trigger | `backend/watches.py`, `track1/scenarios/watch_snapshots.json`; UI `Watches.tsx` |
+| Standing watches / alerts | Built: 4 order conditions checked against scripted, versioned data snapshots; one alert per trigger. Loading a snapshot moves the whole app to that day (chat, briefing, evidence), with simulated values labelled; reminders keep the real calendar | `backend/watches.py`, `track1/scenarios/watch_snapshots.json`; UI `Watches.tsx` |
 | APScheduler | Built: 07:00 briefing, due reminders, watch checks, proposal expiry; restarts do not repeat a run | `backend/scheduler.py` |
 | Static Skills | Built: 8 Markdown Skills, each with its tools; `prompt_version` is returned with every answer | `backend/skills/`, `skills.py` |
-| Evaluation set and runner | Draft: 30 held-out and 17 development cases, every fact rechecked against the CSVs; not yet reviewed by a second member; offline plumbing run passes, first real-model run pending an API key | `evaluation/` (see its README) |
+| Answer check | Built: every order ID, date and figure in an answer is checked against that turn's tool results; unmatched ones are retried once, then shown under the answer | `backend/answer_check.py`, `service.py`; UI `Chat.tsx` |
+| Web interface | Built: chat with past conversations alongside, briefing with modules that open in place, filterable Orders page (totals from `GET /orders`), Actions and Watches pages that refresh themselves, Ctrl+K search | `frontend/` |
+| Evaluation set and runner | 30 held-out and 17 development cases; four real-model runs on 11 Nov 2026 (latest: 29/30 and 15/17), reports in `evaluation/reports/`, failures in `failure_ledger.jsonl` | `evaluation/` (see its README) |
 
 ## Project Overview
 
@@ -137,7 +145,7 @@ All times are Singapore Time (SGT).
 | 15 November 2026, 11:59 PM | Final project submission |
 | 25 November 2026, 11:59 PM | Reimbursement submission |
 
-Detailed weekly tasks, deliverables, and acceptance criteria are maintained in the [Track 1 Implementation Plan](./TRACK1_IMPLEMENTATION_PLAN.md).
+Detailed weekly tasks, deliverables, and acceptance criteria are maintained in the [Track 1 Implementation Plan](./docs/TRACK1_IMPLEMENTATION_PLAN.md).
 
 ## Team Responsibilities
 
@@ -180,14 +188,17 @@ Evaluation results will be reported by category rather than only as a single ove
 - [x] SQLite application state (sessions, follow-ups, watches, alerts, audit)
 - [x] Scheduler and standing watches
 - [x] React user interface (chat, briefing, orders, actions, watches and alerts)
-- [ ] End-to-end system integration (local integration branch, not pushed; first run with a real model pending)
-- [ ] Evaluation and failure analysis (draft cases and runner ready; team review and the first real-model run pending)
+- [x] End-to-end system integration (merged on `main` in PR #3; real-model smoke test passed 11 Nov 2026)
+- [x] Real-model evaluation runs (latest 29/30 held-out, 15/17 development)
+- [ ] Failure analysis write-up and team review of the cases
 - [ ] Final documentation and demonstration
 
 ## Documentation
 
-- [Sprint 2 Changes](./SPRINT2_CHANGES.md) — everything changed on the integration branch, how it was checked, and what is open
-- [Track 1 Implementation Plan](./TRACK1_IMPLEMENTATION_PLAN.md)
+- [Sprint 3 Changes](./docs/SPRINT3_CHANGES.md) — data date, outsourcing risk, answer check, evaluation runs, new interface
+- [Sprint 2 Changes](./docs/SPRINT2_CHANGES.md) — everything changed on the integration branch, how it was checked, and what is open
+- [Track 1 Implementation Plan](./docs/TRACK1_IMPLEMENTATION_PLAN.md)
+- [Backend module map](./backend/README.md) and [Frontend](./frontend/README.md)
 - Contribution guidelines — to be added
 - API documentation — generated by FastAPI at `/docs` while the backend runs
 - [Evaluation](./evaluation/README.md) — case format, running, scoring and its limits; reports go to `evaluation/reports/`

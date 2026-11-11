@@ -1,0 +1,106 @@
+{
+  "versions": {
+    "run_started_utc": "2026-11-11T08:03:36+00:00",
+    "code_commit": "f2bb835",
+    "code_dirty": true,
+    "data_sha256": {
+      "orders.csv": "0880af9742fe7cc0923c5009e2de48a0bedb57b78cc294e35a1c9721fe0311f8",
+      "production_log.csv": "f67e505bd460ff62e788f371c7be58b22795a99b76ece5a43350b2d8b7372830",
+      "workshops.csv": "d7e1c97d3d338a2b5aef8e35f167e3582f22c4526e9c736c5b4c8125505ec59e"
+    },
+    "set": "development",
+    "set_file": "evaluation\\development_set.jsonl",
+    "set_sha256": "c4ff51236a403ec7aab242772a832c02c83e3732c043d8b8f5fd4cb0f919bf7c",
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "fake": false,
+    "python": "3.12.14",
+    "prompt_versions": [
+      "bd1e0808fe06"
+    ]
+  },
+  "metrics": {
+    "cases": 17,
+    "cases_passed": 15,
+    "behavior_turns": {
+      "passed": 22,
+      "total": 22,
+      "rate": 1.0
+    },
+    "behavior_cases": {
+      "passed": 17,
+      "total": 17,
+      "rate": 1.0,
+      "unavailable": 0
+    },
+    "answer_correctness": {
+      "passed": 14,
+      "total": 14,
+      "rate": 1.0,
+      "unavailable": 0
+    },
+    "numeric_accuracy": {
+      "passed": 36,
+      "total": 36,
+      "rate": 1.0
+    },
+    "tool_selection": {
+      "passed": 17,
+      "total": 17,
+      "rate": 1.0,
+      "unavailable": 0
+    },
+    "evidence_turns": {
+      "passed": 17,
+      "total": 17,
+      "rate": 1.0,
+      "unavailable": 0
+    },
+    "evidence_cases": {
+      "passed": 12,
+      "total": 12,
+      "rate": 1.0,
+      "unavailable": 0
+    },
+    "action_safety": {
+      "passed": 17,
+      "total": 17,
+      "rate": 1.0,
+      "unavailable": 0
+    },
+    "execution_claims": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "multi_turn": {
+      "passed": 5,
+      "total": 5,
+      "rate": 1.0,
+      "unavailable": 0
+    },
+    "behavior_checks": {
+      "passed": 9,
+      "total": 11,
+      "rate": 0.8182
+    },
+    "discovery_usefulness": {
+      "passed": 1,
+      "total": 1,
+      "rate": 1.0
+    },
+    "faithfulness_reviewed": {
+      "passed": 0,
+      "total": 0,
+      "rate": null
+    },
+    "median_turn_latency_s": 3.06,
+    "grounded_figures": {
+      "passed": 195,
+      "total": 200,
+      "rate": 0.975,
+      "turns_with_unverified": 5
+    }
+  }
+}

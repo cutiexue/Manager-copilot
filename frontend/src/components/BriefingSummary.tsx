@@ -1,4 +1,6 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { flushSync } from 'react-dom';
+import { useGlassPointer, useRollingNumber, withViewTransition } from '../motion';
 import type {
   Briefing, BriefingFixture, BriefingSource, Check, CheckItem, CheckLevel, EvidenceView, Finding, Level,
 } from '../types';
@@ -125,24 +127,17 @@ function CheckRows({ check, onEvidence, onAsk, onRemind }: CheckProps) {
                 <td className="row-context">{item.context}</td>
                 <td className="row-tag">{item.tag}</td>
                 <td className="row-icons">
-                  <button
-                    className="icon-btn"
-                    title="Evidence"
-                    aria-label={`Evidence for ${item.name}`}
-                    onClick={() => onEvidence(evidenceForFinding(item.finding))}
-                  >
-                    <Icon name="evidence" />
+                  <button className="row-btn" aria-label={`Evidence for ${item.name}`} onClick={() => onEvidence(evidenceForFinding(item.finding))}>
+                    <Icon name="evidence" size={15} />
+                    <span className="row-btn-label">Evidence</span>
                   </button>
-                  <button
-                    className="icon-btn"
-                    title="Ask Co-Pilot"
-                    aria-label={`Ask about ${item.name}`}
-                    onClick={() => onAsk(questionForFinding(item.finding))}
-                  >
-                    <Icon name="ask" />
+                  <button className="row-btn" aria-label={`Ask about ${item.name}`} onClick={() => onAsk(questionForFinding(item.finding))}>
+                    <Icon name="ask" size={15} />
+                    <span className="row-btn-label">Ask</span>
                   </button>
-                  <button className="icon-btn" title="Remind…" aria-label={`Remind about ${item.name}`} onClick={() => onRemind(item)}>
-                    <Icon name="remind" />
+                  <button className="row-btn" aria-label={`Remind about ${item.name}`} onClick={() => onRemind(item)}>
+                    <Icon name="remind" size={15} />
+                    <span className="row-btn-label">Remind</span>
                   </button>
                 </td>
               </tr>
@@ -167,27 +162,86 @@ function CheckRows({ check, onEvidence, onAsk, onRemind }: CheckProps) {
   );
 }
 
-function Section({ id, title, tip, children }: { id: string; title: string; tip?: string; children: ReactNode }) {
+type ModuleId = Check['type'];
+
+const MODULE_ORDER: ModuleId[] = ['stage_output_drop', 'order_at_risk', 'customer_slipping'];
+const vt = (id: ModuleId) => ({ viewTransitionName: `module-${id}` }) as CSSProperties;
+
+// Counts come from the backend's levels when it sends them; older briefings are counted from their items.
+function levelCounts(check?: Check) {
+  const fromBackend = (level: Level) => check?.levels?.find((l) => l.level === level)?.count;
+  const items = check?.items ?? [];
+  if (check?.levels) return { act: fromBackend('act') ?? 0, watch: fromBackend('watch') ?? 0 };
+  return { act: items.filter((i) => levelOf(i) === 'act').length, watch: items.filter((i) => levelOf(i) === 'watch').length };
+}
+
+function CountLine({ check }: { check?: Check }) {
+  const c = levelCounts(check);
+  if (c.act + c.watch === 0) return <span className="module-quiet">Nothing to flag</span>;
   return (
-    <section className="check" aria-labelledby={id}>
-      <div className="check-head">
-        <h3 id={id} title={tip || undefined}>
-          {title}
-        </h3>
-      </div>
-      {children}
-    </section>
+    <span className="module-levels">
+      {c.act > 0 && (
+        <span>
+          <LevelMark level="act" /> {c.act} act now
+        </span>
+      )}
+      {c.watch > 0 && (
+        <span>
+          <LevelMark level="watch" /> {c.watch} watch
+        </span>
+      )}
+    </span>
   );
 }
 
-// The page reads like a daily production report: one headline, three sentences of prose, yesterday's
-// output, then what to act on today, by check. Production comes first, as in the backend's own text briefing.
+// A module in the overview: its title, how many items it flags and a preview. Clicking it opens
+// the module in place.
+function ModuleCard({ id, title, check, briefing, onOpen }: {
+  id: ModuleId; title: string; check?: Check; briefing: Briefing; onOpen: () => void;
+}) {
+  const ref = useRef<HTMLButtonElement>(null);
+  useGlassPointer(ref);
+  const y = briefing.yesterday;
+  const total = useRollingNumber(check?.total ?? check?.items.length ?? 0);
+  return (
+    <button ref={ref} className="module glass-card" style={vt(id)} onClick={onOpen} aria-label={`Open ${title}`}>
+      <span className="module-head">
+        <span className="module-title">{title}</span>
+        <span className="module-open-hint">Open</span>
+      </span>
+      <span className="module-figure">{Math.round(total)}</span>
+      <CountLine check={check} />
+      {id === 'stage_output_drop' && y.is_workday ? (
+        <span className="module-stages">
+          {y.stages.map((st) => (
+            <span key={st.stage} className="module-stage">
+              <span className="module-stage-name">{st.stage.toLowerCase()}</span>
+              <span className="module-stage-value">{st.pieces_completed?.toLocaleString('en-US') ?? '—'}</span>
+            </span>
+          ))}
+        </span>
+      ) : (
+        <span className="module-preview">
+          {(check?.items ?? []).slice(0, 3).map((item) => (
+            <span key={item.key} className="module-preview-row">
+              <span className="module-preview-name">{item.name}</span>
+              <span className="module-preview-tag">{item.tag}</span>
+            </span>
+          ))}
+        </span>
+      )}
+    </button>
+  );
+}
+
+// The page reads like a daily production report: the headline and three sentences on one dark card,
+// then one module per check. A module opens in place; the others wait as thumbnails below it.
 export default function BriefingSummary({ fixture, source, error, onRefresh, onEvidence, onAsk, onPropose }: Props) {
   const { briefing } = fixture;
+  const [open, setOpen] = useState<ModuleId | null>(null);
   const checks = checksFor(briefing);
-  const find = (type: Check['type']) => checks.find((c) => c.type === type);
-  const production = find('stage_output_drop');
-  const later = [find('order_at_risk'), find('customer_slipping')].filter((c): c is Check => !!c && c.items.length > 0);
+  const find = (type: ModuleId) => checks.find((c) => c.type === type);
+  const titleOf = (type: ModuleId) => find(type)?.title ?? CHECK_TITLE[type];
   const rows = (check: Check) => (
     <CheckRows
       check={check}
@@ -196,12 +250,24 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
       onRemind={(item) => onPropose(reminderFor(item.finding, item.note, briefing.as_of_date))}
     />
   );
+  const show = (id: ModuleId | null) => withViewTransition(() => flushSync(() => setOpen(id)));
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') show(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const openCheck = open ? find(open) : undefined;
 
   return (
     <section className="briefing" aria-labelledby="briefing-title">
-      <div className="briefing-head">
+      <header className="page-head briefing-head">
         <div>
-          <h2 id="briefing-title">Morning briefing</h2>
+          <h1 id="briefing-title">Morning briefing</h1>
           <p className="dateline">{longDate(briefing.as_of_date)}</p>
         </div>
         {source === 'snapshot' && (
@@ -212,21 +278,50 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
             </button>
           </p>
         )}
+      </header>
+
+      <div className="hero-card">
+        <Headline briefing={briefing} />
+        <Narrative briefing={briefing} onEvidence={onEvidence} />
       </div>
 
-      <Headline briefing={briefing} />
-      <Narrative briefing={briefing} onEvidence={onEvidence} />
-
-      <Section id="check-production" title="Production" tip={tipFor(production)}>
-        <YesterdayStrip briefing={briefing} onEvidence={onEvidence} />
-        {production && rows(production)}
-      </Section>
-
-      {later.map((check) => (
-        <Section key={check.type} id={`check-${check.type}`} title={check.title} tip={tipFor(check)}>
-          {rows(check)}
-        </Section>
-      ))}
+      {open === null ? (
+        <div className="modules">
+          {MODULE_ORDER.map((id) => (
+            <ModuleCard key={id} id={id} title={titleOf(id)} check={find(id)} briefing={briefing} onOpen={() => show(id)} />
+          ))}
+        </div>
+      ) : (
+        <>
+          <section className="module-detail glass-panel" style={vt(open)} aria-labelledby={`check-${open}`}>
+            <div className="module-detail-head">
+              <div>
+                <h2 id={`check-${open}`} title={tipFor(openCheck) || undefined}>
+                  {titleOf(open)}
+                </h2>
+                <CountLine check={openCheck} />
+              </div>
+              <button className="btn" onClick={() => show(null)}>
+                Close
+              </button>
+            </div>
+            {open === 'stage_output_drop' && <YesterdayStrip briefing={briefing} onEvidence={onEvidence} />}
+            {openCheck && openCheck.items.length > 0 ? (
+              <div className="rank-card">{rows(openCheck)}</div>
+            ) : (
+              <p className="empty">Nothing flagged in this check today.</p>
+            )}
+          </section>
+          <nav className="module-thumbs" aria-label="Other checks">
+            {MODULE_ORDER.filter((id) => id !== open).map((id) => (
+              <button key={id} className="module-thumb" style={vt(id)} onClick={() => show(id)}>
+                <span className="module-thumb-title">{titleOf(id)}</span>
+                <span className="module-thumb-count">{find(id)?.total ?? find(id)?.items.length ?? 0}</span>
+              </button>
+            ))}
+          </nav>
+        </>
+      )}
 
       {briefing.warnings.length > 0 && (
         <ul className="warnings small">

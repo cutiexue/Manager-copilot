@@ -2,20 +2,20 @@
 
 The course CSVs never change, so a watch would never fire on them. As the slides state, watches
 are demonstrated on versioned snapshots: each version in track1/scenarios/watch_snapshots.json
-applies scripted order updates on top of the 2026-04-01 course data for one later day. Only the
-watch checker reads them; every other tool keeps using the course data. The snapshot in use is
+applies scripted order updates on top of the 2026-04-01 course data for one later day. Loading a
+snapshot moves the whole app to that day: every tool reads orders through data_loader, which applies
+the loaded changes. The snapshot in use is
 kept in the app database, so a restart does not lose it.
 """
 
 import json
 from datetime import date
 from functools import lru_cache
-from pathlib import Path
 
-from data_loader import STAGES, load_orders
+from data_loader import STAGES, load_course_orders, orders_at
+from paths import SNAPSHOT_FILE
 from rules import SNAPSHOT
 
-SNAPSHOT_FILE = Path(__file__).resolve().parent / "track1" / "scenarios" / "watch_snapshots.json"
 BASE_VERSION = "v0"
 CONDITIONS = ("not_moved_by", "becomes_overdue", "completed", "reaches_stage")
 _CHANGEABLE = {"status", "current_stage", "last_activity_date", "completed_date", "days_late"}
@@ -27,7 +27,7 @@ def load_snapshots():
     versions = json.loads(SNAPSHOT_FILE.read_text(encoding="utf-8"))["versions"]
     if not versions or versions[0]["version"] != BASE_VERSION or versions[0]["date"] != SNAPSHOT or versions[0]["changes"]:
         raise ValueError("The first snapshot must be the unchanged course data.")
-    known = {order["order_id"] for order in load_orders()}
+    known = {order["order_id"] for order in load_course_orders()}
     previous = None
     for version in versions:
         day = date.fromisoformat(version["date"])
@@ -55,16 +55,8 @@ def next_version(version_id):
 
 def order_state(order_id, version_id):
     """The order as a snapshot shows it: course data plus every scripted change up to that version."""
-    state = next((dict(order) for order in load_orders() if order["order_id"] == order_id), None)
-    if state is None:
-        return None
-    for version in load_snapshots():
-        for change in version["changes"]:
-            if change["order_id"] == order_id:
-                state.update({key: value for key, value in change.items() if key != "order_id"})
-        if version["version"] == version_id:
-            break
-    return state
+    load_snapshots()  # validates the scripted file first
+    return next((dict(order) for order in orders_at(version_id) if order["order_id"] == order_id), None)
 
 
 def baseline(state):

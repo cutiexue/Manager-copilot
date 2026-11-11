@@ -1,13 +1,13 @@
 """Load and validate order data for Track 1."""
 
 import csv
+import json
+from functools import lru_cache
 from math import isfinite
 from datetime import date
-from pathlib import Path
 
-
-# 根据代码文件定位数据，不依赖运行命令时所在的目录。
-DATA_DIR = Path(__file__).resolve().parent / "track1" / "data"
+from paths import DATA_DIR, SNAPSHOT_FILE
+from rules import current_version
 
 ORDERS_FILE = "orders.csv"
 PRODUCTION_FILE = "production_log.csv"
@@ -171,9 +171,42 @@ def _load(filename):
     return rows
 
 
-def load_orders():
-    """Return validated order dictionaries, preserving strings and empty strings."""
+def load_course_orders():
+    """The course orders.csv exactly as given, validated; never changed."""
     return _load(ORDERS_FILE)
+
+
+def load_orders():
+    """Orders as the app sees them now: the course rows plus any scripted snapshot changes loaded."""
+    return orders_at(current_version())
+
+
+@lru_cache(maxsize=1)
+def _snapshot_versions():
+    return tuple(json.loads(SNAPSHOT_FILE.read_text(encoding="utf-8"))["versions"])
+
+
+def scripted_changes(version_id):
+    """{order_id: {field: value}} from every scripted snapshot up to and including version_id."""
+    merged = {}
+    for version in _snapshot_versions():
+        for change in version["changes"]:
+            merged.setdefault(change["order_id"], {}).update(
+                {key: value for key, value in change.items() if key != "order_id"})
+        if version["version"] == version_id:
+            return merged
+    raise ValueError(f"Unknown data snapshot {version_id}.")
+
+
+def orders_at(version_id):
+    """The course orders with the scripted changes of one snapshot applied (in memory only)."""
+    rows = load_course_orders()
+    changes = scripted_changes(version_id)
+    if not changes:
+        return rows
+    rows = [dict(row, **changes[row["order_id"]]) if row["order_id"] in changes else row for row in rows]
+    _validate_orders(f"{ORDERS_FILE} + snapshot {version_id}", rows)
+    return rows
 
 
 def load_production():

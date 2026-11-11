@@ -1,5 +1,5 @@
 import type {
-  Alert, AuditEvent, BriefingFixture, ChaseDraft, ChatMessage, ConfirmResult, FollowUpCounts, OrderNote,
+  Alert, EvidenceRow, OrderDueFilter, OrderList, OrderStatusFilter, AuditEvent, BriefingFixture, ChaseDraft, ChatMessage, ConfirmResult, FollowUpCounts, OrderNote,
   OrderSearchResult, Proposal, ProposalKind, Reminder, SendMessageResponse, Session, SnapshotState, Watch,
 } from './types';
 
@@ -47,6 +47,9 @@ export const api = {
   latestBriefing: () => request<BriefingFixture>('/briefings/latest'),
   searchOrders: (query: string, limit = 8) =>
     request<OrderSearchResult>(`/orders/search?q=${encodeURIComponent(query)}&limit=${limit}`),
+  orders: (f: { status: OrderStatusFilter; due: OrderDueFilter; stage: string; customer: string; q: string }) =>
+    request<OrderList>(`/orders?${new URLSearchParams(f).toString()}`),
+  evidence: (id: string) => request<EvidenceRow>(`/evidence/${encodeURIComponent(id)}`),
   listSessions: () => request<Session[]>('/sessions'),
   createSession: (title: string) =>
     request<Session>('/sessions', { method: 'POST', body: JSON.stringify({ title }) }),

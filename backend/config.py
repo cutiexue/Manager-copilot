@@ -1,9 +1,9 @@
 """Load provider configuration without third-party dependencies."""
 import os
 import re
-from pathlib import Path
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
+from paths import ENV_FILE
 
 @dataclass(frozen=True)
 class LLMConfig:
@@ -39,7 +39,7 @@ def read_env(path):
     return values
 
 def load_config(provider=None):
-    values = read_env(Path(__file__).resolve().with_name(".env"))
+    values = read_env(ENV_FILE)
     values.update(os.environ)
     provider = (provider if provider is not None else values.get("LLM_PROVIDER", "deepseek")).strip().lower()
     defaults = {

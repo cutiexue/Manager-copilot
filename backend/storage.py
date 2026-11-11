@@ -8,8 +8,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from config import read_env
-
-DEFAULT_DB = Path(__file__).resolve().with_name('manager_copilot.db')
+from paths import DEFAULT_DB, ENV_FILE
 
 
 class SessionNotFoundError(KeyError):
@@ -22,7 +21,7 @@ class ConversationConflictError(ValueError):
 
 class SQLiteStore:
     def __init__(self, path=None):
-        values = read_env(Path(__file__).with_name('.env'))
+        values = read_env(ENV_FILE)
         values.update(os.environ)
         self.path = Path(path or values.get('SQLITE_PATH') or DEFAULT_DB)
 

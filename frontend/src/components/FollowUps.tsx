@@ -3,6 +3,7 @@ import { api } from '../api';
 import type { AuditEvent, ChaseDraft, OrderNote, Proposal, Reminder } from '../types';
 import Icon from './Icon';
 import ProposalCard from './ProposalCard';
+import { clock, useAutoRefresh } from '../useAutoRefresh';
 
 interface Props {
   onNewReminder: () => void;
@@ -50,13 +51,16 @@ export default function FollowUps({ onNewReminder, onChanged, refreshKey }: Prop
       ]);
       setData({ pending, reminders: reminders.filter((r) => r.status !== 'DISMISSED'), notes, drafts, audit });
       setError(null);
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unexpected error.');
+      return false;
     }
   }, []);
 
+  const updated = useAutoRefresh(load);
   useEffect(() => {
-    void load();
+    if (refreshKey) void load();
   }, [load, refreshKey]);
 
   const changed = () => {
@@ -76,7 +80,10 @@ export default function FollowUps({ onNewReminder, onChanged, refreshKey }: Prop
   return (
     <section className="panel followups" aria-labelledby="actions-title">
       <div className="actions-head">
-        <h2 id="actions-title">Actions</h2>
+        <div>
+          <h1 id="actions-title">Actions</h1>
+          {updated && <p className="updated small">Updated {clock(updated)} · refreshes every 30 s</p>}
+        </div>
         <button className="btn btn-primary" onClick={onNewReminder}>
           <Icon name="plus" size={14} /> New reminder
         </button>
@@ -105,7 +112,7 @@ export default function FollowUps({ onNewReminder, onChanged, refreshKey }: Prop
           <div className="fu-section">
             <h3>Reminders · {data.reminders.length}</h3>
             {data.reminders.length === 0 ? (
-              <p className="empty small">None.</p>
+              <p className="empty small">No reminders yet. Use Remind on any briefing row, or ask in chat.</p>
             ) : (
               <ul className="fu-list">
                 {data.reminders.map((r) => (
@@ -129,7 +136,7 @@ export default function FollowUps({ onNewReminder, onChanged, refreshKey }: Prop
           <div className="fu-section">
             <h3>Notes · {data.notes.length}</h3>
             {data.notes.length === 0 ? (
-              <p className="empty small">None.</p>
+              <p className="empty small">No notes yet. Ask in chat, e.g. “Note on ORD-062: customer agreed to a new date”.</p>
             ) : (
               <ul className="fu-list">
                 {data.notes.map((n) => (
@@ -147,7 +154,7 @@ export default function FollowUps({ onNewReminder, onChanged, refreshKey }: Prop
           <div className="fu-section">
             <h3>Chase-up drafts · {data.drafts.length}</h3>
             {data.drafts.length === 0 ? (
-              <p className="empty small">None.</p>
+              <p className="empty small">No drafts yet. Ask in chat, e.g. “Draft a chase-up for ORD-002”.</p>
             ) : (
               <ul className="fu-list">
                 {data.drafts.map((d) => (

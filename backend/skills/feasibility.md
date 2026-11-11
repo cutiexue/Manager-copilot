@@ -37,6 +37,7 @@ tools: estimate_in_house, estimate_production_plan, estimate_quickstitch, estima
   load counts every unfinished order in full from its current stage, so it is an upper bound and
   the in-house date is a late estimate; say so. Leave the queue parameters out unless the manager
   states a queue; never pass 0 to make the line look free.
+- Say in-house is used only when uses_in_house is true (producers_used lists who makes it).
 - Cheapest plans compare outside workshops only, because in-house cost is not in the data. Say
   that in-house was left out. Pass in_house_cost_per_piece only when the manager states one.
 - Defaults: start on the reference date; the fastest plan may use in-house production.
@@ -48,3 +49,8 @@ tools: estimate_in_house, estimate_production_plan, estimate_quickstitch, estima
 - Report estimated completion, allocation and external processing cost. In-house, transport and
   rework costs are excluded; currency is unspecified. Never call this total business cost.
   Report infeasible/search-limit results honestly; model-optimal does not mean guaranteed delivery.
+- Every outsourcing plan has `risk`. Start with risk.strategy_rating and risk.summary; for each
+  workshop give its rework chance, dispatcher note and flags. A rework delays only that
+  workshop's pieces. Latest dates assume a full redo, an upper bound.
+- High-risk only: name risk_drivers and offer a safer option. Medium or low: just state it.
+- Add one short line starting "Assumptions:" (e.g. start date, historical rates).

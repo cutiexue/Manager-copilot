@@ -17,3 +17,8 @@ __pycache__/
 # Local application state (SQLite)
 *.db
 *.db-journal
+.ruff_cache/
+
+# Evaluation: the progress log and runs cut short (finished reports in evaluation/reports/ are kept)
+evaluation/last_run.log
+evaluation/reports/*/results.partial.jsonl

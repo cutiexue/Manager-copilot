@@ -6,6 +6,7 @@ from decimal import Decimal
 from math import ceil, isfinite
 
 from data_loader import load_orders, load_workshops
+from outsourcing_risk import plan_risk
 from production_estimates import SNAPSHOT, _finish, estimate_in_house, estimate_production_plan, in_house_workdays
 from tools import query_orders
 
@@ -128,7 +129,14 @@ def _optimize(category, total_pieces, start_date, include_in_house, queue, basel
             deadline_date=horizon.isoformat() if days else None,
             calendar_days_inclusive=result["elapsed_calendar_days"] + 1,
             allocations=external, in_house_pieces=in_house, include_in_house=include_in_house,
+            # What the plan actually uses: include_in_house only allows in-house work (evaluation Q26).
+            producers_used=[a["workshop_id"] for a in external] + (["IN_HOUSE"] if in_house else []),
+            uses_in_house=in_house > 0,
         )
+        if days:
+            # With a deadline, the risk also says which pieces a rework could push past it.
+            result["risk"] = plan_risk([b for b in result["branches"] if b["producer"] != "IN_HOUSE"],
+                                       deadline=horizon.isoformat())
         if not include_in_house:
             cost_note = ("In-house production is left out: its cost is not in the data, so only outside "
                          "workshops are compared. Give an in-house cost per piece to include it.")
@@ -143,9 +151,10 @@ def _optimize(category, total_pieces, start_date, include_in_house, queue, basel
         result["assumptions"] = result["assumptions"] + [
             "One batch per producer; arbitrary numbers of eligible workshops may run in parallel.",
             cost_note,
-            "No shared-resource contention, split fees or quality-risk optimization is modeled.",
+            "No shared-resource contention or split fees are modeled. Quality risk is reported in `risk`, "
+            "not optimized: the plan is chosen on date and cost.",
             "Deadline days are inclusive calendar days; the start date is day one.",
-            "This is not an existing-order forecast or an on-time probability estimate.",
+            "This is not an existing-order forecast; the only probabilities are the defect figures in `risk`.",
         ]
         return result
     except _InHouseUnavailable as exc:
@@ -354,9 +363,10 @@ def _optimize_orders(quantity_basis, scope, order_ids, start_date, deadline_days
                 'Orders may split freely. No category changeover time or order-specific priority/deadline constraint.',
                 'Recorded queues apply once, assumed to be other work; selected orders are not already in those queues.',
                 'Monday to Saturday workdays, inclusive start, transport added once after production.',
-                'Fixed snapshot rates and queues; no holidays, rework or new competing orders. Not a delivery guarantee.',
+                'Fixed snapshot rates and queues; no holidays or new competing orders; rework appears only in risk. Not a delivery guarantee.',
                 'Charges include external processing only, excluding transport/rework. Currency unspecified.',
             ]}
+    result['risk'] = plan_risk(workshop_plans, deadline=horizon.isoformat() if deadline_days is not None else None)
     if deadline_days is not None:
         result.update(
             deadline_days=deadline_days, deadline_date=horizon.isoformat(),

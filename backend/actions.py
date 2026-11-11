@@ -15,6 +15,7 @@ from datetime import date, datetime, time, timedelta
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
+import rules
 import watches
 from data_loader import load_orders
 from tools import canonical_order_id
@@ -157,6 +158,12 @@ class ActionStore:
         with self.store.connection() as conn:
             for statement in SCHEMA:
                 conn.execute(statement)
+        self._sync_today()
+
+    def _sync_today(self):
+        """Point every business rule at the data version saved in this database."""
+        info = watches.version_info(self.data_version())
+        rules.set_current_data(info["version"], info["date"])
 
     # ---- audit -------------------------------------------------------------------------------
     @staticmethod
@@ -189,6 +196,7 @@ class ActionStore:
             conn.execute("INSERT INTO app_state (key, value) VALUES ('data_version', ?) "
                          "ON CONFLICT(key) DO UPDATE SET value=excluded.value", (version_id,))
             self._audit(conn, actor, "data_snapshot_loaded", now, detail=info)
+        self._sync_today()
         return info
 
     # ---- proposals -------------------------------------------------------------------------------
@@ -207,7 +215,8 @@ class ActionStore:
             about = order["order_id"] if order else subject or "general"
             clean = {"text": text, "remind_at": _iso(remind_at), "order_id": order and order["order_id"],
                      "subject": subject, "customer": order and order["customer"]}
-            return clean, f"Reminder · {remind_at.strftime('%a %d %b %H:%M')} · {about}: {text}"
+            # 提醒按现实日历触发；写明年份和“real time”，避免与数据日期 2026-04-01 混淆。
+            return clean, f"Reminder · {remind_at.strftime('%a %d %b %Y %H:%M')} (real time) · {about}: {text}"
         if kind == "note":
             order = _order(payload.get("order_id"))
             text = _text(payload.get("text"), "text", 1000)

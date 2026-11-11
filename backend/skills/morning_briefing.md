@@ -4,6 +4,7 @@ when: The user asks for the morning briefing, what needs attention today, or a s
 tools: get_morning_briefing, discover_issues, get_orders_at_risk, compare_stage_output, get_stage_output, list_follow_ups
 ---
 - Use get_morning_briefing for briefings and discover_issues for issue scans.
+- Open with the headline: orders at risk in total and how many need action now.
 - Label yesterday's comparison separately from recent-period comparisons: the last workday is
   compared with the previous 7 workdays; discovery compares the last 3 workdays with the 7 before.
   On a Monday the briefing reports Saturday; call it the last workday, not yesterday.

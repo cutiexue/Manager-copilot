@@ -10,13 +10,14 @@ import csv
 import subprocess
 from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
-from pathlib import Path
 
 from data_loader import PRODUCTION_SOURCE, STAGES, source_ref
+import evidence_refs
 from discovery import discover_issues
+from paths import BACKEND_DIR, source_path
 from rules import (ACT_NOW_LATE_DAYS, BASELINE_WORKDAYS, CUSTOMER_SLIPPING_MIN_ORDERS, DUE_SOON_DAYS,
-                   MAX_FINDINGS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, STAGE_DROP_PERCENT,
-                   is_due_soon, is_overdue, is_workday, previous_workdays)
+                   MAX_FINDINGS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, STAGE_DROP_PERCENT,
+                   is_due_soon, is_overdue, is_workday, previous_workdays, today_iso)
 from tools import compare_stage_output, get_orders_at_risk, get_stage_output
 
 # Each finding type maps to one fixed decision prompt; these are prompts for
@@ -350,12 +351,13 @@ def _level_count(checks, level):
     return sum(entry["count"] for check in checks for entry in check["levels"] if entry["level"] == level)
 
 
-def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS, narrative_rows=False):
+def get_morning_briefing(as_of_date=None, max_findings=MAX_FINDINGS, narrative_rows=False):
     """Structured morning briefing: yesterday, what is at risk, what needs a decision.
 
     The agent gets the narrative as text only: its source rows are already in the sections above
     it, so repeating them would only lengthen the tool result. The page (narrative_rows=True)
     keeps them so each sentence opens its rows."""
+    as_of_date = as_of_date or today_iso()
     try:
         ref = date.fromisoformat(as_of_date)
     except (TypeError, ValueError):
@@ -396,7 +398,7 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS, narrati
     return {
         "status": "ok",
         "as_of_date": ref.isoformat(),
-        "snapshot_date": SNAPSHOT,
+        "snapshot_date": today_iso(),
         "yesterday": yesterday,
         "at_risk": {
             "count": risk["count"],
@@ -427,8 +429,8 @@ def get_morning_briefing(as_of_date=SNAPSHOT, max_findings=MAX_FINDINGS, narrati
         "warnings": [
             "This briefing is assembled deterministically from tool outputs; "
             "findings are signals to investigate, not diagnoses."
-        ] + (["Some checks could not be completed; see data_gaps."] if data_gaps else []) + ([] if ref.isoformat() == SNAPSHOT else [
-            f"Uses order statuses from the {SNAPSHOT} snapshot; other dates are scenarios, not historical or future facts."
+        ] + (["Some checks could not be completed; see data_gaps."] if data_gaps else []) + ([] if ref.isoformat() == today_iso() else [
+            f"Uses order statuses from the {today_iso()} snapshot; other dates are scenarios, not historical or future facts."
         ]),
     }
 
@@ -486,9 +488,6 @@ def render_briefing_text(briefing):
     return "\n".join(lines)
 
 
-BACKEND_DIR = Path(__file__).resolve().parent
-
-
 def _collect_refs(node, refs):
     """Gather every (source, row) citation in a tool result."""
     if isinstance(node, dict):
@@ -514,7 +513,7 @@ def _backend_commit():
     return result.stdout.strip() or None
 
 
-def get_briefing_payload(as_of_date=SNAPSHOT):
+def get_briefing_payload(as_of_date=None):
     """Briefing plus the raw CSV rows it cites, in the shape of the frontend fixture."""
     briefing = get_morning_briefing(as_of_date, narrative_rows=True)
     if briefing.get("status") != "ok":
@@ -525,10 +524,10 @@ def get_briefing_payload(as_of_date=SNAPSHOT):
     rows = {}
     for source, row in sorted(refs):
         if source not in tables:
-            with (BACKEND_DIR / source).open(encoding="utf-8-sig", newline="") as handle:
+            with source_path(source).open(encoding="utf-8-sig", newline="") as handle:
                 tables[source] = list(csv.reader(handle))
         header, values = tables[source][0], tables[source][row - 1]  # row 是文件行号，表头为第 1 行
-        rows[f"{source}#{row}"] = dict(zip(header, values))
+        rows[f"{source}#{row}"] = evidence_refs.with_snapshot(source, dict(zip(header, values)))
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "generator": "GET /briefings/latest",

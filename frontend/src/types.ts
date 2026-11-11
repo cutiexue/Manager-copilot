@@ -1,4 +1,4 @@
-// Shapes returned by the backend on the `src` branch (briefing.py, service.py, api.py).
+// Shapes returned by the backend in ../backend (briefing.py, service.py, api.py).
 // Keep these in sync with the backend; they mirror its output and add nothing.
 
 export interface SourceRef {
@@ -205,6 +205,13 @@ export interface ChatMessage {
   tool_calls?: ToolCall[];
   evidence?: TurnEvidence;
   proposals?: Proposal[];
+  answer_check?: AnswerCheck;
+}
+
+/** answer_check.py: the order IDs, dates and figures in an answer that the turn's tool results lack */
+export interface AnswerCheck {
+  checked: number;
+  unverified: { kind: 'order' | 'date' | 'number'; text: string }[];
 }
 
 export interface SendMessageResponse {
@@ -213,6 +220,7 @@ export interface SendMessageResponse {
   tool_calls: ToolCall[];
   evidence: TurnEvidence;
   proposals: Proposal[];
+  answer_check?: AnswerCheck;
   prompt_version: string;
 }
 
@@ -365,4 +373,27 @@ export interface EvidenceView {
   refs: SourceRef[];
   /** Raw rows for these refs when they did not come with the briefing (e.g. a chat answer) */
   rows?: Record<string, Record<string, string>>;
+}
+
+// ---- GET /orders: the Orders page list ----
+export type OrderStatusFilter = 'all' | 'unfinished' | 'at_risk' | 'complete';
+export type OrderDueFilter = 'all' | 'overdue' | '7d' | '30d';
+
+export interface OrderList {
+  status: 'ok';
+  as_of_date: string;
+  filters: { status: OrderStatusFilter; due: OrderDueFilter; stage: string; customer: string; query: string };
+  /** Counted by the backend over the orders shown */
+  summary: { orders: number; unfinished: number; at_risk: number; pieces: number; by_stage: { stage: string; orders: number }[] };
+  customers: string[];
+  stages: string[];
+  orders: OrderHit[];
+  source: string;
+}
+
+export interface EvidenceRow {
+  id: string;
+  source: string;
+  row: number;
+  data: Record<string, string>;
 }

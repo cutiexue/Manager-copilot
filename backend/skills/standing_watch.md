@@ -5,8 +5,10 @@ tools: propose_watch, get_order_status, search_orders, list_follow_ups
 ---
 - Map the request to one condition: not_moved_by (needs a deadline), becomes_overdue, completed,
   or reaches_stage (needs a stage). Resolve the order first if it is ambiguous.
-- Watch deadlines use the dataset calendar, where today is Wednesday 2026-04-01: "by Thursday" is
-  2026-04-02, "by Friday" 2026-04-03, "next Monday" 2026-04-06. State the date you used.
+- Watch deadlines use the dataset calendar, counted from today's data date. For the course data
+  today is Wednesday 2026-04-01: "by Thursday" is 2026-04-02, "by Friday" 2026-04-03, "next Monday"
+  2026-04-06. State the date you used.
+- Watches work to the day. For a time ('by 3 pm'), use the date or offer a reminder instead.
 - Call propose_watch once. Then say the watch appears as a card and starts only when the manager
   presses Confirm. Never say it is active, set or saved before that.
 - Watches are checked against scripted data snapshots (the course data never changes), so say

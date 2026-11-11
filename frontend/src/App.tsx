@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import fixtureJson from './fixtures/briefing.json';
 import { api } from './api';
 import { useRoute, type Page } from './route';
+import { useTheme } from './theme';
 import type { BriefingFixture, BriefingSource, EvidenceView, FollowUpCounts, Session } from './types';
-import Sidebar from './components/Sidebar';
+import TopBar from './components/TopBar';
+import Dock from './components/Dock';
+import ChatSidebar from './components/ChatSidebar';
+import CommandPalette, { type Command } from './components/CommandPalette';
+import OrdersPage from './components/OrdersPage';
 import TodayDigest, { suggestionsFor } from './components/TodayDigest';
 import BriefingSummary from './components/BriefingSummary';
 import { actCount } from './components/Headline';
-import DetailPanel from './components/DetailPanel';
 import Chat from './components/Chat';
 import EvidenceDrawer from './components/EvidenceDrawer';
 import ConfirmModal, { type ProposalDraft } from './components/ConfirmModal';
@@ -41,7 +45,8 @@ export default function App() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionsLoaded, setSessionsLoaded] = useState(false);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [theme, setTheme] = useTheme();
   const [evidence, setEvidence] = useState<EvidenceView | null>(null);
   const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
   const [draft, setDraft] = useState<ProposalDraft | null>(null);
@@ -94,8 +99,19 @@ export default function App() {
 
   useEffect(() => {
     document.title = `${PAGE_TITLE[route.page]} · Manager Co-Pilot`;
-    setMenuOpen(false);
   }, [route]);
+
+  // Ctrl+K (⌘K on a Mac) opens search from anywhere; pressing it again closes it.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -182,23 +198,15 @@ export default function App() {
   } else if (route.page === 'orders') {
     page = (
       <div className="page">
-        <header className="page-head">
-          <h1>Orders &amp; output</h1>
-          <p className="muted small">
-            From the {briefing.as_of_date} briefing{source === 'snapshot' ? ' (saved snapshot)' : ''}. Open any row's
-            evidence to see the source data.
-          </p>
-        </header>
-        <DetailPanel
-          briefing={briefing}
+        <OrdersPage
           onEvidence={setEvidence}
           onAsk={ask}
           onRemind={(o) =>
             propose({
               kind: 'reminder',
-              order: { order_id: o.order_id, customer: o.customer, detail: `${o.current_stage} · ${o.risk_reasons.join('; ')}` },
-              text: `Follow up on ${o.order_id} (${o.customer}): ${o.risk_reasons.join('; ')}.`,
-              reason: `At-risk order in the ${briefing.as_of_date} briefing`,
+              order: { order_id: o.order_id, customer: o.customer, detail: `${o.current_stage}${o.risk_reasons.length ? ` · ${o.risk_reasons.join('; ')}` : ''}` },
+              text: `Follow up on ${o.order_id} (${o.customer})${o.risk_reasons.length ? `: ${o.risk_reasons.join('; ')}` : ''}.`,
+              reason: `From the Orders page, data as of ${briefing.as_of_date}`,
             })
           }
         />
@@ -207,7 +215,12 @@ export default function App() {
   } else if (route.page === 'watches') {
     page = (
       <div className="page">
-        <Watches onNewWatch={() => setWatchOpen(true)} onChanged={followUpsChanged} refreshKey={followUpsKey} />
+        <Watches
+          onNewWatch={() => setWatchOpen(true)}
+          // Loading a snapshot moves the whole app to that day, so the briefing and its date reload too.
+          onChanged={() => { followUpsChanged(); void loadBriefing(); }}
+          refreshKey={followUpsKey}
+        />
       </div>
     );
   } else {
@@ -222,13 +235,33 @@ export default function App() {
     );
   }
 
+  const commands = useMemo<Command[]>(() => {
+    const go = (p: Page) => () => navigate({ page: p });
+    return [
+      { id: 'new', label: 'New chat', group: 'Pages', icon: 'plus', run: go('home') },
+      { id: 'briefing', label: 'Morning briefing', group: 'Pages', icon: 'briefing', run: go('briefing') },
+      { id: 'orders', label: 'Orders & output', group: 'Pages', icon: 'orders', run: go('orders') },
+      { id: 'actions', label: 'Actions: reminders, notes and drafts', group: 'Pages', icon: 'actions', run: go('actions') },
+      { id: 'watches', label: 'Watches & alerts', group: 'Pages', icon: 'watch', run: go('watches') },
+      { id: 'reminder', label: 'New reminder…', group: 'Actions', icon: 'remind', run: () => propose({ kind: 'reminder', text: '' }) },
+      { id: 'watch', label: 'New watch…', group: 'Actions', icon: 'watch', run: () => setWatchOpen(true) },
+      { id: 'light', label: 'Theme: light', group: 'Actions', icon: 'sun', run: () => setTheme('light') },
+      { id: 'dark', label: 'Theme: dark', group: 'Actions', icon: 'moon', run: () => setTheme('dark') },
+      { id: 'system', label: 'Theme: match system', group: 'Actions', icon: 'monitor', run: () => setTheme('system') },
+      ...sessions
+        .filter((s) => s.has_messages !== false)
+        .slice(0, 30)
+        .map((s): Command => ({
+          id: `chat-${s.id}`, label: s.title, group: 'Conversations', icon: 'chats',
+          run: () => navigate({ page: 'chat', sessionId: s.id }),
+        })),
+    ];
+  }, [navigate, propose, sessions, setTheme]);
+
   return (
-    <div className={`shell${menuOpen ? ' menu-open' : ''}`}>
-      <Sidebar
-        route={route}
-        sessions={sessions}
-        sessionsLoaded={sessionsLoaded}
-        sessionsError={sessionsError}
+    <div className="shell">
+      <div className="backdrop" aria-hidden />
+      <TopBar
         asOfDate={briefing.as_of_date}
         briefingSource={source}
         briefingDetail={
@@ -238,30 +271,34 @@ export default function App() {
               ? `Saved snapshot from backend ${data.backend_commit ?? 'unknown'}. ${briefingError ?? ''}`.trim()
               : 'Loading the live briefing'
         }
+        onSearch={() => setPaletteOpen(true)}
+        theme={theme}
+        setTheme={setTheme}
+      />
+      <main className={isChat ? 'main main-chat' : 'main'}>
+        {isChat && (
+          <ChatSidebar route={route} sessions={sessions} sessionsLoaded={sessionsLoaded} sessionsError={sessionsError} />
+        )}
+        {page}
+      </main>
+      <Dock
+        route={route}
+        sessions={sessions}
+        sessionsLoaded={sessionsLoaded}
+        sessionsError={sessionsError}
         counts={{
           decisions: actCount(briefing),
           atRisk: briefing.at_risk.count,
           actions: counts ? counts.pending_proposals + counts.due_reminders : 0,
           alerts: counts?.unread_alerts ?? 0,
         }}
-        onPick={() => setMenuOpen(false)}
       />
-      {menuOpen && <div className="sidebar-scrim" onClick={() => setMenuOpen(false)} />}
-
-      <div className="main-col">
-        <header className="mobile-bar">
-          <button className="btn btn-small" onClick={() => setMenuOpen(true)} aria-label="Open navigation">
-            ☰ Menu
-          </button>
-          <span className="mobile-title">Manager Co-Pilot</span>
-        </header>
-        <main className={isChat ? 'main main-chat' : 'main'}>{page}</main>
-      </div>
 
       <EvidenceDrawer view={evidence} rows={data.source_rows} onClose={() => setEvidence(null)} />
 
       {draft && <ConfirmModal draft={draft} onDone={saved} onClose={() => setDraft(null)} />}
       {watchOpen && <WatchModal onDone={saved} onClose={() => setWatchOpen(false)} />}
+      {paletteOpen && <CommandPalette commands={commands} onClose={() => setPaletteOpen(false)} />}
       {toast && (
         <div className="toast" role="status">
           {toast}

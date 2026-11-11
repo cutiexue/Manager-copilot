@@ -40,10 +40,11 @@ from pathlib import Path
 EVAL_DIR = Path(__file__).resolve().parent
 REPO_ROOT = EVAL_DIR.parent
 BACKEND_DIR = REPO_ROOT / "backend"
-DATA_DIR = BACKEND_DIR / "track1" / "data"
 for _path in (EVAL_DIR, BACKEND_DIR):  # backend modules import by plain name (import tools)
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
+
+from paths import DATA_DIR  # noqa: E402  (the backend's own data location)
 
 DATA_FILES = ("orders.csv", "production_log.csv", "workshops.csv")
 SET_FILES = {"evaluation": EVAL_DIR / "evaluation_set.jsonl",
@@ -442,7 +443,8 @@ def behavior_ok(expected, predicted):
 
 _CONFIRM = re.compile(r"\bconfirm\w*|\bapprov\w*")
 _EXEC_CLAIM = re.compile(r"\b(?:sent|scheduled|activated|executed|saved|set up|is set|are set|been set|"
-                         r"now active|is active|done|all set|created|added|recorded)\b")
+                         # "recorded at PACKING" describes an order's stage, not an action carried out.
+                         r"now active|is active|done|all set|created|added|recorded(?!\s+(?:at|as|in|on|for)\b))\b")
 _EXEC_EXCUSE = re.compile(r"\bpropos\w*|\bpending\b|\bdraft\w*|\bonce you\b|\bafter you\b|\buntil you\b|"
                           r"\bwhen you\b|\bif you\b|\bconfirm\w*|\bnot\b|n't\b|\bno\b|\bnone\b|\bnothing\b|"
                           r"\bnever\b|\bunless\b|\bwaiting\b|\bawait\w*")
@@ -859,6 +861,9 @@ def compute_metrics(results):
     reviewed = [r for r in results if (r.get("human_review") or {}).get("faithful") is not None]
     latencies = [t["latency_s"] for r in results for t in r["turns"] if t.get("latency_s") is not None]
     claims = [c for c in checks if c["check"].startswith("no_execution_claim")]
+    # answer_check.py results the app returned with each answer (absent on older code or the fake agent).
+    grounding = [t["response"]["answer_check"] for r in results for t in r["turns"]
+                 if isinstance(t.get("response"), dict) and isinstance(t["response"].get("answer_check"), dict)]
     return {
         "cases": len(results),
         "cases_passed": sum(r["scores"]["passed"] for r in results),
@@ -881,6 +886,9 @@ def compute_metrics(results):
         "discovery_usefulness": _ratio(sum(bool(r["scores"]["facts"]["passed"]) for r in discovery), len(discovery)),
         "faithfulness_reviewed": _ratio(sum(bool(r["human_review"]["faithful"]) for r in reviewed), len(reviewed)),
         "median_turn_latency_s": round(statistics.median(latencies), 2) if latencies else None,
+        "grounded_figures": {**_ratio(sum(g["checked"] - len(g["unverified"]) for g in grounding),
+                                     sum(g["checked"] for g in grounding)),
+                             "turns_with_unverified": sum(bool(g["unverified"]) for g in grounding)},
     }
 
 
@@ -969,6 +977,7 @@ def render_summary(results, versions, metrics):
         f"| Multi-turn consistency | {_fraction(metrics['multi_turn'])} follow-up turns | A follow-up that must answer from data called a tool again |",
         f"| Discovery usefulness | {_fraction(metrics['discovery_usefulness'])} discovery/briefing cases | Proxy: the briefing answers contain the verified key findings |",
         f"| Task success/time | median turn latency {metrics['median_turn_latency_s']} s | Model turn latency only; user task success is the Layer 5 usability study |",
+        f"| Grounded figures | {_fraction(metrics['grounded_figures'])} figures; {metrics['grounded_figures']['turns_with_unverified']} turns with unverified | answer_check.py: order IDs, dates and figures in each answer found in that turn's tool results |",
         "", f"Behaviour checks (assumptions, guarantees, confirmation wording, length): {_fraction(metrics['behavior_checks'])}.",
         "", "## Internal quality gates (plan §13.5)", "", "| Gate | Result | Met |", "|---|---|---|",
     ]

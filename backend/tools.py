@@ -2,12 +2,12 @@
 
 import difflib
 import re
-from datetime import date, timedelta
+from datetime import date
 
 from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, load_orders,
                          load_production, order_row_numbers,
                          production_row_numbers, source_ref)
-from rules import (DUE_SOON_DAYS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, SNAPSHOT, is_overdue,
+from rules import (DUE_SOON_DAYS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, is_overdue, today_iso,
                    previous_workdays, risk_reasons)
 from order_selection import current_selection
 from order_search import search_orders
@@ -116,7 +116,7 @@ def query_orders(scope='all', status=None, customer=None, category=None,
                category=category, due_from=due_from, due_to=due_to, order_ids=order_ids).items() if value is not None}
     ids = [row['order_id'] for row in matches]
     return {
-        'status': 'ok', 'snapshot_date': SNAPSHOT, 'count': len(matches),
+        'status': 'ok', 'snapshot_date': today_iso(), 'count': len(matches),
         'original_order_pieces': sum(int(row['pieces']) for row in matches),
         'by_status': grouped('status'), 'by_category': grouped('category'),
         'order_ids': ids, 'filters': filters, 'scope': scope,
@@ -158,7 +158,12 @@ def get_customer_orders(customer):
     if match["status"] != "ok":
         return {**match, "count": 0, "data": []}
     matched_orders = [order for order in load_orders() if order["customer"] == match["customer"]]
-    result = {"status": "ok", "customer": match["customer"], "count": len(matched_orders), "data": matched_orders,
+    unfinished = [order for order in matched_orders if order["status"] == "IN_PROGRESS"]
+    # Totals computed here, so an answer never adds pieces up itself.
+    result = {"status": "ok", "customer": match["customer"], "count": len(matched_orders),
+              "original_order_pieces": sum(int(order["pieces"]) for order in matched_orders),
+              "unfinished_count": len(unfinished),
+              "unfinished_order_pieces": sum(int(order["pieces"]) for order in unfinished), "data": matched_orders,
               "source": ORDERS_SOURCE, "source_rows": _order_refs(matched_orders)}
     if match["matched"] == "partial":
         result["note"] = f"'{customer.strip()}' was read as {match['customer']}, the only customer it matches."
@@ -283,8 +288,9 @@ def compare_stage_output(stage, production_date, baseline_days=7):
     }
 
 
-def get_overdue_orders(as_of_date=SNAPSHOT):
+def get_overdue_orders(as_of_date=None):
     """Find unfinished orders past their due date using the stored snapshot."""
+    as_of_date = as_of_date or today_iso()
     # 把日期文本转换成日期对象，才能比较日期和计算天数。
     try:
         reference_date = date.fromisoformat(as_of_date)
@@ -303,20 +309,21 @@ def get_overdue_orders(as_of_date=SNAPSHOT):
     return {
         "status": "ok",
         "as_of_date": reference_date.isoformat(),
-        "snapshot_date": SNAPSHOT,
+        "snapshot_date": today_iso(),
         "count": len(overdue_orders),
         "original_order_pieces": sum(int(order['pieces']) for order in overdue_orders),
         "data": overdue_orders,
         "source": ORDERS_SOURCE,
         "source_rows": _order_refs(overdue_orders),
-        "warnings": [] if reference_date.isoformat() == SNAPSHOT else [
-            f"Uses order statuses from the {SNAPSHOT} snapshot; other dates are scenarios, not historical or future facts."
+        "warnings": [] if reference_date.isoformat() == today_iso() else [
+            f"Uses order statuses from the {today_iso()} snapshot; other dates are scenarios, not historical or future facts."
         ],
     }
 
 
-def get_orders_at_risk(as_of_date=SNAPSHOT, due_within_days=DUE_SOON_DAYS):
+def get_orders_at_risk(as_of_date=None, due_within_days=DUE_SOON_DAYS):
     """List unfinished orders that are overdue, due soon, or have gone quiet."""
+    as_of_date = as_of_date or today_iso()
     try:
         reference_date = date.fromisoformat(as_of_date)
     except (TypeError, ValueError):
@@ -336,8 +343,9 @@ def get_orders_at_risk(as_of_date=SNAPSHOT, due_within_days=DUE_SOON_DAYS):
     return {
         "status": "ok",
         "as_of_date": reference_date.isoformat(),
-        "snapshot_date": SNAPSHOT,
+        "snapshot_date": today_iso(),
         "count": len(at_risk),
+        "original_order_pieces": sum(int(order["pieces"]) for order in at_risk),
         "data": at_risk,
         "source": ORDERS_SOURCE,
         "source_rows": _order_refs(at_risk),
@@ -347,8 +355,8 @@ def get_orders_at_risk(as_of_date=SNAPSHOT, due_within_days=DUE_SOON_DAYS):
             "due_within_days": due_within_days,
             "quiet_order_days": QUIET_ORDER_DAYS,
         },
-        "warnings": [] if reference_date.isoformat() == SNAPSHOT else [
-            f"Uses order statuses from the {SNAPSHOT} snapshot; other dates are scenarios, not historical or future facts."
+        "warnings": [] if reference_date.isoformat() == today_iso() else [
+            f"Uses order statuses from the {today_iso()} snapshot; other dates are scenarios, not historical or future facts."
         ],
     }
 
@@ -359,7 +367,7 @@ def trace_order(order_id):
     if found["status"] != "ok":
         return found
     order = found["data"]
-    ref = date.fromisoformat(SNAPSHOT)
+    ref = date.fromisoformat(today_iso())
 
     facts = {
         "days_since_last_activity": (ref - date.fromisoformat(order["last_activity_date"])).days,
@@ -367,7 +375,7 @@ def trace_order(order_id):
     }
     if order["status"] == "IN_PROGRESS":
         facts["days_until_due"] = (date.fromisoformat(order["due_date"]) - ref).days
-        if order["due_date"] < SNAPSHOT:
+        if order["due_date"] < today_iso():
             facts["overdue_calendar_days"] = -facts["days_until_due"]
     else:
         facts["days_late_recorded"] = int(order["days_late"])
@@ -399,7 +407,7 @@ def trace_order(order_id):
         "data": order,
         "facts": facts,
         "evidence": evidence,
-        "snapshot_date": SNAPSHOT,
+        "snapshot_date": today_iso(),
         "source": ORDERS_SOURCE,
         "message": "All facts above are computed from the cited rows; recent stage output is factory-wide context, not per-order progress.",
     }

@@ -26,10 +26,7 @@ export default function TodayDigest({ fixture, source }: Props) {
     <section className="digest" aria-labelledby="digest-title">
       <div className="digest-head">
         <h2 id="digest-title">Today</h2>
-        <span className="muted small">
-          Data as of {briefing.as_of_date}
-          {source === 'snapshot' ? ' · saved snapshot' : ''}
-        </span>
+        {source === 'snapshot' && <span className="muted small">Saved snapshot</span>}
       </div>
       <Headline briefing={briefing} />
       <a className="link" href={hrefFor({ page: 'briefing' })}>
