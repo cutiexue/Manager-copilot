@@ -89,7 +89,8 @@ def test_a_due_reminder_alerts_once(actions):
     alerts = actions.list_alerts(unread_only=True)
     assert [a["kind"] for a in alerts] == ["reminder"]
     actions.mark_alert_read(alerts[0]["id"], now=NOW)
-    assert actions.counts() == {"pending_proposals": 0, "due_reminders": 1, "active_watches": 0, "unread_alerts": 0}
+    assert actions.counts() == {"pending_proposals": 0, "due_reminders": 1, "active_watches": 0, "unread_alerts": 0,
+                                "unread_notices": 0}
     assert actions.dismiss_reminder(fired[0], now=NOW)["status"] == "DISMISSED"
 
 

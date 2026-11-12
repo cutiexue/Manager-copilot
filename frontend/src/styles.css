@@ -27,6 +27,8 @@
   --accent-soft: rgba(109, 124, 148, 0.16);
   --chart-a: #6d7c94;
   --chart-b: #a3b1c6;
+  --chart-risk: #4d5b70;         /* stage chart: orders at risk (the At risk tile's tone) */
+  --chart-rest: #8e9bb0;         /* stage chart: other unfinished orders */
   --track: rgba(163, 177, 198, 0.28);
   --risk: #b42318;              /* act now only */
   --risk-bg: rgba(180, 35, 24, 0.09);
@@ -73,6 +75,8 @@
   --accent-soft: rgba(163, 177, 198, 0.2);
   --chart-a: #a3b1c6;
   --chart-b: #6d7c94;
+  --chart-risk: #e0e5ec;
+  --chart-rest: #7b89a0;
   --track: rgba(163, 177, 198, 0.14);
   --risk: #ff8a7a;
   --risk-bg: rgba(255, 138, 122, 0.14);
@@ -172,7 +176,8 @@ code { font: 13px var(--mono); letter-spacing: 0; }
 .rank-card { background: var(--solid); border-radius: 20px; padding: 6px 10px; container-type: inline-size; }
 
 /* ---- Shell: top bar, one page, the dock ---- */
-.shell { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100vh; height: 100dvh; }
+/* One column no wider than the screen, so a wide child cannot push the page past the edge */
+.shell { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); height: 100vh; height: 100dvh; }
 .topbar {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 14px clamp(16px, 3vw, 32px);
@@ -260,6 +265,7 @@ kbd {
   position: absolute; top: -7px; right: -10px; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px;
   background: var(--accent); color: #fff; font: 700 10px/17px var(--font); text-align: center; font-variant-numeric: tabular-nums;
 }
+:root[data-theme='dark'] .dock-badge { color: #1b1919; } /* the dark accent is light grey */
 .dock-dot { position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--accent); }
 .dock-label {
   position: absolute; left: 50%; bottom: calc(100% + 12px + (var(--s) - 1) * 30px); transform: translateX(-50%);
@@ -269,18 +275,20 @@ kbd {
 }
 .dock-item:hover .dock-label, .dock-item:focus-visible .dock-label { opacity: 1; }
 .dock-item:active .dock-icon { transform: translateY(calc((var(--s) - 1) * -14px)) scale(calc(var(--s) * 0.94)); }
-.dock-pop {
-  position: absolute; left: 50%; bottom: calc(100% + 14px); transform: translateX(-50%);
-  width: min(380px, calc(100vw - 32px)); padding: 14px 8px 8px; border-radius: 22px;
+/* ---- Conversations page: every past conversation, grouped by day ---- */
+.conversations-page { display: grid; gap: 20px; min-width: 0; }
+.conversations-list { padding: 18px clamp(12px, 2vw, 20px) 14px; display: grid; gap: 10px; min-width: 0; }
+.conv-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.conv-rows .side-group:first-child { margin-top: 4px; }
+.conv-row {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  padding: 11px 12px; border-radius: 12px; color: var(--text); text-decoration: none; font-size: 15px;
+  transition: background-color 150ms ease;
 }
-.dock-pop-title { margin: 0 10px 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
-.dock-pop ul { list-style: none; margin: 0; padding: 0; max-height: 50vh; overflow-y: auto; }
-.dock-pop a {
-  display: block; padding: 9px 10px; border-radius: 12px; color: var(--text); text-decoration: none;
-  font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.dock-pop a:hover { background: var(--solid-hover); }
-.dock-pop a[aria-current='page'] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.conv-row svg { color: var(--faint); }
+.conv-row:hover, .conv-row:focus-visible { background: var(--solid-hover); }
+.conv-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conv-when { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .side-note { margin: 4px 10px 8px; font-size: 13px; color: var(--muted); }
 
 /* ---- Command palette: low in the middle, over a dimmed and blurred page ---- */
@@ -533,19 +541,43 @@ kbd {
 .stat-label { font-size: 14px; font-weight: 600; color: var(--muted); }
 .stat-dark .stat-label { color: var(--on-dark-2); }
 .stat-value { color: var(--ink); font-size: clamp(34px, 4vw, 44px); line-height: 1; font-weight: 700; letter-spacing: -0.04em; }
-.stage-chart { margin: 0; padding: 20px 24px 18px; }
-.stage-chart figcaption { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 15px; font-weight: 700; margin-bottom: 14px; }
-.stage-chart figcaption span { font-weight: 500; color: var(--muted); font-size: 13px; }
-.bars { display: grid; grid-template-columns: repeat(var(--bars, 4), minmax(0, 1fr)); gap: clamp(10px, 3vw, 28px); }
-.bar-col { display: grid; gap: 8px; justify-items: center; }
-.bar-value { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.bar-track { position: relative; width: min(100%, 72px); height: 120px; border-radius: 14px; background: var(--track); overflow: hidden; }
-.bar-fill {
-  position: absolute; inset: 0; border-radius: 14px;
-  background: linear-gradient(180deg, var(--chart-a), var(--chart-b));
-  transition: transform 560ms var(--ease-move);
+.stage-chart { margin: 0; padding: 20px 24px 16px; }
+.stage-chart figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap; font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+.chart-legend { display: flex; gap: 14px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.chart-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.key-risk { background: var(--chart-risk); }
+.key-rest { background: var(--chart-rest); }
+/* One row per stage: name, then a bar from a shared baseline with its count at the tip. The track keeps
+   room on the right so the longest bar's label never overflows. */
+.stage-rows { list-style: none; margin: 0; padding: 0; display: grid; }
+.stage-row { display: grid; grid-template-columns: 84px minmax(0, 1fr); align-items: center; gap: 12px; padding: 7px 0; border-radius: 10px; outline-offset: 2px; }
+.stage-name { font-size: 13px; color: var(--muted); }
+.stage-track { position: relative; height: 16px; margin-right: 128px; }
+.stage-track::before { content: ''; position: absolute; left: -1px; top: -7px; bottom: -7px; width: 1px; background: var(--field-line); } /* baseline */
+.stage-bar {
+  position: absolute; inset: 0 auto 0 0; width: var(--w); display: flex; gap: 2px; /* 2px surface gap between the parts */
+  border-radius: 0 4px 4px 0; overflow: hidden; transition: width 520ms var(--ease-move), opacity 150ms ease;
 }
-.bar-label { font-size: 13px; color: var(--muted); }
+.seg { flex-basis: 0; min-width: 2px; height: 100%; }
+.seg-risk { background: var(--chart-risk); }
+.seg-rest { background: var(--chart-rest); }
+.stage-value {
+  position: absolute; left: calc(var(--w) + 10px); top: 50%; transform: translateY(-50%); white-space: nowrap;
+  font-size: 13px; color: var(--muted); transition: left 520ms var(--ease-move);
+}
+.stage-value strong { font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; }
+/* Pointing at or focusing a stage keeps it at full strength and quiets the others. */
+.stage-rows.has-active .stage-row:not(.is-active) .stage-bar { opacity: 0.45; }
+.chart-tip {
+  position: absolute; z-index: 2; bottom: calc(100% + 10px); left: clamp(56px, var(--w), calc(100% - 56px)); transform: translateX(-50%);
+  display: grid; gap: 3px; min-width: 132px; padding: 9px 12px; border-radius: 12px;
+  background: var(--glass-strong); box-shadow: var(--shadow); font-size: 12px; color: var(--muted); pointer-events: none;
+}
+.chart-tip-title { font-weight: 600; color: var(--text); }
+.chart-tip-row { display: flex; align-items: center; gap: 6px; }
+.chart-tip-row strong { color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+.tip-line { display: inline-block; width: 12px; height: 3px; border-radius: 2px; }
 .orders-list { padding: 18px clamp(12px, 2vw, 20px) 16px; display: grid; gap: 14px; min-width: 0; }
 .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .orders-search { flex: 1 1 220px; }
@@ -587,6 +619,19 @@ kbd {
 }
 .composer textarea:focus { outline: none; }
 .composer .btn-primary { padding: 10px 20px; font-size: 15px; }
+/* Voice: the mic sits beside Send; while listening it turns into a pulsing stop button */
+.composer .mic { width: 42px; height: 42px; padding: 0; border-radius: 50%; color: var(--text-2); }
+.composer .mic-on { color: var(--accent-ink); background: var(--accent-soft); animation: mic-pulse 1.6s ease-in-out infinite; }
+@keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); } 50% { box-shadow: 0 0 0 7px var(--accent-soft); } }
+.voice-bar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 18px; margin-top: 12px; color: var(--muted); }
+.voice-bar label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.voice-lang select {
+  font: 500 13px var(--font); padding: 3px 8px; border-radius: 10px; border: 1px solid var(--field-line);
+  background: var(--field); color: var(--text); cursor: pointer;
+}
+.voice-auto input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); }
+.voice-status { color: var(--text-2); font-weight: 600; }
+.voice-bar + .hint { margin-top: 6px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .chip {
   font: 500 14px/1.4 var(--font); padding: 7px 14px; border-radius: 999px; cursor: pointer;
@@ -621,7 +666,7 @@ kbd {
 .md-table .table-scroll .num, .md-table .table-scroll td:first-child { white-space: nowrap; min-width: 0; }
 .md-table .link { padding: 4px 8px 6px; }
 .md a { color: var(--accent-ink); }
-.msg-ai .sources { align-self: flex-start; }
+.msg-tools { display: flex; flex-wrap: wrap; gap: 2px; align-self: flex-start; }
 .check-note { margin: 2px 0 0; color: var(--muted); }
 .check-warn { padding: 6px 12px; border-radius: 12px; background: var(--accent-soft); color: var(--text); }
 
@@ -645,6 +690,8 @@ kbd {
 .actions-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
 .fu-section { margin-top: 26px; }
 .fu-section h3 { margin: 0 0 10px; font-size: 18px; font-weight: 700; letter-spacing: -0.015em; color: var(--text); }
+.fu-section h3:has(+ .fu-rule) { margin-bottom: 2px; }
+.fu-rule { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
 .fu-section .proposal { margin-bottom: 8px; }
 .fu-list { list-style: none; margin: 0; padding: 6px; border-radius: 20px; background: var(--solid); }
 .fu-list li {
@@ -693,6 +740,10 @@ kbd {
 .calc dt { color: var(--muted); font-size: 14px; }
 .calc dd { margin: 0; font-variant-numeric: tabular-nums; }
 .source-block { margin-bottom: 16px; }
+.tool-result { margin: 12px 0; }
+.tool-result summary { cursor: pointer; padding: 10px 0; font-weight: 600; }
+.tool-result pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow-y: auto; font-size: 12px; }
+.tool-result .calc dd { min-width: 0; overflow-wrap: anywhere; }
 .source-block .table-scroll { padding: 4px; border-radius: 16px; background: var(--solid); }
 .modal {
   width: min(560px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; padding: 28px; border-radius: 28px;
@@ -741,13 +792,16 @@ kbd {
   .topbar { padding: 10px 16px; }
   .topbar .theme-switch { display: none; } /* the theme is still in search (Ctrl+K) */
   .topbar-right { flex-wrap: nowrap; }
+  /* Phones show only the date; screen readers still hear "Data as of" */
+  .phone-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .brand-name { font-size: 14px; }
   .dock-wrap { bottom: 10px; }
   .dock { padding: 6px; border-radius: 24px; }
   .dock ul { gap: 2px; }
   .dock-item, .dock-capsule { width: 46px; height: 46px; border-radius: 16px; }
-  .bars { gap: 8px; }
-  .bar-label { font-size: 11px; }
+  .stage-row { grid-template-columns: 64px minmax(0, 1fr); gap: 8px; }
+  .stage-track { margin-right: 104px; }
+  .stage-name { font-size: 12px; }
   .picker-list li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .opt-risk { justify-self: start; }
   .narrative { font-size: 15px; }
@@ -770,8 +824,9 @@ kbd {
   .palette-scrim { padding-bottom: 14vh; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .segmented-capsule, .liquid, .liquid-blob, .bar-fill, .dock-icon { transition: none; }
+  .segmented-capsule, .liquid, .liquid-blob, .stage-bar, .stage-value, .dock-icon { transition: none; }
   .is-open .liquid-option { animation: none; }
+  .composer .mic-on { animation: none; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .glass-card, .glass-panel, .glass-pop, .dock, .composer, .modal, .drawer, .palette, .pill, .module-thumb {
@@ -796,3 +851,6 @@ kbd {
 .side-list a:hover { background: var(--solid-hover); }
 .side-list a[aria-current='page'] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
 @media (max-width: 960px) { .chat-sidebar { display: none; } }
+
+/* Shown by ErrorBoundary when a page fails to render. */
+.page-error { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }

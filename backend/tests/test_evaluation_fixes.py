@@ -52,6 +52,12 @@ def test_q11_top_five_orders_come_from_one_ranking_with_their_rows():
     assert discover_issues(finding_type="nonsense")["status"] == "error"
 
 
+def test_equal_severity_orders_rank_by_due_date():
+    # ORD-029 (due today) and ORD-103 (due in 3 days) both score 0; the one due first ranks first.
+    ids = [f["details"]["order_id"] for f in discover_issues(max_findings=10, finding_type="order_at_risk")["findings"]]
+    assert ids[-1] == "ORD-029" and "ORD-103" not in ids
+
+
 def test_q26_a_plan_says_which_producers_it_actually_uses():
     plan = optimize_fastest_plan("TOPS", 800)
     assert plan["include_in_house"] is True  # in-house was allowed ...

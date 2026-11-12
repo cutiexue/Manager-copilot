@@ -1,6 +1,7 @@
 # Sprint 3 changes
 
-What changed after Sprint 2, why, and how it was checked. Tests: 260 passing (`cd backend && python -m pytest`).
+Historical changes in commit `7d4f16f`, which passed 260 tests. Later local reliability fixes and their
+validation are recorded separately in [Final fixes](FINAL_FIXES_2026-11-11.md).
 
 ## Data date
 
@@ -26,10 +27,11 @@ What changed after Sprint 2, why, and how it was checked. Tests: 260 passing (`c
 
 ## Answer check
 
-- After each answer, `answer_check.py` checks every order ID, date and figure in it against that
-  turn's tool results, allowing for rounding, percentages and thousands separators.
-- If figures appear with no tool call behind them, the model is asked once more. Anything still
-  unmatched is listed under the answer.
+- After each answer, `answer_check.py` checks supported order IDs, dates and some numeric values
+  for presence in the tool results or user request. Small integers and semantic relationships are
+  not checked; passing is not proof of factual correctness.
+- If unmatched values appear with no tool call, the model is asked once more. Remaining unmatched
+  values are listed under the answer; answers that already called a tool are not retried by this rule.
 
 ## Fixes from the Evaluation Report V1
 
@@ -42,21 +44,24 @@ What changed after Sprint 2, why, and how it was checked. Tests: 260 passing (`c
 
 ## Evaluation (real DeepSeek model, 11 Nov 2026)
 
-| Run | Held-out (30) | Development (17) |
+| Run | Iterative evaluation suite (30) | Development (17) |
 |---|---|---|
 | 1 | 26 | — |
 | 2 | 26 | — |
 | 3 | 29 | — |
 | 4 | 29 | 15 |
 
-- Run 4 scored 100% on answer correctness, numeric accuracy, evidence, multi-turn and action safety.
+- Run 4 passed the preset fact, numeric, evidence, multi-turn and action-safety checks. These are
+  bounded automated checks, not proof that every statement was correct. No human faithfulness
+  review was recorded, and the labels remain draft. The 30 cases informed development and must
+  not be reported as independent held-out results.
 - Its remaining failures were wording, not data: an offer question at the end of one answer, a
   missing assumptions line, and 53 words where 50 were allowed. The Skills were adjusted for all
   three after run 4, and no run has been made since.
-- Held-out case T1-EVAL-013 says "counting today", which conflicts with its expected answer. It
+- Evaluation case T1-EVAL-013 says "counting today", which conflicts with its expected answer. It
   needs a review by its owner and was not edited.
 - Reports are in `evaluation/reports/<time>/`. Failures are in `evaluation/failure_ledger.jsonl`.
-- Run everything with `run_evaluation.bat`.
+- `run_evaluation.bat` now defaults to offline checks; `--real` explicitly runs the paid model.
 
 ## Interface
 

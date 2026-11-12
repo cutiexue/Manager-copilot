@@ -31,6 +31,12 @@ def test_the_scheduled_briefing_runs_once_per_day(actions):
     assert manual["created"] and len(actions.list_alerts()) == 2  # a manual run raises no alert
 
 
+def test_a_briefing_missed_while_the_computer_slept_still_runs(actions):
+    app_scheduler = jobs.AppScheduler(actions, clock=lambda: MORNING)
+    job = app_scheduler.scheduler.get_job("morning_briefing")
+    assert job.misfire_grace_time is None  # no 1-hour limit after 07:00
+
+
 def test_a_failing_job_is_audited_and_the_scheduler_keeps_going(actions, monkeypatch):
     app_scheduler = jobs.AppScheduler(actions, clock=lambda: MORNING)
 

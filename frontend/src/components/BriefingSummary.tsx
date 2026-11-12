@@ -177,7 +177,11 @@ function levelCounts(check?: Check) {
 
 function CountLine({ check }: { check?: Check }) {
   const c = levelCounts(check);
-  if (c.act + c.watch === 0) return <span className="module-quiet">Nothing to flag</span>;
+  const unchecked = check?.not_checked?.length ?? 0;
+  if (c.act + c.watch === 0) {
+    // A check that could not run is never shown as all clear.
+    return <span className="module-quiet">{unchecked > 0 ? `${unchecked} not checked` : 'Nothing to flag'}</span>;
+  }
   return (
     <span className="module-levels">
       {c.act > 0 && (
@@ -190,8 +194,23 @@ function CountLine({ check }: { check?: Check }) {
           <LevelMark level="watch" /> {c.watch} watch
         </span>
       )}
+      {unchecked > 0 && <span className="module-quiet">{unchecked} not checked</span>}
     </span>
   );
+}
+
+/** "knitting, assembly · Missing production records …" for a check that could not judge everything. */
+function notCheckedText(check?: Check): string | null {
+  const gaps = check?.not_checked ?? [];
+  if (gaps.length === 0) return null;
+  const reasons = [...new Set(gaps.map((g) => g.reason))].join(' ');
+  return `Not checked · ${gaps.map((g) => g.stage.toLowerCase()).join(', ')} · ${reasons}`;
+}
+
+/** The figure on a card or thumbnail: a dash when the check found nothing because it could not run. */
+function checkFigure(check?: Check): number | null {
+  const total = check?.total ?? check?.items.length ?? 0;
+  return total === 0 && (check?.not_checked?.length ?? 0) > 0 ? null : total;
 }
 
 // A module in the overview: its title, how many items it flags and a preview. Clicking it opens
@@ -202,14 +221,15 @@ function ModuleCard({ id, title, check, briefing, onOpen }: {
   const ref = useRef<HTMLButtonElement>(null);
   useGlassPointer(ref);
   const y = briefing.yesterday;
-  const total = useRollingNumber(check?.total ?? check?.items.length ?? 0);
+  const figure = checkFigure(check);
+  const total = useRollingNumber(figure ?? 0);
   return (
     <button ref={ref} className="module glass-card" style={vt(id)} onClick={onOpen} aria-label={`Open ${title}`}>
       <span className="module-head">
         <span className="module-title">{title}</span>
         <span className="module-open-hint">Open</span>
       </span>
-      <span className="module-figure">{Math.round(total)}</span>
+      <span className="module-figure">{figure === null ? '—' : Math.round(total)}</span>
       <CountLine check={check} />
       {id === 'stage_output_drop' && y.is_workday ? (
         <span className="module-stages">
@@ -307,16 +327,19 @@ export default function BriefingSummary({ fixture, source, error, onRefresh, onE
             </div>
             {open === 'stage_output_drop' && <YesterdayStrip briefing={briefing} onEvidence={onEvidence} />}
             {openCheck && openCheck.items.length > 0 ? (
-              <div className="rank-card">{rows(openCheck)}</div>
+              <>
+                <div className="rank-card">{rows(openCheck)}</div>
+                {notCheckedText(openCheck) && <p className="empty small">{notCheckedText(openCheck)}</p>}
+              </>
             ) : (
-              <p className="empty">Nothing flagged in this check today.</p>
+              <p className="empty">{notCheckedText(openCheck) ?? 'Nothing flagged in this check today.'}</p>
             )}
           </section>
           <nav className="module-thumbs" aria-label="Other checks">
             {MODULE_ORDER.filter((id) => id !== open).map((id) => (
               <button key={id} className="module-thumb" style={vt(id)} onClick={() => show(id)}>
                 <span className="module-thumb-title">{titleOf(id)}</span>
-                <span className="module-thumb-count">{find(id)?.total ?? find(id)?.items.length ?? 0}</span>
+                <span className="module-thumb-count">{checkFigure(find(id)) ?? '—'}</span>
               </button>
             ))}
           </nav>

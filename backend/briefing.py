@@ -17,7 +17,7 @@ from discovery import discover_issues
 from paths import BACKEND_DIR, source_path
 from rules import (ACT_NOW_LATE_DAYS, BASELINE_WORKDAYS, CUSTOMER_SLIPPING_MIN_ORDERS, DUE_SOON_DAYS,
                    MAX_FINDINGS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, STAGE_DROP_PERCENT,
-                   is_due_soon, is_overdue, is_workday, previous_workdays, today_iso)
+                   data_context, is_due_soon, is_overdue, is_workday, previous_workdays, today_iso)
 from tools import compare_stage_output, get_orders_at_risk, get_stage_output
 
 # Each finding type maps to one fixed decision prompt; these are prompts for
@@ -148,10 +148,33 @@ def _summary(ref, yesterday, risk_orders, risk_rows, findings, data_gaps):
         add("yesterday", text, rows)
 
     if data_gaps:
-        add("data_gaps", f"{len(data_gaps)} {'check' if len(data_gaps) == 1 else 'checks'} could not be "
-                         "completed because records are missing.")
+        add("data_gaps", _gap_sentence(data_gaps))
 
     return {"text": " ".join(point["text"] for point in points), "points": points}
+
+
+def _gap_sentence(data_gaps):
+    """One sentence for every check that could not be completed, naming the stages."""
+    stages = [stage for stage in STAGES if any(gap["stage"] == stage for gap in data_gaps)]
+    count = len(data_gaps)
+    return (f"{count} {'check' if count == 1 else 'checks'} could not be completed for "
+            f"{_join(stages)}: usable production records are missing.")
+
+
+def _yesterday_gaps(yesterday):
+    """At most one gap per stage for the last workday: its own record first, then its baseline."""
+    gaps = []
+    for entry in yesterday["stages"]:
+        if "output_status" in entry:
+            reason = (f"No production record for {yesterday['date']}." if entry["output_status"] == "not_found"
+                      else f"Output for {yesterday['date']} unavailable ({entry['output_status']}).")
+        elif "comparison_status" in entry:
+            reason = ("Too few earlier workdays for the baseline." if entry["comparison_status"] == "insufficient_data"
+                      else f"Baseline comparison unavailable ({entry['comparison_status']}).")
+        else:
+            continue
+        gaps.append({"stage": entry["stage"], "section": "yesterday", "reason": reason})
+    return gaps
 
 
 def _plural(count, noun):
@@ -316,12 +339,13 @@ def _row_order(item, ref):
     return (item["level"] != "act", -item["finding"]["severity"], days_left)
 
 
-def _checks(ref, findings):
+def _checks(ref, findings, stage_gaps=()):
     """Every finding grouped by the check that produced it, each at a level: act now or watch.
 
     Each check is judged on its own (ACT_NOW_LATE_DAYS in rules.py), so an item's level never
     depends on the other checks. Every item carries a level, and each level carries the rule
     that put items there, so the page can show the rule beside the items it explains.
+    `not_checked` lists what a check could not judge, so an empty check is never read as all clear.
     """
     basis = {f["type"]: f["severity_basis"] for f in reversed(findings)}
     rules = _level_rules()
@@ -342,8 +366,11 @@ def _checks(ref, findings):
         levels = [{"level": level, "label": _LEVEL_LABELS[level], "rule": rule,
                    "count": sum(item["level"] == level for item in items)}
                   for level, rule in rules[kind].items()]
+        not_checked = ([{"stage": gap["stage"], "reason": gap["reason"]} for gap in stage_gaps]
+                       if kind == "stage_output_drop" else [])
         checks.append({"type": kind, "title": title, "total": len(items), "how_picked": how_picked,
-                       "ranked_by": basis.get(kind), "levels": levels, "items": items})
+                       "ranked_by": basis.get(kind), "levels": levels, "items": items,
+                       "not_checked": not_checked})
     return checks
 
 
@@ -351,6 +378,7 @@ def _level_count(checks, level):
     return sum(entry["count"] for check in checks for entry in check["levels"] if entry["level"] == level)
 
 
+@data_context()
 def get_morning_briefing(as_of_date=None, max_findings=MAX_FINDINGS, narrative_rows=False):
     """Structured morning briefing: yesterday, what is at risk, what needs a decision.
 
@@ -371,14 +399,9 @@ def get_morning_briefing(as_of_date=None, max_findings=MAX_FINDINGS, narrative_r
     findings = findings_result["findings"]
     # The summary and the review lists cover every finding, not only the ones selected for decisions.
     all_findings = discover_issues(as_of_date, max(findings_result["total_findings"], 1))["findings"]
-    checks = _checks(ref, all_findings)
+    checks = _checks(ref, all_findings, findings_result["data_gaps"])
     narrative = _narrative(ref, yesterday, risk["data"], risk["source_rows"], checks)
-    data_gaps = list(findings_result["data_gaps"])
-    for entry in yesterday["stages"]:
-        for field in ("output_status", "comparison_status"):
-            if field in entry:
-                data_gaps.append({"stage": entry["stage"], "section": "yesterday",
-                                  "reason": entry[field]})
+    data_gaps = list(findings_result["data_gaps"]) + _yesterday_gaps(yesterday)
     customer_order_ids = {
         order_id for finding in findings if finding["type"] == "customer_slipping"
         for order_id in finding["details"]["order_ids"]
@@ -429,7 +452,7 @@ def get_morning_briefing(as_of_date=None, max_findings=MAX_FINDINGS, narrative_r
         "warnings": [
             "This briefing is assembled deterministically from tool outputs; "
             "findings are signals to investigate, not diagnoses."
-        ] + (["Some checks could not be completed; see data_gaps."] if data_gaps else []) + ([] if ref.isoformat() == today_iso() else [
+        ] + ([_gap_sentence(data_gaps)] if data_gaps else []) + ([] if ref.isoformat() == today_iso() else [
             f"Uses order statuses from the {today_iso()} snapshot; other dates are scenarios, not historical or future facts."
         ]),
     }
@@ -454,7 +477,8 @@ def render_briefing_text(briefing):
                 suffix = f" ({change:+.1f}%)" if change is not None else ""
                 parts.append(f"{entry['stage']} {entry['pieces_completed']}{suffix}")
             else:
-                parts.append(f"{entry['stage']} {entry.get('output_status', 'unknown')}")
+                status = entry.get("output_status", "unknown")
+                parts.append(f"{entry['stage']} {'no record' if status == 'not_found' else status}")
         lines.append(f"{label} ({yesterday['date']}): " + "; ".join(parts))
     else:
         lines.append(f"{label} ({yesterday['date']}): scheduled rest day, no output expected.")
@@ -469,16 +493,15 @@ def render_briefing_text(briefing):
         for decision in briefing["decisions"]:
             lines.append(f"- {decision['about']} {decision['suggested_decision']}")
 
-    if yesterday["is_workday"]:
+    compared = [entry for entry in yesterday["stages"] if entry.get("change_percent") is not None]
+    if yesterday["is_workday"] and compared:
         lines.append("")
         lines.append(f"{label} vs baseline:")
-        for entry in yesterday["stages"]:
-            if "change_percent" in entry and entry["change_percent"] is not None:
-                lines.append(
-                    f"- {entry['stage']}: {entry['pieces_completed']} pcs vs "
-                    f"{entry['baseline_average']:.1f} avg over "
-                    f"{entry['baseline_workdays']} workdays "
-                    f"({entry['change_percent']:+.1f}%)")
+        lines.extend(
+            f"- {entry['stage']}: {entry['pieces_completed']} pcs vs "
+            f"{entry['baseline_average']:.1f} avg over {entry['baseline_workdays']} workdays "
+            f"({entry['change_percent']:+.1f}%)"
+            for entry in compared)
 
     lines.append("")
     lines.append("Every figure traces to the source rows in the structured briefing.")
@@ -513,8 +536,12 @@ def _backend_commit():
     return result.stdout.strip() or None
 
 
+@data_context()
 def get_briefing_payload(as_of_date=None):
     """Briefing plus the raw CSV rows it cites, in the shape of the frontend fixture."""
+    # Keep the calculated findings and their raw evidence on one snapshot, including when
+    # another request advances the app's data before the evidence rows are collected.
+    # Nested calls inherit an existing chat/job snapshot instead of selecting a new one.
     briefing = get_morning_briefing(as_of_date, narrative_rows=True)
     if briefing.get("status") != "ok":
         raise ValueError(briefing.get("message", "Briefing could not be generated."))

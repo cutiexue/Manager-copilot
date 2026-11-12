@@ -332,7 +332,7 @@ def describe(name, result, question, history):
             rows = sorted((r for r in rows if any("no recorded activity" in x for x in r.get("risk_reasons", []))),
                           key=lambda r: r["last_activity_date"])
         elif re.search(r"due within|due in the next|fall due", q):
-            rows = [r for r in rows if any(x.startswith("due in") for x in r.get("risk_reasons", []))]
+            rows = [r for r in rows if any(x.startswith(("due in", "due today")) for x in r.get("risk_reasons", []))]
         if name == "get_overdue_orders":
             rows.sort(key=lambda r: -r["overdue_calendar_days"])
         if re.search(r"longest|furthest|most overdue|worst", q) and rows:

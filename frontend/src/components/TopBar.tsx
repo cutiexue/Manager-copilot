@@ -32,7 +32,7 @@ export default function TopBar({ asOfDate, briefingSource, briefingDetail, onSea
       </a>
       <div className="topbar-right">
         <span className="pill pill-data" title="Orders, output and the briefing are judged on the dataset date.">
-          Data as of {asOfDate}
+          <span className="phone-sr">Data as of </span>{asOfDate}
         </span>
         <span className="pill pill-soft hide-narrow" title="Reminders fire on the real calendar, Singapore time.">
           Reminders: real time, {REAL_TODAY}

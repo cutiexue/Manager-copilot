@@ -51,8 +51,10 @@ def test_a_chat_turn_proposes_but_only_the_confirm_button_saves(tmp_path):
     reply = client.post(f"/sessions/{session_id}/messages", json={"message": "Remind me to chase ORD-002"}).json()
 
     assert [(c["name"], c["status"]) for c in reply["tool_calls"]] == [("trace_order", "ok"), ("propose_reminder", "proposed")]
-    assert {"source": "track1/data/orders.csv", "row": 86, "key": "ORD-002", "id": "orders.csv:86"} in reply["evidence"]["refs"]
-    assert reply["evidence"]["rows"]["track1/data/orders.csv#86"]["customer"] == "Cotton Club"
+    ref = next(r for r in reply['evidence']['refs'] if r['id'] == 'orders.csv:86@v0')
+    assert (ref['source'], ref['row'], ref['key'], ref['data_version']) == (
+        'track1/data/orders.csv', 86, 'ORD-002', 'v0')
+    assert reply['evidence']['rows'][ref['row_key']]['customer'] == 'Cotton Club'
     [proposal] = reply["proposals"]
     assert (proposal["kind"], proposal["status"], proposal["session_id"]) == ("reminder", "PROPOSED", session_id)
     assert reply["prompt_version"]
@@ -68,7 +70,8 @@ def test_a_chat_turn_proposes_but_only_the_confirm_button_saves(tmp_path):
     assert len(client.get("/reminders").json()) == 1
     assert client.get(f"/sessions/{session_id}/messages").json()[-1]["proposals"][0]["status"] == "EXECUTED"
     audit = [(e["actor"], e["event"]) for e in reversed(client.get("/audit").json())]
-    assert audit == [("agent", "proposal_created"), ("user", "confirmed"), ("system", "executed")]
+    assert audit == [("agent", "proposal_created"), ("system", "proposal_ready"),
+                     ("user", "confirmed"), ("system", "executed")]
 
 
 def test_ui_proposals_follow_the_same_rules(tmp_path):
@@ -105,9 +108,12 @@ def test_watches_alert_on_the_next_scripted_snapshot(tmp_path):
     assert client.get(f"/watches/{watch_id}").json()["status"] == "TRIGGERED"
     paused = client.post(f"/watches/{watch_id}/pause")
     assert (paused.status_code, paused.json()["code"]) == (409, "ACTION_STATE")
-    assert client.get("/follow-ups/counts").json()["unread_alerts"] == 2
+    # Only the watch the manager set up is counted; the briefing notice is not.
+    counts = client.get("/follow-ups/counts").json()
+    assert (counts["unread_alerts"], counts["unread_notices"]) == (1, 1)
     client.post(f"/alerts/{alert['id']}/read")
-    assert client.get("/follow-ups/counts").json()["unread_alerts"] == 1
+    counts = client.get("/follow-ups/counts").json()
+    assert (counts["unread_alerts"], counts["unread_notices"]) == (0, 1)
 
     client.post("/dev/data/advance")
     last = client.post("/dev/data/advance")

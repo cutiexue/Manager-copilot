@@ -29,7 +29,7 @@ from briefing import get_briefing_payload
 from order_search import list_orders, search_orders
 from scheduler import run_morning_briefing
 from service import AgentIncompleteError, ModelUnavailableError
-from storage import ConversationConflictError, SessionNotFoundError
+from storage import ConversationConflictError, RequestConflictError, RequestInProgressError, SessionNotFoundError
 
 logger = logging.getLogger('manager_copilot.api')
 
@@ -98,6 +98,10 @@ def create_app(service, scheduler=None):
             raise ApiError(404, 'NOT_FOUND', str(exc)) from None
         except ConversationConflictError as exc:
             raise ApiError(409, 'CONFLICT', str(exc)) from None
+        except RequestConflictError as exc:
+            raise ApiError(409, 'REQUEST_CONFLICT', str(exc)) from None
+        except RequestInProgressError as exc:
+            raise ApiError(409, 'REQUEST_IN_PROGRESS', str(exc)) from None
         except ActionStateError as exc:
             raise ApiError(409, 'ACTION_STATE', str(exc)) from None
         except ValueError as exc:
@@ -123,8 +127,8 @@ def create_app(service, scheduler=None):
 
     @app.post('/sessions', status_code=201)
     async def create_session(request: Request):
-        data = await body(request, ['title'])
-        return await run_in_threadpool(run, service.create_session, data.get('title', 'New conversation'))
+        data = await body(request, ['title', 'request_id'])
+        return await run_in_threadpool(run, service.create_session, data.get('title', 'New conversation'), data.get('request_id'))
 
     @app.get('/sessions/{session_id}/messages')
     def history(session_id: str):
@@ -132,8 +136,8 @@ def create_app(service, scheduler=None):
 
     @app.post('/sessions/{session_id}/messages')
     async def message(session_id: str, request: Request):
-        data = await body(request, ['message'])
-        return await run_in_threadpool(run, service.send_message, session_id, data.get('message'))
+        data = await body(request, ['message', 'request_id'])
+        return await run_in_threadpool(run, service.send_message, session_id, data.get('message'), data.get('request_id'))
 
     # ---- briefing and orders ------------------------------------------------------------------------
     @app.get('/briefings/latest')
@@ -188,9 +192,10 @@ def create_app(service, scheduler=None):
 
     @app.post('/actions/proposals', status_code=201)
     async def create_proposal(request: Request):
-        data = await body(request, ['kind', 'payload', 'reason', 'session_id'])
+        data = await body(request, ['kind', 'payload', 'reason', 'session_id', 'request_id'])
         return await run_in_threadpool(run, lambda: actions.propose(
-            data.get('kind'), data.get('payload'), 'ui', data.get('session_id'), data.get('reason')))
+            data.get('kind'), data.get('payload'), 'ui', data.get('session_id'), data.get('reason'),
+            request_id=data.get('request_id')))
 
     @app.post('/actions/{proposal_id}/confirm')
     def confirm_action(proposal_id: str):

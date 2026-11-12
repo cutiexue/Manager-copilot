@@ -7,7 +7,7 @@ understand language; it reacts to a few keywords so every UI flow can be tried:
   - "remind" + order ID                          -> propose_reminder (confirm it on the card)
   - "note" + order ID                            -> propose_order_note
   - "chase" or "draft" + order ID                -> draft_chase_message
-  - "watch", "tell me if" or "let me know" + ID  -> propose_watch (not moved by Thu 2 Apr)
+  - "watch", "tell me if" or "let me know" + ID  -> propose_watch (not moved by the next data day)
   - "at risk"                                    -> get_orders_at_risk, answered as a table
   - "briefing"                                   -> get_morning_briefing
 Anything else is echoed back. Every answer starts with [demo model].
@@ -25,6 +25,7 @@ import json
 import os
 import re
 import sys
+from datetime import date, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -42,6 +43,7 @@ from scheduler import AppScheduler  # noqa: E402
 from service import ChatService  # noqa: E402
 from storage import SQLiteStore  # noqa: E402
 from tools import canonical_order_id  # noqa: E402
+import rules  # noqa: E402
 
 ORDER = re.compile(r"\bord[\s-]*\d{1,4}\b", re.IGNORECASE)
 
@@ -61,13 +63,14 @@ def plan(question):
     if order and "note" in text:
         return [("propose_order_note", {"order_id": order, "text": question.strip()[:300]})]
     if order and any(word in text for word in ("watch", "tell me if", "let me know")):
-        return [("propose_watch", {"order_id": order, "condition": "not_moved_by", "deadline": "2026-04-02"})]
+        tomorrow = (date.fromisoformat(rules.today_iso()) + timedelta(days=1)).isoformat()
+        return [("propose_watch", {"order_id": order, "condition": "not_moved_by", "deadline": tomorrow})]
     if order:
         return [("trace_order", {"order_id": order})]
     if "at risk" in text or "at-risk" in text:
-        return [("get_orders_at_risk", {"as_of_date": "2026-04-01"})]
+        return [("get_orders_at_risk", {"as_of_date": rules.today_iso()})]
     if "briefing" in text:
-        return [("get_morning_briefing", {"as_of_date": "2026-04-01"})]
+        return [("get_morning_briefing", {"as_of_date": rules.today_iso()})]
     return []
 
 

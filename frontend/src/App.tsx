@@ -7,6 +7,7 @@ import type { BriefingFixture, BriefingSource, EvidenceView, FollowUpCounts, Ses
 import TopBar from './components/TopBar';
 import Dock from './components/Dock';
 import ChatSidebar from './components/ChatSidebar';
+import Conversations from './components/Conversations';
 import CommandPalette, { type Command } from './components/CommandPalette';
 import OrdersPage from './components/OrdersPage';
 import TodayDigest, { suggestionsFor } from './components/TodayDigest';
@@ -24,6 +25,7 @@ const snapshot = fixtureJson as unknown as BriefingFixture;
 const PAGE_TITLE: Record<Page, string> = {
   home: 'New chat',
   chat: 'Chat',
+  chats: 'Conversations',
   briefing: 'Briefing',
   orders: 'Orders & output',
   actions: 'Actions',
@@ -143,7 +145,9 @@ export default function App() {
 
   const sessionCreated = useCallback(
     (s: Session) => {
-      setSessions((list) => [{ ...s, has_messages: true }, ...list.filter((x) => x.id !== s.id)]);
+      // Stamped now until the next list load, so it is filed under Today straight away.
+      setSessions((list) => [{ ...s, has_messages: true, updated_at: s.updated_at ?? new Date().toISOString() },
+        ...list.filter((x) => x.id !== s.id)]);
       navigate({ page: 'chat', sessionId: s.id }, { replace: true });
     },
     [navigate],
@@ -180,6 +184,13 @@ export default function App() {
         welcome={route.page === 'home' ? <TodayDigest fixture={data} source={source} /> : undefined}
         suggestions={route.page === 'home' ? suggestionsFor(briefing) : undefined}
       />
+    );
+  } else if (route.page === 'chats') {
+    page = (
+      <div className="page">
+        <Conversations sessions={sessions} sessionsLoaded={sessionsLoaded} sessionsError={sessionsError}
+          onRetry={() => void loadSessions()} />
+      </div>
     );
   } else if (route.page === 'briefing') {
     page = (
@@ -239,6 +250,7 @@ export default function App() {
     const go = (p: Page) => () => navigate({ page: p });
     return [
       { id: 'new', label: 'New chat', group: 'Pages', icon: 'plus', run: go('home') },
+      { id: 'chats', label: 'Conversations', group: 'Pages', icon: 'chats', run: go('chats') },
       { id: 'briefing', label: 'Morning briefing', group: 'Pages', icon: 'briefing', run: go('briefing') },
       { id: 'orders', label: 'Orders & output', group: 'Pages', icon: 'orders', run: go('orders') },
       { id: 'actions', label: 'Actions: reminders, notes and drafts', group: 'Pages', icon: 'actions', run: go('actions') },
@@ -283,9 +295,6 @@ export default function App() {
       </main>
       <Dock
         route={route}
-        sessions={sessions}
-        sessionsLoaded={sessionsLoaded}
-        sessionsError={sessionsError}
         counts={{
           decisions: actCount(briefing),
           atRisk: briefing.at_risk.count,

@@ -2,6 +2,7 @@
 
 import json
 
+import pytest
 from langchain_core.messages import AIMessage
 
 from answer_check import check
@@ -66,6 +67,73 @@ def test_orders_from_earlier_turns_may_be_named_but_their_figures_must_be_fresh(
     assert check("The ORD-114 draft is waiting for Confirm.", [], earlier_results=earlier)["unverified"] == []
     result = check("ORD-114 has 2,000 pieces.", [], earlier_results=earlier)
     assert result["unverified"] == [{"kind": "number", "text": "2,000"}]
+
+
+def test_words_that_start_like_months_are_not_dates():
+    compare = execute_tool("compare_stage_output", json.dumps({"stage": "ASSEMBLY", "production_date": "2026-03-31"}))
+    for answer in ("Assembly output decreased 11.8% against the 515.7 baseline.",
+                   "12 may need a call today.", "I marked 12 orders.", "Output declined 12% this week.",
+                   "There are 12 separate orders."):
+        assert not [u for u in check(answer, [compare, {"count": 12}])["unverified"] if u["kind"] == "date"], answer
+    # Real month names and abbreviations are still dates.
+    dates = {u["text"] for u in check("Due 31 Mar, 12 May, Dec 12 and sept 3.", [])["unverified"]}
+    assert dates == {"2026-03-31", "2026-05-12", "2026-12-12", "2026-09-03"}
+
+
+def test_figures_in_chinese_answers_are_checked():
+    lookup = [{"order_id": "ORD-107", "pieces": 2000, "days_late": 16, "due_date": "2026-03-16", "count": 12}]
+    assert check("订单ORD-107已逾期16天，共2000件，截止2026-03-16。", lookup) == {"checked": 4, "unverified": []}
+    assert check("共有99个订单存在风险。", lookup)["unverified"] == [{"kind": "number", "text": "99"}]
+
+
+def test_a_source_row_number_vouches_only_for_a_row_citation():
+    lookup = [{"order_id": "ORD-083", "source_rows": [{"source": "track1/data/orders.csv", "row": 88,
+                                                        "key": "ORD-083"}], "count": 12}]
+    assert check("ORD-083 is on row 88 of orders.csv.", lookup)["unverified"] == []
+    assert check("ORD-083 在 orders.csv 第88行。", lookup)["unverified"] == []
+    assert check("88 orders are at risk.", lookup)["unverified"] == [{"kind": "number", "text": "88"}]
+
+
+@pytest.mark.parametrize("answer", [
+    "Evidence: row 88. There are 88 overdue orders.",
+    "There are 88 overdue orders. Evidence: row 88.",
+    "共有88个逾期订单，证据在第88行。",
+    "证据在第88行，共有88个逾期订单。",
+    "ORD-083 was due 2026-03-16. Row 88 reports 88 overdue orders.",
+])
+def test_a_row_citation_does_not_vouch_for_another_mention_of_the_same_number(answer):
+    lookup = [{"order_id": "ORD-083", "due_date": "2026-03-16", "row": 88, "count": 12}]
+    result = check(answer, lookup)
+    assert result["unverified"] == [{"kind": "number", "text": "88"}]
+    assert result["checked"] == (4 if answer.startswith("ORD-") else 2)
+
+
+@pytest.mark.parametrize("answer", [
+    "第88个订单存在风险。",
+    "请查看第88个订单，证据在第88行。",
+    "证据在第88行，请查看第88个订单。",
+])
+def test_a_chinese_ordinal_is_not_a_row_citation(answer):
+    assert check(answer, [{"row": 88}])["unverified"] == [{"kind": "number", "text": "88"}]
+
+
+@pytest.mark.parametrize("citation", ["row 88", "row #88", "line no. 88", "#88", "第88行", "第 88 行"])
+def test_real_row_citations_are_still_verified(citation):
+    answer = f"ORD-083 was due 2026-03-16; evidence: {citation}."
+    lookup = [{"order_id": "ORD-083", "due_date": "2026-03-16", "source_row": 88}]
+    assert check(answer, lookup) == {"checked": 3, "unverified": []}
+
+
+def test_a_row_citation_does_not_exempt_a_percentage_or_decimal():
+    assert check("Row 88: 88% are late, by 88.5 days.", [{"row": 88}])["unverified"] == [
+        {"kind": "number", "text": "88%"}, {"kind": "number", "text": "88.5"},
+    ]
+
+
+def test_a_repeated_number_is_valid_if_also_supported_as_a_fact():
+    assert check("Row 88 reports 88 overdue orders.", [{"row": 88, "count": 88}]) == {
+        "checked": 2, "unverified": [],
+    }
 
 
 def test_figures_without_any_lookup_are_answered_again_after_a_lookup(tmp_path):

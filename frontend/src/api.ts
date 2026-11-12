@@ -43,6 +43,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+// One path segment from an ID. IDs come from the backend or the URL hash; encoding keeps "/", "?" or "#"
+// in a crafted ID from reaching another endpoint, and "." / ".." are refused because the browser
+// would resolve them as path steps.
+function seg(id: string): string {
+  if (!id || id === '.' || id === '..') throw new ApiError('Invalid ID.', 400, 'INVALID_ID');
+  return encodeURIComponent(id);
+}
+
 export const api = {
   latestBriefing: () => request<BriefingFixture>('/briefings/latest'),
   searchOrders: (query: string, limit = 8) =>
@@ -51,32 +59,34 @@ export const api = {
     request<OrderList>(`/orders?${new URLSearchParams(f).toString()}`),
   evidence: (id: string) => request<EvidenceRow>(`/evidence/${encodeURIComponent(id)}`),
   listSessions: () => request<Session[]>('/sessions'),
-  createSession: (title: string) =>
-    request<Session>('/sessions', { method: 'POST', body: JSON.stringify({ title }) }),
-  history: (sessionId: string) => request<ChatMessage[]>(`/sessions/${sessionId}/messages`),
-  send: (sessionId: string, message: string) =>
-    request<SendMessageResponse>(`/sessions/${sessionId}/messages`, {
+  createSession: (title: string, requestId?: string) =>
+    request<Session>('/sessions', { method: 'POST', body: JSON.stringify({ title, request_id: requestId }) }),
+  history: (sessionId: string) => request<ChatMessage[]>(`/sessions/${seg(sessionId)}/messages`),
+  send: (sessionId: string, message: string, requestId?: string) =>
+    request<SendMessageResponse>(`/sessions/${seg(sessionId)}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, request_id: requestId }),
     }),
 
   // Follow-ups: a proposal is carried out only by confirm(), which runs when the manager presses Confirm.
-  proposals: (status?: string) => request<Proposal[]>(`/actions${status ? `?status=${status}` : ''}`),
-  propose: (kind: ProposalKind, payload: Record<string, unknown>, reason?: string) =>
-    request<Proposal>('/actions/proposals', { method: 'POST', body: JSON.stringify({ kind, payload, reason }) }),
-  confirm: (id: string) => request<ConfirmResult>(`/actions/${id}/confirm`, { method: 'POST' }),
-  cancel: (id: string) => request<Proposal>(`/actions/${id}/cancel`, { method: 'POST' }),
+  proposals: (status?: string) => request<Proposal[]>(`/actions${status ? `?status=${encodeURIComponent(status)}` : ''}`),
+  propose: (kind: ProposalKind, payload: Record<string, unknown>, reason?: string, requestId?: string) =>
+    request<Proposal>('/actions/proposals', {
+      method: 'POST', body: JSON.stringify({ kind, payload, reason, request_id: requestId }),
+    }),
+  confirm: (id: string) => request<ConfirmResult>(`/actions/${seg(id)}/confirm`, { method: 'POST' }),
+  cancel: (id: string) => request<Proposal>(`/actions/${seg(id)}/cancel`, { method: 'POST' }),
   counts: () => request<FollowUpCounts>('/follow-ups/counts'),
   reminders: () => request<Reminder[]>('/reminders'),
-  dismissReminder: (id: string) => request<Reminder>(`/reminders/${id}/dismiss`, { method: 'POST' }),
+  dismissReminder: (id: string) => request<Reminder>(`/reminders/${seg(id)}/dismiss`, { method: 'POST' }),
   notes: () => request<OrderNote[]>('/notes'),
   drafts: () => request<ChaseDraft[]>('/drafts'),
   audit: (limit = 50) => request<AuditEvent[]>(`/audit?limit=${limit}`),
   watches: () => request<Watch[]>('/watches'),
   changeWatch: (id: string, change: 'pause' | 'resume' | 'cancel') =>
-    request<Watch>(`/watches/${id}/${change}`, { method: 'POST' }),
+    request<Watch>(`/watches/${seg(id)}/${change}`, { method: 'POST' }),
   alerts: () => request<Alert[]>('/alerts'),
-  readAlert: (id: string) => request<Alert>(`/alerts/${id}/read`, { method: 'POST' }),
+  readAlert: (id: string) => request<Alert>(`/alerts/${seg(id)}/read`, { method: 'POST' }),
   snapshot: () => request<SnapshotState>('/data/snapshot'),
   advanceSnapshot: () => request<SnapshotState>('/dev/data/advance', { method: 'POST' }),
   resetSnapshot: () => request<SnapshotState>('/dev/data/reset', { method: 'POST' }),

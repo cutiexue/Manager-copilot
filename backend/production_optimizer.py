@@ -9,6 +9,7 @@ from data_loader import load_orders, load_workshops
 from outsourcing_risk import plan_risk
 from production_estimates import SNAPSHOT, _finish, estimate_in_house, estimate_production_plan, in_house_workdays
 from tools import query_orders
+from rules import today_iso
 
 
 class _InHouseUnavailable(Exception):
@@ -90,6 +91,7 @@ def _allocate(producers, start, deadline, quantity):
 
 def _optimize(category, total_pieces, start_date, include_in_house, queue, baseline_days, days, in_house_cost=None):
     try:
+        start_date = today_iso() if start_date is None else start_date
         start, producers = _prepare(category, total_pieces, start_date, include_in_house, queue, baseline_days,
                                     in_house_cost)
         if days is not None and (type(days) is not int or not 1 <= days <= 3650):
@@ -103,6 +105,7 @@ def _optimize(category, total_pieces, start_date, include_in_house, queue, basel
                 message += (" Outside workshops only were compared; the fastest plan, which can add in-house "
                             "capacity, gives the earliest possible date.")
             return {"status": "infeasible" if days else "search_limit", "message": message,
+                    "start_date": start.isoformat(), "scenario_start_date": start.isoformat(), "data_as_of": SNAPSHOT,
                     "deadline_date": horizon.isoformat(), "unallocated_pieces": missing,
                     "maximum_deliverable_pieces": total_pieces - missing, "include_in_house": include_in_house}
         if days is None:
@@ -168,14 +171,14 @@ def _optimize(category, total_pieces, start_date, include_in_house, queue, basel
         return {"status": "error", "message": str(exc)}
 
 
-def optimize_fastest_plan(category, total_pieces, start_date=SNAPSHOT,
+def optimize_fastest_plan(category, total_pieces, start_date=None,
                           include_in_house=True, in_house_queue_workdays=None, baseline_days=7):
     """Find earliest full delivery; break date ties by external processing cost."""
     return _optimize(category, total_pieces, start_date, include_in_house,
                      in_house_queue_workdays, baseline_days, None)
 
 
-def optimize_cheapest_plan(category, total_pieces, deadline_days, start_date=SNAPSHOT,
+def optimize_cheapest_plan(category, total_pieces, deadline_days, start_date=None,
                            include_in_house=None, in_house_queue_workdays=None, baseline_days=7,
                            in_house_cost_per_piece=None):
     """Cheapest plan within inclusive calendar deadline_days; outside workshops only unless an in-house cost per piece is given."""
@@ -272,6 +275,7 @@ def _optimize_orders(quantity_basis, scope, order_ids, start_date, deadline_days
     if deadline_days is not None and (type(deadline_days) is not int or not 1 <= deadline_days <= 3650):
         return {'status': 'error', 'message': 'deadline_days must be an integer from 1 to 3650.'}
     try:
+        start_date = today_iso() if start_date is None else start_date
         start = date.fromisoformat(start_date)
         horizon = start + timedelta(days=(deadline_days or 3650) - 1)
     except (TypeError, ValueError, OverflowError):
@@ -303,6 +307,8 @@ def _optimize_orders(quantity_basis, scope, order_ids, start_date, deadline_days
     if delivered < total:
         return {'status': 'infeasible' if deadline_days is not None else 'search_limit',
                 'message': 'Insufficient compatible capacity within the requested horizon.',
+                'start_date': start.isoformat(), 'scenario_start_date': start.isoformat(), 'data_as_of': SNAPSHOT,
+                'order_selection_as_of': today_iso(),
                 'quantity_basis': quantity_basis, 'total_pieces': total,
                 'deadline_date': horizon.isoformat(), 'maximum_deliverable_pieces': delivered,
                 'unallocated_pieces': total - delivered}
@@ -351,6 +357,7 @@ def _optimize_orders(quantity_basis, scope, order_ids, start_date, deadline_days
     completion = max(date.fromisoformat(plan['completion_date']) for plan in workshop_plans)
     result = {'status': 'ok', 'quantity_basis': quantity_basis, 'order_count': summary['count'],
             'total_pieces': total, 'by_category': demands, 'start_date': start.isoformat(),
+            'data_as_of': SNAPSHOT, 'scenario_start_date': start.isoformat(), 'order_selection_as_of': today_iso(),
             'completion_date': completion.isoformat(), 'calendar_days_inclusive': (completion - start).days + 1,
             'external_processing_cost': float(cost), 'workshops': workshop_plans, 'orders': order_plans,
             'sources': ['track1/data/orders.csv', 'track1/data/workshops.csv'],
@@ -363,7 +370,8 @@ def _optimize_orders(quantity_basis, scope, order_ids, start_date, deadline_days
                 'Orders may split freely. No category changeover time or order-specific priority/deadline constraint.',
                 'Recorded queues apply once, assumed to be other work; selected orders are not already in those queues.',
                 'Monday to Saturday workdays, inclusive start, transport added once after production.',
-                'Fixed snapshot rates and queues; no holidays or new competing orders; rework appears only in risk. Not a delivery guarantee.',
+                'Capacity and queues use the 2026-04-01 reference data; order selection uses the current data date. '
+                'No holidays or new competing orders; rework appears only in risk. Not a delivery guarantee.',
                 'Charges include external processing only, excluding transport/rework. Currency unspecified.',
             ]}
     result['risk'] = plan_risk(workshop_plans, deadline=horizon.isoformat() if deadline_days is not None else None)
@@ -378,14 +386,14 @@ def _optimize_orders(quantity_basis, scope, order_ids, start_date, deadline_days
 
 
 def optimize_orders_outsourced(quantity_basis, scope='selected', order_ids=None,
-                               start_date=SNAPSHOT, expected_order_count=None):
+                               start_date=None, expected_order_count=None):
     """Find earliest external delivery of original quantities, not remaining work."""
     return _optimize_orders(quantity_basis, scope, order_ids, start_date,
                             expected_order_count=expected_order_count)
 
 
 def optimize_orders_cheapest(quantity_basis, deadline_days, scope='selected', order_ids=None,
-                             start_date=SNAPSHOT, expected_order_count=None):
+                             start_date=None, expected_order_count=None):
     """Minimize shared-workshop processing charges within an inclusive calendar deadline."""
     if deadline_days is None:
         return {'status': 'error', 'message': 'deadline_days is required.'}

@@ -10,7 +10,7 @@ from datetime import date
 import evidence_refs
 from data_loader import STAGES, load_production, production_row_numbers
 from llm import execute_tool
-from rules import MAX_BASELINE_WORKDAYS, is_workday, previous_workdays, today_iso
+from rules import MAX_BASELINE_WORKDAYS, data_context, is_workday, previous_workdays, today_iso
 from tool_schemas import ESTIMATION_FUNCTIONS, TOOLS
 from tools import compare_stage_output, trace_order
 
@@ -30,6 +30,7 @@ def _evidence(result):
     return {"refs": refs, "rows": evidence_refs.raw_rows(refs)}
 
 
+@data_context()
 def order_detail(order_id, actions):
     """The order with its computed facts and cited rows, and the follow-ups saved for it."""
     trace = trace_order(order_id)
@@ -60,6 +61,7 @@ def latest_production_day():
     return date.fromisoformat(max(row["date"] for row in load_production() if row["date"] < today_iso()))
 
 
+@data_context()
 def stage_output(stage, on=None, baseline_days=7, days=10):
     """One stage's output on a day (default: the last workday) against its baseline, plus the
     daily series up to that day."""
@@ -100,6 +102,7 @@ def estimators():
             for tool in TOOLS if tool["function"]["name"] in ESTIMATION_FUNCTIONS]
 
 
+@data_context()
 def estimate(estimator, arguments):
     """Run one read-only feasibility estimator with the same argument checks the agent gets."""
     if estimator not in ESTIMATION_FUNCTIONS:
@@ -115,13 +118,16 @@ def estimate(estimator, arguments):
     return {"estimator": estimator, "result": result, "evidence": _evidence(result)}
 
 
-_EVIDENCE_ID = re.compile(r"([a-z_]+\.csv):([0-9]{1,7})")
+_EVIDENCE_ID = re.compile(r"([a-z_]+\.csv):([0-9]{1,7})(?:@(v[0-9]+))?")
 
 
 def evidence_row(evidence_id):
     """One cited CSV row by its ID, "<file>:<line>" such as "orders.csv:12" (the header is line 1)."""
     match = _EVIDENCE_ID.fullmatch(evidence_id.strip())
-    found = evidence_refs.lookup(match.group(1), int(match.group(2))) if match else None
+    try:
+        found = evidence_refs.lookup(match.group(1), int(match.group(2)), match.group(3)) if match else None
+    except ValueError:
+        found = None
     if found is None:
         raise NotFoundError(f"No source row {evidence_id!r}. IDs look like orders.csv:12 "
                             "(file name and line number; the header is line 1).")

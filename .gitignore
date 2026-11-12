@@ -7,6 +7,7 @@ Claude outputs/
 # Secrets
 .env
 api.txt
+env.txt
 
 # Python
 __pycache__/
@@ -22,3 +23,5 @@ __pycache__/
 # Evaluation: the progress log and runs cut short (finished reports in evaluation/reports/ are kept)
 evaluation/last_run.log
 evaluation/reports/*/results.partial.jsonl
+# Offline --fake runs (plumbing checks, not model results) never sit beside the real reports
+evaluation/reports/*-fake/

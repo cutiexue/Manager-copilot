@@ -18,3 +18,6 @@ tools: propose_watch, get_order_status, search_orders, list_follow_ups
 - Conditions on output levels, customers or anything other than one order are not supported as
   watches; say so and offer an order watch or a reminder instead.
 - For "what am I watching?", use list_follow_ups with kind="watches".
+- Only a confirmed watch or a due reminder raises an alert. Everything else found in the data (orders
+  at risk, output drops, customers slipping) waits for the morning briefing. Asked to be told about every risk,
+  say so and offer watches on named orders or a reminder to check.

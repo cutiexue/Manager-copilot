@@ -674,6 +674,11 @@ API contract 在前后端并行开发前冻结，并通过 OpenAPI schema 生成
 
 相同原因和同一订单的提醒需要 deduplicate 和 cooldown，避免一天内重复打扰。
 
+> 实现说明（2026-11-12）：最终版没有按严重程度弹提醒。只有经理自己设并确认的 watch 和提醒会打断；
+> 系统自己的发现（风险订单、工序产量下降、客户延误）一律进晨报，按严重程度排进 act now / watch。
+> 原因是课程数据没有实时更新，按发现弹提醒只会重复晨报。每个提醒有唯一 key，只弹一次。
+> 规则和理由见 README 的 “Alerts: what interrupts and what waits”。
+
 ---
 
 ## 13. Evaluation Plan

@@ -4,6 +4,7 @@ presses Confirm in the app, and there is deliberately no tool that confirms."""
 from contextlib import contextmanager
 from contextvars import ContextVar
 
+import rules
 import watches
 
 _context = ContextVar("action_context", default=None)
@@ -14,9 +15,9 @@ _NOT_SAVED = ("Not saved yet: the manager must press Confirm on the card in the 
 
 
 @contextmanager
-def action_context(actions, session_id):
+def action_context(actions, session_id, turn_id=None):
     """Make the action store and conversation available to the tools for one chat turn."""
-    token = _context.set({"actions": actions, "session_id": session_id})
+    token = _context.set({"actions": actions, "session_id": session_id, 'turn_id': turn_id})
     try:
         yield
     finally:
@@ -28,7 +29,8 @@ def _propose(kind, payload):
     if context is None:
         return dict(_UNAVAILABLE)
     try:
-        proposal = context["actions"].propose(kind, payload, "chat", context["session_id"])
+        proposal = context["actions"].propose(kind, payload, "chat", context["session_id"],
+                                             turn_id=context['turn_id'])
     except ValueError as exc:
         return {"status": "error", "message": str(exc)}
     return {"status": "proposed",
@@ -65,6 +67,6 @@ def list_follow_ups(kind=None):
         items = context["actions"].follow_ups(kind)
     except ValueError as exc:
         return {"status": "error", "message": str(exc)}
-    version = context["actions"].data_version()
+    version = rules.current_version()
     return {"status": "ok", **items, "watch_data_snapshot": watches.version_info(version),
             "note": "Watches are checked against scripted data snapshots, not live factory data."}

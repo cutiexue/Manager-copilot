@@ -44,7 +44,11 @@ def _period(stage, start, end, by_key, rows):
     recorded_workdays = sum(1 for d in recorded if is_workday(d))
     result = {
         "stage": stage, "date_from": start.isoformat(), "date_to": end.isoformat(),
-        "total_pieces": total, "calendar_days": len(days), "scheduled_workdays": len(workdays),
+        # A partial sum is not the total for the requested period. Keep the observed sum separately.
+        "total_pieces": None if missing else total, "recorded_total_pieces": total,
+        "complete_records": not missing,
+        "status": "ok" if not missing else ("partial" if recorded_workdays else "insufficient_data"),
+        "calendar_days": len(days), "scheduled_workdays": len(workdays),
         "recorded_workdays": recorded_workdays, "missing_workdays": missing,
         "mean_per_recorded_workday": round(total / recorded_workdays, 2) if recorded_workdays else None,
         "source_rows": [source_ref(PRODUCTION_SOURCE, rows[(d.isoformat(), stage)], f"{d.isoformat()} {stage}")
@@ -68,13 +72,15 @@ def summarize_stage_output(date_from, date_to, stage=None):
     periods = [_period(s, start, end, by_key, rows) for s in stages]
     missing = any(p["missing_workdays"] for p in periods)
     return {
-        "status": "ok", "date_from": start.isoformat(), "date_to": end.isoformat(),
+        "status": ("ok" if not missing else
+                   "partial" if any(p["recorded_workdays"] for p in periods) else "insufficient_data"),
+        "date_from": start.isoformat(), "date_to": end.isoformat(),
         "stages": periods, "source": PRODUCTION_SOURCE,
         "rules": "Workdays are Monday to Saturday; Sunday rows are recorded as 0 and add nothing. A workday "
                  "without a record is listed in missing_workdays, never counted as zero.",
         "warnings": ["Factory-wide stage output, not per-order progress or capacity."] + (
-            ["Some workdays have no record; mean_per_scheduled_workday is left out and totals cover recorded "
-             "days only."] if missing else []),
+            ["Some workdays have no record; total_pieces is unknown for those stages. "
+             "recorded_total_pieces covers recorded days only, not the full period."] if missing else []),
     }
 
 
@@ -107,23 +113,34 @@ def compare_stage_periods(first_from=None, first_to=None, second_from=None, seco
     comparisons = []
     for s in stages:
         a, b = _period(s, *first, by_key, rows), _period(s, *second, by_key, rows)
-        change = b["total_pieces"] - a["total_pieces"]
+        comparable = a["complete_records"] and b["complete_records"]
+        change = b["total_pieces"] - a["total_pieces"] if comparable else None
         comparisons.append({
             "stage": s, "first_total": a["total_pieces"], "second_total": b["total_pieces"], "change": change,
-            "change_percent": round(100 * change / a["total_pieces"], 2) if a["total_pieces"] else None,
+            "change_percent": round(100 * change / a["total_pieces"], 2) if comparable and a["total_pieces"] else None,
+            "first_recorded_total": a["recorded_total_pieces"], "second_recorded_total": b["recorded_total_pieces"],
+            "comparable": comparable,
+            "status": ("ok" if comparable else "insufficient_data"
+                       if not a["recorded_workdays"] or not b["recorded_workdays"] else "partial"),
             "first_missing_workdays": a["missing_workdays"], "second_missing_workdays": b["missing_workdays"],
             "source_rows": a["source_rows"] + b["source_rows"],
         })
-    ranked = [c for c in comparisons if c["change_percent"] is not None]
     complete = not any(c["first_missing_workdays"] or c["second_missing_workdays"] for c in comparisons)
+    # A global "largest" claim needs every requested stage to be comparable.
+    ranked = [c for c in comparisons if c["change_percent"] is not None] if complete else []
+    declines = [c for c in ranked if c["change_percent"] < 0]
+    increases = [c for c in ranked if c["change_percent"] > 0]
     return {
-        "status": "ok", "basis": basis,
+        "status": ("ok" if complete else "insufficient_data"
+                   if all(c["status"] == "insufficient_data" for c in comparisons) else "partial"), "basis": basis,
         "first_period": {"date_from": first[0].isoformat(), "date_to": first[1].isoformat()},
         "second_period": {"date_from": second[0].isoformat(), "date_to": second[1].isoformat()},
         "stages": comparisons,
-        "largest_decline": min(ranked, key=lambda c: c["change_percent"])["stage"] if ranked else None,
-        "largest_increase": max(ranked, key=lambda c: c["change_percent"])["stage"] if ranked else None,
+        "largest_decline": min(declines, key=lambda c: c["change_percent"])["stage"] if declines else None,
+        "largest_increase": max(increases, key=lambda c: c["change_percent"])["stage"] if increases else None,
         "complete_records": complete, "source": PRODUCTION_SOURCE,
         "warnings": ["A change in output is not a diagnosis of its cause."] + (
-            [] if complete else ["Some workdays have no record, so the totals are not fully comparable."]),
+            [] if complete else ["Stages with missing workdays have unknown period totals and no change "
+                                 "or ranking; recorded totals alone are not comparable. Overall largest-change "
+                                 "rankings are withheld until every requested stage has complete records."]),
     }

@@ -9,6 +9,7 @@ Times use the application clock (Asia/Singapore). Watches use the data clock ins
 scripted snapshot in use (see watches.py), never the computer's date.
 """
 
+import hashlib
 import json
 import re
 from datetime import date, datetime, time, timedelta
@@ -23,6 +24,11 @@ from tools import canonical_order_id
 APP_TZ = ZoneInfo("Asia/Singapore")
 PROPOSAL_TTL = timedelta(hours=24)
 KINDS = ("reminder", "note", "chase_message", "watch")
+# Alert policy (README "Alerts: what interrupts and what waits"): only what the manager set up and
+# confirmed, a watch or a reminder, raises an alert that is counted on the dock. A new briefing is a
+# notice and is not counted. Findings (orders at risk, output drops, customers slipping) never alert;
+# they wait for the morning briefing.
+INTERRUPTING_ALERTS = ("reminder", "watch")
 _WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
 SCHEMA = [
@@ -158,6 +164,13 @@ class ActionStore:
         with self.store.connection() as conn:
             for statement in SCHEMA:
                 conn.execute(statement)
+            # Additive migration keeps existing conversations, confirmed actions and audit history.
+            columns = {row['name'] for row in conn.execute('PRAGMA table_info(action_proposals)')}
+            for name in ('request_id', 'request_fingerprint', 'turn_id'):
+                if name not in columns:
+                    conn.execute(f'ALTER TABLE action_proposals ADD COLUMN {name} TEXT')
+            conn.execute('CREATE UNIQUE INDEX IF NOT EXISTS proposal_request_id '
+                         'ON action_proposals(request_id) WHERE request_id IS NOT NULL')
         self._sync_today()
 
     def _sync_today(self):
@@ -200,7 +213,7 @@ class ActionStore:
         return info
 
     # ---- proposals -------------------------------------------------------------------------------
-    def _prepare(self, kind, payload, now):
+    def _prepare(self, kind, payload, now, data_version=None):
         """Validate a proposal's payload and return (clean payload, summary)."""
         if kind not in KINDS:
             raise ValueError(f"kind must be one of {', '.join(KINDS)}.")
@@ -227,7 +240,7 @@ class ActionStore:
             return ({"order_id": order["order_id"], "customer": order["customer"], "text": text},
                     f"Chase-up draft for {order['customer']} ({order['order_id']}); not sent")
         order = _order(payload.get("order_id"))
-        version = self.data_version()
+        version = data_version or self.data_version()
         state = watches.order_state(order["order_id"], version)
         data_date = date.fromisoformat(watches.version_info(version)["date"])
         deadline, stage = watches.check_definition(payload.get("condition"), state, data_date,
@@ -237,20 +250,67 @@ class ActionStore:
         return ({"order_id": order["order_id"], "condition": condition, "deadline": deadline, "stage": stage,
                  "current": watches.baseline(state), "data_version": version}, summary)
 
-    def propose(self, kind, payload, source, session_id=None, reason=None, now=None):
+    def propose(self, kind, payload, source, session_id=None, reason=None, now=None, *, request_id=None, turn_id=None):
+        """Create once per UI request ID; chat drafts become confirmable only after their turn commits."""
         now = now or now_sg()
         if source not in ("chat", "ui"):
             raise ValueError("source must be chat or ui.")
-        clean, summary = self._prepare(kind, payload, now)
+        if request_id is not None and (not isinstance(request_id, str) or
+                                      not re.fullmatch(r'[A-Za-z0-9._:-]{1,128}', request_id)):
+            raise ValueError('request_id must be 1 to 128 letters, digits, dots, underscores, colons or hyphens.')
+        if turn_id is not None and source != 'chat':
+            raise ValueError('Only a chat proposal can belong to a turn.')
+        # Hash the original intent, not its time-relative interpretation. A retry of "tomorrow"
+        # after midnight must return the first proposal rather than move the existing reminder.
+        fingerprint = hashlib.sha256(json.dumps(
+            [kind, payload, source, session_id, reason], sort_keys=True, ensure_ascii=False,
+            allow_nan=False, separators=(',', ':')).encode()).hexdigest()
         proposal_id = str(uuid4())
         with self.store.connection() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            if request_id is not None:
+                previous = conn.execute('SELECT * FROM action_proposals WHERE request_id=?', (request_id,)).fetchone()
+                if previous is not None:
+                    if previous['request_fingerprint'] != fingerprint:
+                        raise ActionStateError('This request_id was already used for a different action. '
+                                               'Use a new request_id when changing the request.')
+                    return self._proposal(previous)
+            clean, summary = self._prepare(kind, payload, now,
+                                           rules.current_version() if turn_id is not None else None)
+            status = 'DRAFT' if turn_id is not None else 'PROPOSED'
             conn.execute('INSERT INTO action_proposals (id, kind, status, source, session_id, payload, summary, '
-                         'reason, created_at, expires_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                         (proposal_id, kind, "PROPOSED", source, session_id, json.dumps(clean, ensure_ascii=False),
-                          summary, reason, _iso(now), _iso(now + PROPOSAL_TTL)))
+                         'reason, created_at, expires_at, request_id, request_fingerprint, turn_id) '
+                         'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                         (proposal_id, kind, status, source, session_id, json.dumps(clean, ensure_ascii=False),
+                          summary, reason, _iso(now), _iso(now + PROPOSAL_TTL), request_id, fingerprint, turn_id))
             self._audit(conn, "agent" if source == "chat" else "user", "proposal_created", now, proposal_id,
-                        kind, None, {"summary": summary})
+                        kind, None, {"summary": summary, 'status': status, 'turn_id': turn_id})
         return self.get(proposal_id)
+
+    def activate_turn(self, conn, turn_id, now=None):
+        """Activate only this turn's drafts inside the conversation-save transaction."""
+        now = now or now_sg()
+        rows = conn.execute("SELECT id, kind FROM action_proposals WHERE turn_id=? AND status='DRAFT'",
+                            (turn_id,)).fetchall()
+        for row in rows:
+            conn.execute("UPDATE action_proposals SET status='PROPOSED' WHERE id=? AND status='DRAFT'", (row['id'],))
+            self._audit(conn, 'system', 'proposal_ready', now, row['id'], row['kind'], detail={'turn_id': turn_id})
+
+    def fail_turn(self, turn_id, now=None):
+        """Invalidate only uncommitted drafts from this turn; never undo previously confirmed work."""
+        now = now or now_sg()
+        with self.store.connection() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            rows = conn.execute("SELECT id, kind FROM action_proposals WHERE turn_id=? AND status='DRAFT'",
+                                (turn_id,)).fetchall()
+            for row in rows:
+                conn.execute("UPDATE action_proposals SET status='FAILED',decided_at=?,error=? WHERE id=? AND status='DRAFT'",
+                             (_iso(now), 'The chat turn did not complete; this proposal cannot be confirmed.', row['id']))
+                self._audit(conn, 'system', 'proposal_invalidated', now, row['id'], row['kind'],
+                            detail={'turn_id': turn_id, 'reason': 'chat_turn_failed'})
+            if rows:
+                self._audit(conn, 'system', 'turn_failed', now,
+                            detail={'turn_id': turn_id, 'invalidated_proposals': len(rows)})
 
     @staticmethod
     def _proposal(row):
@@ -270,6 +330,8 @@ class ActionStore:
         if status:
             query += ' AND status=?'
             args.append(status)
+        else:
+            query += " AND status!='DRAFT'"
         if session_id:
             query += ' AND session_id=?'
             args.append(session_id)
@@ -329,10 +391,10 @@ class ActionStore:
     def expire_stale(self, now=None):
         now = now or now_sg()
         with self.store.connection() as conn:
-            rows = conn.execute("SELECT id, kind FROM action_proposals WHERE status='PROPOSED' AND expires_at < ?",
+            rows = conn.execute("SELECT id, kind FROM action_proposals WHERE status IN ('PROPOSED','DRAFT') AND expires_at < ?",
                                 (_iso(now),)).fetchall()
             for row in rows:
-                conn.execute("UPDATE action_proposals SET status='EXPIRED', decided_at=? WHERE id=? AND status='PROPOSED'",
+                conn.execute("UPDATE action_proposals SET status='EXPIRED', decided_at=? WHERE id=? AND status IN ('PROPOSED','DRAFT')",
                              (_iso(now), row["id"]))
                 self._audit(conn, "system", "proposal_expired", now, row["id"], row["kind"])
         return len(rows)
@@ -565,12 +627,16 @@ class ActionStore:
         return {name: load() for name, load in picked.items()}
 
     def counts(self):
+        marks = ",".join("?" * len(INTERRUPTING_ALERTS))
         with self.store.connection() as conn:
-            def one(query):
-                return conn.execute(query).fetchone()[0]
+            def one(query, params=()):
+                return conn.execute(query, params).fetchone()[0]
             return {
                 "pending_proposals": one("SELECT COUNT(*) FROM action_proposals WHERE status='PROPOSED'"),
                 "due_reminders": one("SELECT COUNT(*) FROM reminders WHERE status='DUE'"),
                 "active_watches": one("SELECT COUNT(*) FROM watches WHERE status='ACTIVE'"),
-                "unread_alerts": one("SELECT COUNT(*) FROM alerts WHERE read_at IS NULL"),
+                "unread_alerts": one(f"SELECT COUNT(*) FROM alerts WHERE read_at IS NULL AND kind IN ({marks})",
+                                     INTERRUPTING_ALERTS),
+                "unread_notices": one(f"SELECT COUNT(*) FROM alerts WHERE read_at IS NULL AND kind NOT IN ({marks})",
+                                      INTERRUPTING_ALERTS),
             }

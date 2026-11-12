@@ -162,7 +162,8 @@ def discover_issues(as_of_date=None, max_findings=MAX_FINDINGS, finding_type=Non
         "customer_slipping": _customer_findings(orders, order_rows, ref),
     }
     for group in groups.values():
-        group.sort(key=lambda finding: finding["severity"], reverse=True)
+        # Equal severity: the order due first comes first (an order due today before one due in 3 days).
+        group.sort(key=lambda finding: (-finding["severity"], finding["details"].get("due_date", "")))
     if finding_type is not None:
         # One kind only: its severities share a unit, so a straight ranking is meaningful.
         groups = {finding_type: groups[finding_type]}

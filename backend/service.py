@@ -2,14 +2,16 @@
 
 import json
 from datetime import date
+from uuid import uuid4
 
 import openai
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, messages_from_dict, messages_to_dict
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage, messages_from_dict, messages_to_dict
 from langgraph.errors import GraphRecursionError
 
 import answer_check
 import evidence_refs
 import rules
+import watches
 from action_tools import action_context
 from actions import ActionNotFoundError, ActionStore
 from llm import PROMPT_VERSION, build_agent
@@ -102,7 +104,7 @@ def needs_lookup(answer, messages, question, earlier):
     return bool(checked(answer, messages, question, earlier)['unverified'])
 
 
-def turn_details(messages, actions=None):
+def turn_details(messages, actions=None, *, include_evidence=True):
     """What one turn did: tool calls in order, the CSV rows its tools cited, and any proposals."""
     calls, by_id, results = [], {}, []
     for message in messages:
@@ -115,8 +117,9 @@ def turn_details(messages, actions=None):
             result = _result(message)
             if getattr(message, 'tool_call_id', None) in by_id:
                 by_id[message.tool_call_id]['status'] = result.get('status')
+                by_id[message.tool_call_id]['result'] = result
             results.append(result)
-    refs = evidence_refs.collect(results)
+    refs = evidence_refs.collect(results, versioned=include_evidence, resolve_implicit=include_evidence)
     proposals = []
     for result in results:
         if result.get('status') == 'proposed' and isinstance(result.get('proposal'), dict):
@@ -124,9 +127,29 @@ def turn_details(messages, actions=None):
                 proposals.append(actions.get(result['proposal']['id']) if actions else result['proposal'])
             except ActionNotFoundError:
                 continue
-    return {'tool_calls': calls,
-            'evidence': {'refs': refs, 'rows': evidence_refs.raw_rows(refs[:MAX_EVIDENCE_ROWS])},
-            'proposals': proposals}
+    evidence = {'refs': refs, 'rows': {}, 'source_context': 'legacy_unknown',
+                'warnings': ['Historical data version was not recorded; original tool outputs are available '
+                             'but current CSV rows are not substituted.']}
+    if include_evidence:
+        evidence = {'refs': refs, 'rows': evidence_refs.raw_rows(refs[:MAX_EVIDENCE_ROWS]),
+                    'data_version': rules.current_version(), 'data_date': rules.today_iso(),
+                    'source_context': 'recorded_snapshot', 'warnings': []}
+    return {'tool_calls': calls, 'evidence': evidence, 'proposals': proposals}
+
+
+def _record_turn(final_message, messages, question, earlier=(), retried=False):
+    """Keep the answer's actual evidence rows and check, rather than rebuilding them later.
+
+    response_metadata is persisted by LangChain message serialization, but is not
+    model content. Historical tool results already hold each original structured result.
+    """
+    evidence = turn_details(messages)['evidence']
+    check = {**checked(final_message.content, messages, question, earlier), 'retried': retried}
+    final_message.response_metadata['manager_copilot'] = {
+        'data_version': rules.current_version(), 'data_date': rules.today_iso(),
+        'evidence': evidence, 'answer_check': check,
+    }
+    return evidence, check
 
 
 class ChatService:
@@ -136,8 +159,8 @@ class ChatService:
         self.actions.setup()
         self.agent = agent if agent is not None else build_agent(config)
 
-    def create_session(self, title='New conversation'):
-        return self.store.create_session(title)
+    def create_session(self, title='New conversation', request_id=None):
+        return self.store.create_session(title, request_id)
 
     def list_sessions(self):
         return self.store.list_sessions()
@@ -156,19 +179,51 @@ class ChatService:
             turn.append(message)
             if message.type == 'ai' and message.content and not getattr(message, 'tool_calls', None):
                 item = {'role': 'ai', 'content': message.content}
-                details = turn_details(turn, self.actions)
+                details = turn_details(turn, self.actions, include_evidence=False)
+                saved_context = message.response_metadata.get('manager_copilot', {})
+                if not isinstance(saved_context, dict):
+                    saved_context = {}
+                if isinstance(saved_context.get('evidence'), dict):
+                    details['evidence'] = saved_context['evidence']
                 if details['tool_calls']:
                     item.update(details)
-                item['answer_check'] = checked(message.content, turn, question, earlier)
+                item['answer_check'] = saved_context.get('answer_check',
+                    {'checked': 0, 'unverified': [], 'retried': False, 'unavailable': True})
                 history.append(item)
         return history
 
-    def send_message(self, session_id, message):
+    def send_message(self, session_id, message, request_id=None):
         if not isinstance(message, str) or not message.strip() or len(message) > 20000:
             raise ValueError('Message must contain 1 to 20000 characters.')
-        turn = {}
-
+        turn_id = str(uuid4())
         question = message.strip()
+        claim = self.store.claim_chat_request(session_id, request_id, question, turn_id)
+        if claim is not None and 'response' in claim:
+            # Replay the original answer and its frozen evidence, but show each card's
+            # current state just as get_history does after confirmation or cancellation.
+            response = claim['response']
+            proposals = []
+            for proposal in response.get('proposals', []):
+                try:
+                    proposals.append(self.actions.get(proposal['id']))
+                except ActionNotFoundError:
+                    continue
+            return {**response, 'proposals': proposals}
+        try:
+            with self.store.keep_chat_request_alive(claim):
+                if claim is not None and claim.get('abandoned_turn'):
+                    self.actions.fail_turn(claim['abandoned_turn'])
+                return self._generate_message(session_id, question, turn_id, claim)
+        except BaseException:
+            try:
+                self.actions.fail_turn(turn_id)
+            finally:
+                self.store.fail_chat_request(claim)
+            raise
+
+    def _generate_message(self, session_id, question, turn_id, claim):
+        turn = {}
+        snapshot = watches.version_info(self.actions.data_version())
 
         def ask(history, retry=False):
             note = today_note(self.actions, session_id)
@@ -176,7 +231,7 @@ class ChatService:
                 note = SystemMessage(content=f'{note.content}\n{RETRY_NOTE}', name='data_date')
             messages = history + [note, HumanMessage(content=question)]
             try:
-                with selection_context(messages), plan_context(messages), action_context(self.actions, session_id):
+                with selection_context(messages), plan_context(messages), action_context(self.actions, session_id, turn_id):
                     result = self.agent.invoke({'messages': messages}, {'recursion_limit': 16})
             except GraphRecursionError as exc:
                 raise AgentIncompleteError('The assistant needed too many steps and stopped before answering.') from exc
@@ -200,13 +255,32 @@ class ChatService:
             if turn['retried']:
                 everything, new, content = ask(history, retry=True)
             turn['messages'], turn['earlier'] = new, history
+            turn['answer'] = content
+            # Store the normalized answer and frozen evidence before committing the turn.
+            everything[-1].content = content
+            turn['evidence'], turn['check'] = _record_turn(everything[-1], new, question, history, turn['retried'])
             return messages_to_dict(_saved(everything)), content
 
-        answer = self.store.update_turn(session_id, generate)
-        messages = turn.get('messages', [])
-        check = {**checked(answer, messages, question, turn.get('earlier', [])), 'retried': turn.get('retried', False)}
-        return {'session_id': session_id, 'answer': answer, **turn_details(messages, self.actions),
-                'answer_check': check, 'prompt_version': PROMPT_VERSION}
+        def commit_response(conn):
+            self.actions.activate_turn(conn, turn_id)
+            details = turn_details(turn.get('messages', []), include_evidence=False)
+            # Read the newly activated cards through this same transaction, not a second
+            # connection that would still see DRAFT until the transaction commits.
+            proposals = []
+            for proposal in details['proposals']:
+                row = conn.execute('SELECT * FROM action_proposals WHERE id=?', (proposal['id'],)).fetchone()
+                if row is not None:
+                    proposals.append(self.actions._proposal(row))
+            details['proposals'] = proposals
+            details['evidence'] = turn['evidence']
+            turn['response'] = {'session_id': session_id, 'answer': turn['answer'], **details,
+                                'answer_check': turn['check'], 'prompt_version': PROMPT_VERSION}
+            # The response, history and proposal activation either all commit or all roll back.
+            self.store.complete_chat_request(conn, claim, turn['response'])
+
+        with rules.data_context(snapshot['version'], snapshot['date']):
+            self.store.update_turn(session_id, generate, on_commit=commit_response)
+            return turn['response']
 
     def morning_briefing(self, session_id):
         """Generate an on-demand briefing locally and persist it in the conversation."""
@@ -217,10 +291,18 @@ class ChatService:
             if report['status'] != 'ok':
                 raise RuntimeError('Briefing could not be generated.')
             answer = render_briefing_text(report)
-            messages = messages_from_dict(saved) + [
+            call_id = str(uuid4())
+            new = [
                 HumanMessage(content='Show the morning briefing for the dataset reference date.'),
+                AIMessage(content='', tool_calls=[{'name': 'get_morning_briefing',
+                    'args': {'as_of_date': rules.today_iso()}, 'id': call_id, 'type': 'tool_call'}]),
+                ToolMessage(content=json.dumps(report), name='get_morning_briefing', tool_call_id=call_id),
                 AIMessage(content=answer),
             ]
+            _record_turn(new[-1], new[1:], new[0].content)
+            messages = messages_from_dict(saved) + new
             return messages_to_dict(messages), answer
 
-        return {'session_id': session_id, 'answer': self.store.update_turn(session_id, generate)}
+        snapshot = watches.version_info(self.actions.data_version())
+        with rules.data_context(snapshot['version'], snapshot['date']):
+            return {'session_id': session_id, 'answer': self.store.update_turn(session_id, generate)}

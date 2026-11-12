@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 // Hash routes (#/briefing, #/chat/<id>) keep the current page on refresh and make the
 // browser back button work, without adding a router dependency.
 
-export type Page = 'home' | 'chat' | 'briefing' | 'orders' | 'actions' | 'watches';
+export type Page = 'home' | 'chat' | 'chats' | 'briefing' | 'orders' | 'actions' | 'watches';
 
 export interface Route {
   page: Page;
@@ -11,10 +11,24 @@ export interface Route {
   sessionId?: string;
 }
 
+// Conversation IDs are UUIDs (backend/storage.py). Anything else in the address is ignored, so a
+// crafted link cannot steer a request to another endpoint, and a bad "%" escape cannot crash the page.
+const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function decodeSessionId(raw: string): string | null {
+  try {
+    const id = decodeURIComponent(raw);
+    return SESSION_ID.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 export function parseHash(hash: string): Route {
-  const [, page = '', id] = hash.replace(/^#/, '').split('/');
-  if (page === 'chat' && id) return { page: 'chat', sessionId: decodeURIComponent(id) };
-  if (page === 'briefing' || page === 'orders' || page === 'actions' || page === 'watches') return { page };
+  const [, page = '', raw] = hash.replace(/^#/, '').split('/');
+  const id = page === 'chat' && raw ? decodeSessionId(raw) : null;
+  if (id) return { page: 'chat', sessionId: id };
+  if (page === 'chats' || page === 'briefing' || page === 'orders' || page === 'actions' || page === 'watches') return { page };
   return { page: 'home' };
 }
 

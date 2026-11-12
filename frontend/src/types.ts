@@ -7,6 +7,8 @@ export interface SourceRef {
   key: string;
   /** "<file>:<line>", e.g. "orders.csv:86"; GET /evidence/{id} returns that row. Chat answers carry it. */
   id?: string;
+  data_version?: string;
+  row_key?: string;
 }
 
 export interface Evidence {
@@ -125,6 +127,8 @@ export interface Check {
   /** Older briefings only: when an item was flagged */
   flag_rule?: string;
   items: CheckItem[];
+  /** What the check could not judge, e.g. stages with no production records; empty is not "all clear" */
+  not_checked?: { stage: string; reason: string }[];
 }
 
 export interface Briefing {
@@ -190,12 +194,17 @@ export interface ToolCall {
   name: string;
   arguments: Record<string, unknown>;
   status: string | null;
+  result?: Record<string, unknown>;
 }
 
 /** The CSV rows the turn's tools cited, and those rows as they appear in the files */
 export interface TurnEvidence {
   refs: SourceRef[];
   rows: Record<string, Record<string, string>>;
+  data_version?: string | null;
+  data_date?: string | null;
+  source_context?: string;
+  warnings?: string[];
 }
 
 export interface ChatMessage {
@@ -226,7 +235,7 @@ export interface SendMessageResponse {
 
 // ---- Follow-ups (actions.py): proposals and what confirming them creates ----
 export type ProposalKind = 'reminder' | 'note' | 'chase_message' | 'watch';
-export type ProposalStatus = 'PROPOSED' | 'EXECUTED' | 'CANCELLED' | 'FAILED' | 'EXPIRED';
+export type ProposalStatus = 'DRAFT' | 'PROPOSED' | 'EXECUTED' | 'CANCELLED' | 'FAILED' | 'EXPIRED';
 
 export interface Proposal {
   id: string;
@@ -321,7 +330,10 @@ export interface FollowUpCounts {
   pending_proposals: number;
   due_reminders: number;
   active_watches: number;
+  /** Unread alerts from a watch or reminder the manager set up; the only alerts counted on the dock */
   unread_alerts: number;
+  /** Unread system notices (a new briefing); not counted */
+  unread_notices: number;
 }
 
 /** A scripted data snapshot that watches are checked against */
@@ -370,6 +382,11 @@ export interface EvidenceView {
   claim: string;
   /** Calculation lines, copied from tool output fields (never computed here) */
   calculation: { label: string; value: string }[];
+  calculationTitle?: string;
+  toolResults?: { name: string; result: Record<string, unknown> }[];
+  dataVersion?: string | null;
+  dataDate?: string | null;
+  warnings?: string[];
   refs: SourceRef[];
   /** Raw rows for these refs when they did not come with the briefing (e.g. a chat answer) */
   rows?: Record<string, Record<string, string>>;
@@ -379,12 +396,19 @@ export interface EvidenceView {
 export type OrderStatusFilter = 'all' | 'unfinished' | 'at_risk' | 'complete';
 export type OrderDueFilter = 'all' | 'overdue' | '7d' | '30d';
 
+/** Orders shown at one stage, and how many of them are at risk (counted by the backend). */
+export interface StageCount {
+  stage: string;
+  orders: number;
+  at_risk: number;
+}
+
 export interface OrderList {
   status: 'ok';
   as_of_date: string;
   filters: { status: OrderStatusFilter; due: OrderDueFilter; stage: string; customer: string; query: string };
   /** Counted by the backend over the orders shown */
-  summary: { orders: number; unfinished: number; at_risk: number; pieces: number; by_stage: { stage: string; orders: number }[] };
+  summary: { orders: number; unfinished: number; at_risk: number; pieces: number; by_stage: StageCount[] };
   customers: string[];
   stages: string[];
   orders: OrderHit[];

@@ -5,14 +5,14 @@ redone, and gives each workshop a one-line note "a human dispatcher would give i
 told batch by batch: a rework at one workshop delays only that workshop's pieces, never the others.
 
 - each workshop's profile: defect rate, the dispatcher's note word for word, and rule-based flags;
-- each batch: its chance of needing rework, its pieces, and the latest those pieces could arrive if
-  reworked;
+- each batch: its chance of needing rework, its pieces, and their arrival date in a specified full-redo
+  scenario;
 - the plan: the chance every batch comes back clean, the pieces expected to sit in reworked batches,
   and, with a deadline, how many pieces could miss it and how likely that is.
 
-How long a partial rework takes is not in the data, so "the latest those pieces could arrive" is a
-stated upper bound: the whole batch redone once at the same workshop, with no new queue, then shipped
-again. Real reworks are partial, so they finish sooner. In-house work has no defect data and is left out.
+Actual rework duration is not in the data. The scenario redoes the whole batch once at the same
+workshop and capacity, with no new queue, then adds transport again. This is not a real-world
+latest arrival or a guaranteed bound. In-house work has no defect data and is left out.
 """
 
 from datetime import date, timedelta
@@ -23,9 +23,9 @@ from data_loader import WORKSHOPS_SOURCE, load_workshops, source_ref, workshop_r
 from rules import (BUSY_QUEUE_DAYS, HIGH_DEFECT_RATE, RISK_HIGH_FROM, RISK_MEDIUM_FROM,
                    SLOW_PICKUP_DAYS)
 
-REWORK_ASSUMPTION = ("How long a partial rework takes is not in the data. The latest arrival of a reworked "
-                     "batch assumes the whole batch is redone once at the same workshop with no new queue, then "
-                     "shipped again, so it is an upper bound; real reworks are partial and finish sooner.")
+REWORK_ASSUMPTION = ("Actual rework duration is not in the data. The full-redo scenario assumes the whole batch "
+                     "is redone once at the same workshop and capacity with no new queue, then adds the fixed "
+                     "transport overhead again. It is not a guaranteed latest arrival; actual delays may be longer.")
 
 
 def _workday_finish(start, workdays):
@@ -48,7 +48,7 @@ def workshop_profile(row):
     if defect >= HIGH_DEFECT_RATE:
         flags.append(f"high defect rate ({defect:.0%} of batches)")
     if int(row["pickup_lead_days"]) >= SLOW_PICKUP_DAYS:
-        flags.append(f"slow pickup and delivery ({row['pickup_lead_days']} days each way)")
+        flags.append(f"slow pickup and delivery ({row['pickup_lead_days']} calendar days of fixed transport overhead per batch)")
     if float(row["current_queue_days"]) >= BUSY_QUEUE_DAYS:
         flags.append(f"busy: {row['current_queue_days']} days of work already queued")
     if row["max_batch_pieces"]:
@@ -92,9 +92,9 @@ def plan_risk(batches, deadline=None):
         row = rows[batch.get("workshop_id") or batch["producer"]]
         entry = {**workshop_profile(row), "pieces": batch["pieces"], "completion_date": batch["completion_date"],
                  "rework_chance": float(row["defect_rate"]),
-                 "latest_arrival_if_reworked": _redo_completion(batch, row).isoformat()}
+                 "rework_scenario_arrival": _redo_completion(batch, row).isoformat()}
         if deadline:
-            entry["late_if_reworked"] = entry["latest_arrival_if_reworked"] > deadline
+            entry["late_if_reworked"] = entry["rework_scenario_arrival"] > deadline
         entries.append(entry)
     total = sum(e["pieces"] for e in entries)
     clean = prod(1 - e["rework_chance"] for e in entries)
@@ -118,7 +118,7 @@ def plan_risk(batches, deadline=None):
     if deadline is None:
         for e in entries:
             lines.append(f"{e['workshop_id']} {e['name']} ({e['pieces']} pieces): {e['rework_chance']:.0%} chance of "
-                         f"rework; if so, those pieces arrive by {_day(e['latest_arrival_if_reworked'])} at the latest "
+                         f"rework; the full-redo scenario puts their arrival on {_day(e['rework_scenario_arrival'])} "
                          f"instead of {_day(e['completion_date'])}.")
         result.update(risk_level=_level(1 - clean), risk_basis="chance that some outsourced batch needs rework")
     else:
@@ -130,18 +130,18 @@ def plan_risk(batches, deadline=None):
             chance_some_pieces_late=round(1 - on_time, 4),
             chance_all_pieces_on_time=round(on_time, 4),
             risk_level=_level(1 - on_time),
-            risk_basis="chance that a rework pushes some pieces past the deadline (upper-bound rework time)",
+            risk_basis="chance of rework at a batch whose full-redo scenario exceeds the deadline",
         )
         if not exposed:
-            lines.append(f"Even if a batch needs rework, all {total} outsourced pieces still arrive by the "
-                         f"{_day(deadline)} deadline.")
+            lines.append(f"Under the stated full-redo assumptions, all {total} outsourced pieces still arrive by the "
+                         f"{_day(deadline)} deadline; this is not a real-world delivery guarantee.")
         for e in exposed:
             others = total - e["pieces"]
             lines.append(f"{e['workshop_id']} {e['name']} ({e['pieces']} pieces): {e['rework_chance']:.0%} chance of "
-                         f"rework; if so, those pieces could arrive as late as {_day(e['latest_arrival_if_reworked'])}, "
+                         f"rework; their full-redo scenario arrival is {_day(e['rework_scenario_arrival'])}, "
                          f"after the {_day(deadline)} deadline" + (f"; the other {others} pieces are unaffected." if others else "."))
-    lines.append("Rework time is not in the data; the latest dates assume the whole batch is redone, so real "
-                 "delays are shorter.")
+    lines.append("Actual rework time is unknown. Scenario dates assume one full redo, unchanged capacity, no "
+                 "new queue and fixed transport; actual arrivals may be later.")
     result["strategy_rating"] = STRATEGY_RATING[result["risk_level"]]
     if result["risk_level"] == "high":
         # Name what drives the risk, so a safer plan can avoid it.

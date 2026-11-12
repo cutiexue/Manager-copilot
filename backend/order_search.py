@@ -141,9 +141,11 @@ def list_orders(status="all", due="all", stage="", customer="", query="", as_of_
         shown.append((order, reasons))
     shown.sort(key=lambda item: (item[0]["status"] != "IN_PROGRESS", not item[1], item[0]["due_date"], item[0]["order_id"]))
 
-    by_stage = {name: 0 for name in STAGES + ("COMPLETE",)}
-    for order, _ in shown:
-        by_stage[order["current_stage"]] += 1
+    # Orders and at-risk orders per stage, so the page's stage chart never counts in the browser.
+    by_stage = {name: {"orders": 0, "at_risk": 0} for name in STAGES + ("COMPLETE",)}
+    for order, reasons in shown:
+        by_stage[order["current_stage"]]["orders"] += 1
+        by_stage[order["current_stage"]]["at_risk"] += bool(reasons)
     return {
         "status": "ok",
         "as_of_date": ref.isoformat(),
@@ -153,7 +155,7 @@ def list_orders(status="all", due="all", stage="", customer="", query="", as_of_
             "unfinished": sum(o["status"] == "IN_PROGRESS" for o, _ in shown),
             "at_risk": sum(bool(r) for _, r in shown),
             "pieces": sum(int(o["pieces"]) for o, _ in shown),
-            "by_stage": [{"stage": name, "orders": count} for name, count in by_stage.items()],
+            "by_stage": [{"stage": name, **counts} for name, counts in by_stage.items()],
         },
         "customers": sorted(customers),
         "stages": [name for name in STAGES + ("COMPLETE",) if name in stages],

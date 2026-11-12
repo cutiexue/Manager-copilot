@@ -1,12 +1,13 @@
 # Manager Co-Pilot — Frontend (Member F)
 
 React + TypeScript + Vite. Built against the backend in `../backend` (originally the `src` branch).
+Use Node.js 22.6+ (latest Node 22 patch recommended) for the response-loss regression tests.
 
 ## Run
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev          # http://localhost:5173
 ```
 
@@ -20,7 +21,7 @@ python main.py --api # serves 127.0.0.1:8000; Vite proxies /api/* to it
 Without the backend the page still loads: the briefing falls back to the saved snapshot
 (header pill "Briefing: snapshot") and the chat panel shows a "Backend offline" state.
 
-Other commands: `npm run typecheck`, `npm run build`.
+Other commands: `npm test`, `npm run typecheck`, `npm run build`.
 
 ## Where each page gets its data
 
@@ -30,10 +31,10 @@ Every page reads live data from the backend; only the briefing has an offline fa
 |---|---|---|
 | Chat | `GET/POST /sessions`, `GET/POST /sessions/{id}/messages` | Each answer carries its tool calls, cited rows and proposals |
 | Morning briefing | `GET /briefings/latest` | Falls back to `src/fixtures/briefing.json` when the backend is unreachable, labelled "snapshot" |
-| Evidence drawer | rows cited in the briefing payload or the chat answer | Shows the raw CSV rows behind a claim (`GET /evidence/{id}` serves one row to other clients) |
-| Orders & output | the briefing payload | Yesterday's output and at-risk orders |
+| Evidence drawer | rows cited in the briefing payload or the chat answer | Chat evidence preserves the answer's snapshot, with expandable structured tool results and versioned source rows. Legacy unknown-version answers show a warning instead of current rows |
+| Orders & output | `GET /orders`, `GET /evidence/{id}` | Totals, the stage chart (orders and at-risk orders per stage) and the order list are counted by the backend |
 | Actions | `/actions`, `/reminders`, `/notes`, `/drafts`, `/audit` | Proposals are carried out only after Confirm; the audit log is append-only |
-| Watches & alerts | `/watches`, `/alerts`, `/data/snapshot`, `/dev/data/*` | Watches are checked against scripted data snapshots |
+| Watches & alerts | `/watches`, `/alerts`, `/data/snapshot`, `/dev/data/*` | Watches are checked against scripted data snapshots. Only alerts from the manager's watches and reminders are counted on the dock; a new briefing is an uncounted notice |
 | Order search | `GET /orders/search` | Capped results, so it scales with the order book |
 
 The UI never computes business numbers. Every figure shown is copied from a tool
@@ -59,15 +60,30 @@ URL hash, so refresh keeps the page and the browser back button works.
 | Address | Page |
 |---|---|
 | `#/` | **New chat** (home): today's top 3 briefing items above a centred chat box, with suggested questions |
-| `#/chat/<id>` | An open conversation; past ones are listed beside the chat (and under the dock's *Conversations* button on narrow screens) |
+| `#/chats` | **Conversations**: every past conversation grouped by day (Today, Previous 7 days, Older), with a filter; the dock's *Conversations* item opens it |
+| `#/chat/<id>` | An open conversation; on wide screens past ones are also listed beside the chat |
 | `#/briefing` | Morning briefing: summary on a dark card, then one module per check; a module opens in place with every item (Evidence, Ask, Remind) |
-| `#/orders` | Every order, filtered by due date, status, stage, customer or search; totals and the stage chart come from `GET /orders` |
+| `#/orders` | Every order, filtered by due date, status, stage, customer or search; totals and the stage chart (one bar per stage, its at-risk part darker) come from `GET /orders` |
 | `#/actions` | Proposals waiting for Confirm, reminders, order notes, chase-up drafts and the audit log; **New reminder** searches all orders |
 | `#/watches` | Standing watches, the alerts they raised, and the scripted data snapshot they are checked against |
 
 "Ask" buttons on any page open a new conversation with the question typed in but not sent.
 "Remind…" and "New reminder" open one dialog: the order is preset or searched for, and nothing is
 recorded until the manager confirms or cancels.
+
+If a create/confirm response is lost, retrying unchanged in the same dialog reuses its request and
+proposal IDs. Editing the fields is a new intent; closing/reopening or refreshing loses that local
+retry identity, so inspect Actions before starting again when the result is uncertain.
+
+Chat uses the same principle: Retry of an unchanged failed message keeps its logical request ID,
+including recovery of a lost new-conversation response. A completed retry returns the original
+saved answer and proposals. Editing the message or sending it again after success starts a new
+request. Leaving the conversation or refreshing clears the local retry identity; inspect the
+conversation history and Actions before sending an uncertain request again.
+
+The Orders page hides previous rows while new filters load. Superseded successes and errors are
+discarded, including during the search debounce interval, so a delayed request cannot overwrite
+the currently selected filters. The customer and stage options remain available during loading.
 
 Look: the Neumorphism Light palette (#E0E5EC surface, #FFFFFF highlight, #A3B1C6 shadow, #4D5B70
 and #6D7C94 slate): raised cards from paired shadows, frosted panels, one dark slate card per page.
@@ -84,7 +100,7 @@ The evidence drawer and the confirm dialog open over whichever page is showing.
 ```
 src/
 ├── App.tsx                    shell, pages and shared state (briefing, conversations, counts)
-├── route.ts                   hash routes (#/, #/chat/<id>, #/briefing, #/orders, #/actions, #/watches)
+├── route.ts                   hash routes (#/, #/chats, #/chat/<id>, #/briefing, #/orders, #/actions, #/watches)
 ├── api.ts                     backend client (via /api proxy)
 ├── types.ts                   backend response shapes
 ├── evidence.ts                tool output → evidence drawer view, Ask questions
@@ -92,6 +108,8 @@ src/
 ├── theme.ts                   light / dark / system theme
 ├── motion.ts                  springs, rolling numbers, glass pointer light, view transitions
 ├── useAutoRefresh.ts          30-second and on-focus reload for the Actions and Watches pages
+├── voice.ts                   voice helpers: dictation languages, answer-language detection, Markdown to speech, voice choice
+├── useVoice.ts                dictation, read-aloud and the voice settings (browser Web Speech API)
 ├── fixtures/briefing.json     briefing snapshot (offline fallback)
 └── components/
     ├── TopBar.tsx             brand, data date, reminders clock, search (Ctrl+K), theme switch
@@ -108,7 +126,7 @@ src/
     ├── OrdersPage.tsx         Orders & output: filters, backend totals, stage chart, order list
     ├── LiquidFilter.tsx       due-date filter: one capsule that splits into options
     ├── Segmented.tsx          segmented control with a sliding capsule
-    ├── Chat.tsx               multi-turn chat, error states, per-answer sources
+    ├── Chat.tsx               multi-turn chat, error states, per-answer sources, voice input and read-aloud
     ├── Markdown.tsx           safe Markdown rendering of model answers; long tables expand
     ├── ProposalCard.tsx       a proposed follow-up waiting for Confirm
     ├── EvidenceDrawer.tsx     claim, calculation, source rows

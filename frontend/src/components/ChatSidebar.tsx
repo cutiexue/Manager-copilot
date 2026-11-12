@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Session } from '../types';
 import { hrefFor, type Route } from '../route';
+import { matchingSessions, sessionGroup as groupOf } from '../sessions';
 import Icon from './Icon';
 
 interface Props {
@@ -10,24 +11,11 @@ interface Props {
   sessionsError: string | null;
 }
 
-const DAY = 86_400_000;
-
-/** Today, Previous 7 days or Older, by when the conversation last changed (real time). */
-function groupOf(s: Session, now: number): string {
-  const at = Date.parse(s.updated_at ?? s.created_at ?? '');
-  if (Number.isNaN(at)) return 'Older';
-  if (new Date(at).toDateString() === new Date(now).toDateString()) return 'Today';
-  return now - at < 7 * DAY ? 'Previous 7 days' : 'Older';
-}
-
 // Past conversations beside the chat, newest first, with a filter. Shown on the chat pages on wide
-// screens; on narrow ones the dock's Conversations button lists them instead.
+// screens; the dock's Conversations page lists them on every screen size.
 export default function ChatSidebar({ route, sessions, sessionsLoaded, sessionsError }: Props) {
   const [filter, setFilter] = useState('');
-  const words = filter.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const recent = sessions
-    .filter((s) => s.has_messages !== false)
-    .filter((s) => words.every((w) => s.title.toLowerCase().includes(w)));
+  const recent = matchingSessions(sessions, filter);
   const now = Date.now();
   let last = '';
 

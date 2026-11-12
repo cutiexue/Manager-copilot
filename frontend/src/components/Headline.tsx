@@ -11,7 +11,8 @@ export function actCount(briefing: Briefing): number {
 export default function Headline({ briefing }: { briefing: Briefing }) {
   return (
     <p className="headline">
-      <strong>{briefing.at_risk.count} orders at risk</strong> · <LevelMark level="act" /> {actCount(briefing)} to act
+      <strong>{briefing.at_risk.count} {briefing.at_risk.count === 1 ? 'order' : 'orders'} at risk</strong> ·{' '}
+      <LevelMark level="act" /> {actCount(briefing)} to act
       on now
     </p>
   );

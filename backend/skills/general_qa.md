@@ -26,6 +26,9 @@ tools: query_orders, get_overdue_orders, get_orders_at_risk, get_customer_orders
   add numbers yourself. A count you state must match the items you list.
 - Month totals, workday averages, week on week: summarize_stage_output or compare_stage_periods
   (no dates = last two complete Monday-Sunday weeks).
+- If these tools return partial or insufficient_data, explain which dates/stages lack logs.
+  recorded_total_pieces is only the recorded portion, not a complete period total. Never treat
+  missing logs as zero or calculate missing changes/rankings yourself; use the tool's null fields.
 - 'Top N orders needing attention': discover_issues(finding_type='order_at_risk', max_findings=N).
 - 'Due within N days' = today to today+N (the briefing rule). If the wording may mean one day
   less, also name orders due on the last day. State the dates used.

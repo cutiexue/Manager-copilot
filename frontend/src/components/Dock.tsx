@@ -1,18 +1,14 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { Session } from '../types';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { hrefFor, type Page, type Route } from '../route';
 import { Spring, finePointer, reducedMotion } from '../motion';
 import Icon, { type IconName } from './Icon';
 
 interface Props {
   route: Route;
-  sessions: Session[];
-  sessionsLoaded: boolean;
-  sessionsError: string | null;
   counts: { decisions: number; atRisk: number; actions: number; alerts: number };
 }
 
-type Slot = 'home' | 'chats' | Exclude<Page, 'home' | 'chat'>;
+type Slot = Exclude<Page, 'chat'>;
 
 const ITEMS: { slot: Slot; label: string; icon: IconName }[] = [
   { slot: 'home', label: 'New chat', icon: 'plus' },
@@ -23,7 +19,8 @@ const ITEMS: { slot: Slot; label: string; icon: IconName }[] = [
   { slot: 'watches', label: 'Watches & alerts', icon: 'watch' },
 ];
 
-const slotFor = (route: Route): Slot => (route.page === 'home' ? 'home' : route.page === 'chat' ? 'chats' : route.page);
+// An open conversation belongs to Conversations in the dock.
+const slotFor = (route: Route): Slot => (route.page === 'chat' ? 'chats' : route.page);
 
 // Icons grow when the pointer is near: full size at the icon, nothing beyond this distance.
 const REACH = 110;
@@ -32,15 +29,14 @@ const GROW = 0.38;
 // The app's navigation: a floating glass dock at the bottom centre. The current page sits on a glass
 // capsule that slides to the next page when it changes, stretching along its path and settling with a
 // small bounce; a dot under the icon marks it too. Pointing at the dock enlarges the icon under the
-// pointer and, less, its neighbours, and shows the name above it.
-export default function Dock({ route, sessions, sessionsLoaded, sessionsError, counts }: Props) {
+// pointer and, less, its neighbours, and shows the name above it. Every item is a page link.
+export default function Dock({ route, counts }: Props) {
   const current = slotFor(route);
   const listRef = useRef<HTMLUListElement>(null);
   const capsuleRef = useRef<HTMLLIElement>(null);
   const itemRefs = useRef<Record<string, HTMLLIElement | null>>({});
   const springs = useRef<{ x: Spring; w: Spring } | null>(null);
   const frame = useRef(0);
-  const [chatsOpen, setChatsOpen] = useState(false);
 
   const badge: Partial<Record<Slot, number>> = {
     briefing: counts.decisions || undefined,
@@ -105,21 +101,6 @@ export default function Dock({ route, sessions, sessionsLoaded, sessionsError, c
     return () => window.removeEventListener('resize', onResize);
   }, [current]);
 
-  useEffect(() => setChatsOpen(false), [route]);
-
-  useEffect(() => {
-    if (!chatsOpen) return;
-    const close = (e: MouseEvent | KeyboardEvent) => {
-      if (e instanceof KeyboardEvent ? e.key === 'Escape' : !(e.target as Element).closest('.dock-wrap')) setChatsOpen(false);
-    };
-    window.addEventListener('mousedown', close);
-    window.addEventListener('keydown', close);
-    return () => {
-      window.removeEventListener('mousedown', close);
-      window.removeEventListener('keydown', close);
-    };
-  }, [chatsOpen]);
-
   const magnify = (clientX: number | null) => {
     const list = listRef.current;
     if (!list) return;
@@ -136,33 +117,8 @@ export default function Dock({ route, sessions, sessionsLoaded, sessionsError, c
     }
   };
 
-  const recent = sessions.filter((s) => s.has_messages !== false);
-
   return (
     <div className="dock-wrap">
-      {chatsOpen && (
-        <div className="dock-pop glass-pop" role="dialog" aria-label="Conversations">
-          <p className="dock-pop-title">Recent conversations</p>
-          {!sessionsLoaded ? (
-            <p className="side-note">Loading…</p>
-          ) : sessionsError ? (
-            <p className="side-note">Conversations appear here when the backend is running.</p>
-          ) : recent.length === 0 ? (
-            <p className="side-note">No conversations yet. Ask something to start one.</p>
-          ) : (
-            <ul>
-              {recent.slice(0, 12).map((s) => (
-                <li key={s.id}>
-                  <a href={hrefFor({ page: 'chat', sessionId: s.id })}
-                    aria-current={route.page === 'chat' && route.sessionId === s.id ? 'page' : undefined}>
-                    {s.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
       <nav className="dock" aria-label="Main">
         <ul
           ref={listRef}
@@ -185,17 +141,10 @@ export default function Dock({ route, sessions, sessionsLoaded, sessionsError, c
             );
             return (
               <li key={item.slot} ref={(el) => (itemRefs.current[item.slot] = el)}>
-                {item.slot === 'chats' ? (
-                  <button className="dock-item" aria-label={item.label} aria-expanded={chatsOpen}
-                    aria-current={active ? 'page' : undefined} onClick={() => setChatsOpen((o) => !o)}>
-                    {body}
-                  </button>
-                ) : (
-                  <a className="dock-item" aria-label={count ? `${item.label}, ${count}` : item.label}
-                    href={hrefFor({ page: item.slot as Page })} aria-current={active ? 'page' : undefined}>
-                    {body}
-                  </a>
-                )}
+                <a className="dock-item" aria-label={count ? `${item.label}, ${count}` : item.label}
+                  href={hrefFor({ page: item.slot })} aria-current={active ? 'page' : undefined}>
+                  {body}
+                </a>
               </li>
             );
           })}

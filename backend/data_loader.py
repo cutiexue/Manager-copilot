@@ -235,6 +235,9 @@ def workshop_row_numbers():
     return {row["workshop_id"]: index + 2 for index, row in enumerate(load_workshops())}
 
 
-def source_ref(source, row_number, key):
+def source_ref(source, row_number, key, *, data_version=None):
     """Build one source-row citation for a tool result."""
-    return {"source": source, "row": row_number, "key": key}
+    ref = {"source": source, "row": row_number, "key": key}
+    if data_version is not None:
+        ref["data_version"] = data_version
+    return ref

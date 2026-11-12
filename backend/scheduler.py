@@ -16,10 +16,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import watches
 from actions import APP_TZ, now_sg
 from briefing import get_briefing_payload
+from rules import data_context
 
 logger = logging.getLogger("manager_copilot.scheduler")
 
 
+@data_context()
 def run_morning_briefing(actions, now, trigger="scheduler"):
     """Generate and store the briefing; a scheduled run happens at most once per day."""
     payload = get_briefing_payload()  # today's data date: the course data, or the scripted snapshot loaded
@@ -66,8 +68,10 @@ class AppScheduler:
         self.scheduler = BackgroundScheduler(timezone=APP_TZ, job_defaults={
             "coalesce": True, "max_instances": 1, "misfire_grace_time": 3600})
         hour, minute = self.briefing_at
+        # No grace limit: if the computer slept through 07:00, the briefing still runs when it wakes.
+        # Today's run key keeps a late run from repeating one that already happened.
         self.scheduler.add_job(self.run, "cron", hour=hour, minute=minute, args=["morning_briefing"],
-                               id="morning_briefing")
+                               id="morning_briefing", misfire_grace_time=None)
         self.scheduler.add_job(self.run, "interval", minutes=1, args=["reminders"], id="reminders")
         self.scheduler.add_job(self.run, "interval", minutes=watch_minutes, args=["watch_check"], id="watch_check")
         self.scheduler.add_job(self.run, "interval", minutes=10, args=["proposal_expiry"], id="proposal_expiry")

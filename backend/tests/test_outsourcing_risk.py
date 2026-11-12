@@ -30,10 +30,10 @@ def test_independent_batches_combine():
     assert risk["risk_level"] == "medium" and "deadline_date" not in risk
 
 
-def test_a_redo_that_still_fits_the_deadline_is_no_delivery_risk():
+def test_a_redo_that_still_fits_the_deadline_has_no_lateness_in_this_scenario():
     risk = optimize_cheapest_plan("TOPS", 800, 25)["risk"]
     [w3] = risk["workshops"]
-    assert (w3["workshop_id"], w3["completion_date"], w3["latest_arrival_if_reworked"]) == ("W3", "2026-04-13", "2026-04-20")
+    assert (w3["workshop_id"], w3["completion_date"], w3["rework_scenario_arrival"]) == ("W3", "2026-04-13", "2026-04-20")
     assert risk["chance_some_batch_needs_rework"] == 0.09
     assert risk["chance_some_pieces_late"] == 0 and risk["pieces_that_could_be_late"] == 0
     assert risk["risk_level"] == "low" and "still arrive by the 25 Apr deadline" in risk["summary"]
@@ -75,7 +75,8 @@ def test_every_outsourcing_result_carries_risk_and_states_the_rework_assumption(
     for result in results:
         assert result["status"] == "ok", result
         assert result["risk"]["status"] == "ok"
-        assert any("upper bound" in a for a in result["risk"]["assumptions"])
+        assert any("full-redo scenario" in a and "not a guaranteed latest arrival" in a
+                   for a in result["risk"]["assumptions"])
         assert any("delays only that workshop" in a for a in result["risk"]["assumptions"])
 
 

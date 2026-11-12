@@ -6,7 +6,7 @@ from math import ceil, isfinite
 
 from outsourcing_risk import plan_risk, workshop_profile
 from data_loader import ORDERS_SOURCE, load_course_orders, load_production, load_workshops, order_row_numbers, source_ref
-from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES
+from rules import MAX_BASELINE_WORKDAYS, MAX_QUEUE_WORKDAYS, MAX_SCENARIO_PIECES, today_iso
 
 SNAPSHOT = "2026-04-01"
 STAGES = ("KNITTING", "ASSEMBLY", "WASHING", "PACKING")
@@ -16,7 +16,8 @@ ASSUMPTIONS = [
     "The start date is inclusive: one workday starting Monday finishes Monday.",
     "External queue and production are rounded up together to whole workdays; transport is added once as calendar days after production.",
     "Dates assume every outsourced batch comes back clean; `risk` gives, batch by batch, the chance of "
-    "rework and how late each reworked batch could arrive (an upper bound).",
+    "rework and its full-redo scenario arrival date under stated assumptions, not a guaranteed latest date.",
+    "Capacity, queues and reference unfinished-order load are from 2026-04-01, even when the scenario starts later.",
     "Reported cost includes external per-piece processing charges only. In-house cost is excluded by request; transport and rework charges are not supplied.",
     "Currency is unspecified in the source data.",
 ]
@@ -29,7 +30,7 @@ def _error(message):
 def _validate(pieces, start_date):
     if type(pieces) is not int or not 0 <= pieces <= MAX_SCENARIO_PIECES:
         raise ValueError(f"pieces must be an integer from 0 to {MAX_SCENARIO_PIECES}.")
-    return date.fromisoformat(start_date)
+    return date.fromisoformat(today_iso() if start_date is None else start_date)
 
 
 def _finish(start, workdays):
@@ -65,7 +66,8 @@ def open_order_load():
     rows = order_row_numbers()
     by_stage = {stage: sum(int(o["pieces"]) for o in orders if STAGES.index(o["current_stage"]) <= index)
                 for index, stage in enumerate(STAGES)}
-    return orders, by_stage, [source_ref(ORDERS_SOURCE, rows[o["order_id"]], o["order_id"]) for o in orders]
+    return orders, by_stage, [source_ref(ORDERS_SOURCE, rows[o["order_id"]], o["order_id"], data_version="v0")
+                            for o in orders]
 
 
 def in_house_workdays(pieces, totals, baseline_days, flat_queue=0, stage_waits=None):
@@ -83,8 +85,8 @@ def in_house_workdays(pieces, totals, baseline_days, flat_queue=0, stage_waits=N
     return end
 
 
-def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=None, baseline_days=7):
-    """Estimate an in-house batch from recent output, queued behind the unfinished orders at each stage (an upper bound)."""
+def estimate_in_house(pieces, start_date=None, queue_workdays=None, baseline_days=7):
+    """Estimate an in-house batch using the conservative reference unfinished-order workload."""
     # A number in queue_workdays replaces that queue with one flat queue (C-1).
     try:
         start = _validate(pieces, start_date)
@@ -106,8 +108,9 @@ def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=None, baseline
         basis = "open_orders"
         queue_note = ("The unfinished orders go first. At each stage, every unfinished order that still has "
                       "to pass through it counts with its full pieces, including the stage it is in now "
-                      "(progress within a stage is not recorded), so this load is an upper bound and the "
-                      "date is a late estimate. Each stage clears that load at its recent average output "
+                      "(progress within a stage is not recorded), so this workload is an upper bound. "
+                      "This conservative workload assumption does not guarantee a latest completion date. "
+                      "Each stage clears that load at its recent average output "
                       "before working on this batch; no new orders arrive meanwhile.")
     else:
         basis = "not_applied_before_snapshot"
@@ -147,7 +150,8 @@ def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=None, baseline
             totals.append(total)
             stage_results.append({"stage": stage, "average_pieces_per_workday": total / baseline_days,
                                   "production_workdays": (pieces * baseline_days + total - 1) // total})
-    result = {"status": "ok", "producer": "IN_HOUSE", "pieces": pieces, "queue_basis": basis}
+    result = {"status": "ok", "producer": "IN_HOUSE", "pieces": pieces, "queue_basis": basis,
+              "data_as_of": SNAPSHOT, "scenario_start_date": start.isoformat(), "start_date": start.isoformat()}
     waits = None
     if basis == "open_orders" and pieces:
         orders, load, refs = open_order_load()
@@ -159,7 +163,7 @@ def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=None, baseline
             entry["open_order_workdays"] = max(0, clear - elapsed)
             waits.append(entry["open_order_workdays"])
         result["open_order_load"] = {
-            "as_of_date": SNAPSHOT, "orders": len(orders),
+            "as_of_date": SNAPSHOT, "data_version": "v0", "orders": len(orders),
             "original_pieces": sum(int(o["pieces"]) for o in orders), "upper_bound": True,
             "source": ORDERS_SOURCE, "source_rows": refs}
     if waits is not None:
@@ -175,7 +179,7 @@ def estimate_in_house(pieces, start_date=SNAPSHOT, queue_workdays=None, baseline
     return result
 
 
-def _estimate_workshop(workshop_id, category, pieces, start_date=SNAPSHOT):
+def _estimate_workshop(workshop_id, category, pieces, start_date=None):
     try:
         start = _validate(pieces, start_date)
     except (TypeError, ValueError) as exc:
@@ -204,46 +208,47 @@ def _estimate_workshop(workshop_id, category, pieces, start_date=SNAPSHOT):
             "external_processing_cost": float(cost), "currency": None, "profile": workshop.copy(),
             "risk": plan_risk([{"workshop_id": workshop_id, "pieces": pieces, "completion_date": completion.isoformat()}])
             if pieces else {"status": "no_outsourcing", **workshop_profile(workshop)},
-            "snapshot_date": SNAPSHOT, "source": "track1/data/workshops.csv",
+            "snapshot_date": SNAPSHOT, "data_as_of": SNAPSHOT,
+            "scenario_start_date": start.isoformat(), "start_date": start.isoformat(), "source": "track1/data/workshops.csv",
             "assumptions": ASSUMPTIONS + ["Queue and profile values use the 2026-04-01 snapshot even for other scenario dates."]}
 
 
-def estimate_quickstitch(category, pieces, start_date=SNAPSHOT):
+def estimate_quickstitch(category, pieces, start_date=None):
     """Estimate W1 QuickStitch."""
     return _estimate_workshop("W1", category, pieces, start_date)
 
 
-def estimate_steadyhands(category, pieces, start_date=SNAPSHOT):
+def estimate_steadyhands(category, pieces, start_date=None):
     """Estimate W2 SteadyHands."""
     return _estimate_workshop("W2", category, pieces, start_date)
 
 
-def estimate_budgetworks(category, pieces, start_date=SNAPSHOT):
+def estimate_budgetworks(category, pieces, start_date=None):
     """Estimate W3 BudgetWorks."""
     return _estimate_workshop("W3", category, pieces, start_date)
 
 
-def estimate_little_loom(category, pieces, start_date=SNAPSHOT):
+def estimate_little_loom(category, pieces, start_date=None):
     """Estimate W4 Little Loom."""
     return _estimate_workshop("W4", category, pieces, start_date)
 
 
-def estimate_giantweave(category, pieces, start_date=SNAPSHOT):
+def estimate_giantweave(category, pieces, start_date=None):
     """Estimate W5 GiantWeave."""
     return _estimate_workshop("W5", category, pieces, start_date)
 
 
-def estimate_nimble_needle(category, pieces, start_date=SNAPSHOT):
+def estimate_nimble_needle(category, pieces, start_date=None):
     """Estimate W6 Nimble Needle."""
     return _estimate_workshop("W6", category, pieces, start_date)
 
 
-def estimate_oldmill(category, pieces, start_date=SNAPSHOT):
+def estimate_oldmill(category, pieces, start_date=None):
     """Check W7 OldMill eligibility before estimating."""
     return _estimate_workshop("W7", category, pieces, start_date)
 
 
-def estimate_freshstart(category, pieces, start_date=SNAPSHOT):
+def estimate_freshstart(category, pieces, start_date=None):
     """Estimate W8 FreshStart with its per-batch cap."""
     return _estimate_workshop("W8", category, pieces, start_date)
 
@@ -256,11 +261,12 @@ WORKSHOP_ESTIMATORS = dict(zip(
 
 
 def estimate_production_plan(category, total_pieces, in_house_pieces, allocations,
-                             start_date=SNAPSHOT, in_house_queue_workdays=None, baseline_days=7):
+                             start_date=None, in_house_queue_workdays=None, baseline_days=7):
     """Summarize an explicit allocation; reject gaps rather than allocating them."""
     try:
         start = _validate(total_pieces, start_date)
         _validate(in_house_pieces, start_date)
+        start_date = start.isoformat()
     except (ValueError, TypeError) as exc:
         return _error(str(exc))
     if category not in ("TOPS", "ACCESSORIES"):
@@ -302,4 +308,4 @@ def estimate_production_plan(category, total_pieces, in_house_pieces, allocation
             "external_processing_cost": float(cost), "in_house_cost_excluded": True, "currency": None,
             "total_pieces": total_pieces, "branches": branches, "assumptions": ASSUMPTIONS,
             "risk": plan_risk([b for b in branches if b["producer"] != "IN_HOUSE"]),
-            "snapshot_date": SNAPSHOT}
+            "snapshot_date": SNAPSHOT, "data_as_of": SNAPSHOT, "scenario_start_date": start_date}

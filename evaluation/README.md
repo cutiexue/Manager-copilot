@@ -6,7 +6,7 @@ truth taken from the CSVs and the deterministic tools — never from a language 
 
 | File | What it is |
 |---|---|
-| `evaluation_set.jsonl` | 30 cases, 5 per owner A–F. Becomes the locked, held-out set once reviewed |
+| `evaluation_set.jsonl` | 30 cases, 5 per owner A–F; already used for iterative development, not an independent held-out set |
 | `development_set.jsonl` | 17 cases for day-to-day prompt and tool tuning |
 | `run_evaluation.py` | Runner and scorer; the scoring functions are importable |
 | `fake_agent.py` | Offline rule-based stand-in for the model, used by `--fake` |
@@ -41,11 +41,12 @@ Owners may reword their cases; whoever changes a case re-derives its facts. To v
 4. Set `"reviewer": "<name>"` and `"review_status": "verified"`. `--check` rejects a verified case
    without a named reviewer other than the owner.
 
-**Locking.** When all 30 evaluation cases are verified, run `--check`, commit the file and record its
-SHA-256 (every report shows the first 12 digits under "Case file"). From then on, tune only on the
-development set. If the evaluation set or the system is changed after its results were looked at, the
-earlier results count as development results and must be labelled so (§13.1). **Development-set results
-are never reported as held-out results.**
+**Locking and independence.** These 30 cases have already informed prompt/Skill changes. Reviewing
+their labels now does not make them unseen held-out tests. Keep using them as a regression suite;
+report the historical runs as development results. For an independent final evaluation, prepare a
+separate unseen set with reviewed labels, freeze it and the code before running, and record their
+hashes. Do not tune on those results and continue to describe them as held-out. Every report records
+the case-file SHA-256 and code version. **Development-set results are never held-out results.**
 
 The questions in `Sprint2/LOCAL_TEST_GUIDE.md` §5 have already been used to tune the prompt by hand, so
 they are in the development set; the evaluation set uses other orders, customers and wording.

@@ -46,9 +46,11 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
     if (refreshKey) void load();
   }, [load, refreshKey]);
 
-  // Watch and reminder alerts ask for action; system notices (a new briefing) only inform.
-  const needsAction = alerts.filter((a) => a.kind !== 'briefing');
-  const notices = alerts.filter((a) => a.kind === 'briefing');
+  // Alert policy (README): only a watch or reminder the manager set up interrupts and is counted on the
+  // dock. A new briefing is a notice. Findings never alert; they wait for the morning briefing.
+  const interrupts = (a: Alert) => a.kind === 'watch' || a.kind === 'reminder';
+  const needsAction = alerts.filter(interrupts);
+  const notices = alerts.filter((a) => !interrupts(a));
 
   const run = async (step: () => Promise<unknown>) => {
     setBusy(true);
@@ -105,8 +107,9 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
 
       <div className="fu-section">
         <h3>Needs attention · {needsAction.filter((a) => !a.read_at).length} new</h3>
+        <p className="fu-rule">Your watches and reminders · counted on the dock</p>
         {needsAction.length === 0 ? (
-          <p className="empty small">No alerts. A watch or reminder that fires shows up here.</p>
+          <p className="empty small">No alerts.</p>
         ) : (
           <AlertList alerts={needsAction} onRead={(id) => void run(() => api.readAlert(id))} />
         )}
@@ -115,6 +118,7 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
       {notices.length > 0 && (
         <div className="fu-section">
           <h3>System notices</h3>
+          <p className="fu-rule">New briefings · not counted</p>
           <AlertList alerts={notices} notice onRead={(id) => void run(() => api.readAlert(id))} />
         </div>
       )}
@@ -131,7 +135,12 @@ export default function Watches({ onNewWatch, onChanged, refreshKey }: Props) {
               <li key={w.id}>
                 <span className="fu-main">
                   <strong>{w.summary}</strong>
-                  {(w.outcome || w.last_result) && <span className="muted"> · {w.outcome ?? w.last_result}</span>}
+                  {/* last_result is an internal code (met, not_met, resolved, error); show the outcome text instead. */}
+                  {w.outcome ? (
+                    <span className="muted"> · {w.outcome}</span>
+                  ) : w.last_result === 'error' ? (
+                    <span className="muted"> · Check failed</span>
+                  ) : null}
                 </span>
                 <span className="fu-side">
                   <span className={`badge badge-${w.status.toLowerCase()}`}>{STATUS[w.status]}</span>

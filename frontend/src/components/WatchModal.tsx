@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
+import { confirmProposalAttempt, type ProposalAttempt } from '../proposalRetry';
 import type { OrderHit, WatchCondition } from '../types';
 import type { OrderChoice } from './ConfirmModal';
 import OrderPicker, { orderDetail } from './OrderPicker';
@@ -32,6 +33,7 @@ export default function WatchModal({ order: initial, onDone, onClose }: Props) {
   const [stage, setStage] = useState('PACKING');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const attemptRef = useRef<ProposalAttempt | null>(null);
 
   useEffect(() => {
     // Deadlines are dataset dates: default to the day after the watch data's current date.
@@ -52,8 +54,7 @@ export default function WatchModal({ order: initial, onDone, onClose }: Props) {
       const payload: Record<string, unknown> = { order_id: order.order_id, condition };
       if (condition === 'not_moved_by') payload.deadline = deadline;
       if (condition === 'reaches_stage') payload.stage = stage;
-      const proposal = await api.propose('watch', payload);
-      await api.confirm(proposal.id);
+      await confirmProposalAttempt(attemptRef, api, 'watch', payload);
       onDone(`Watching ${order.order_id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unexpected error.');
@@ -74,7 +75,7 @@ export default function WatchModal({ order: initial, onDone, onClose }: Props) {
                 {order.customer && <> · {order.customer}</>}
                 {order.detail && <span className="chosen-detail">{order.detail}</span>}
               </span>
-              <button className="btn btn-ghost btn-small" onClick={() => setOrder(null)}>
+              <button className="btn btn-ghost btn-small" disabled={busy} onClick={() => setOrder(null)}>
                 Change
               </button>
             </div>
@@ -86,7 +87,7 @@ export default function WatchModal({ order: initial, onDone, onClose }: Props) {
         </div>
         <label className="field">
           <span className="field-label">Alert me when it</span>
-          <select className="input" value={condition} onChange={(e) => setCondition(e.target.value as WatchCondition)}>
+          <select className="input" value={condition} disabled={busy} onChange={(e) => setCondition(e.target.value as WatchCondition)}>
             {CONDITIONS.map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
@@ -97,13 +98,13 @@ export default function WatchModal({ order: initial, onDone, onClose }: Props) {
         {condition === 'not_moved_by' && (
           <label className="field">
             <span className="field-label">By (dataset date)</span>
-            <input className="input" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+            <input className="input" type="date" value={deadline} disabled={busy} onChange={(e) => setDeadline(e.target.value)} />
           </label>
         )}
         {condition === 'reaches_stage' && (
           <label className="field">
             <span className="field-label">Stage</span>
-            <select className="input" value={stage} onChange={(e) => setStage(e.target.value)}>
+            <select className="input" value={stage} disabled={busy} onChange={(e) => setStage(e.target.value)}>
               {STAGES.map((s) => (
                 <option key={s}>{s}</option>
               ))}
@@ -117,11 +118,13 @@ export default function WatchModal({ order: initial, onDone, onClose }: Props) {
         {error && (
           <p className="picker-error small" role="alert">
             {error}
+            {' '}If a response was lost, retry with the same values to recover the saved result. Check Actions before
+            changing the request.
           </p>
         )}
         <div className="modal-actions">
           <button className="btn" disabled={busy} onClick={onClose}>
-            Cancel — do nothing
+            {attemptRef.current ? 'Close' : 'Cancel — do nothing'}
           </button>
           <button
             className="btn btn-primary"

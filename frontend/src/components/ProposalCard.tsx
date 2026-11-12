@@ -17,6 +17,7 @@ const DONE: Record<Proposal['kind'], string> = {
 };
 
 function outcome(p: Proposal): string {
+  if (p.status === 'DRAFT') return 'Preparing · not available for confirmation';
   if (p.status === 'EXECUTED') return DONE[p.kind];
   if (p.status === 'CANCELLED') return 'Cancelled · nothing saved';
   if (p.status === 'EXPIRED') return 'Expired · nothing saved';

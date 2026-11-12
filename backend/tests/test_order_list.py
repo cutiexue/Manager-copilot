@@ -22,6 +22,17 @@ def test_all_orders_and_totals_match_the_csv():
     assert sum(s["orders"] for s in result["summary"]["by_stage"]) == len(rows)
 
 
+def test_stage_chart_counts_at_risk_orders_per_stage():
+    result = list_orders()
+    by_stage = {s["stage"]: s for s in result["summary"]["by_stage"]}
+    assert sum(s["at_risk"] for s in by_stage.values()) == result["summary"]["at_risk"] == 12
+    assert by_stage["COMPLETE"]["at_risk"] == 0
+    for stage, counts in by_stage.items():
+        assert counts["at_risk"] == sum(1 for o in result["orders"]
+                                        if o["current_stage"] == stage and o["risk_reasons"])
+        assert counts["at_risk"] <= counts["orders"]
+
+
 def test_overdue_filter_matches_the_overdue_tool():
     result = list_orders(due="overdue")
     overdue = get_overdue_orders()

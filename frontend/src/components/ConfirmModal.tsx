@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
+import { confirmProposalAttempt, type ProposalAttempt } from '../proposalRetry';
 import type { OrderHit } from '../types';
 import OrderPicker, { orderDetail } from './OrderPicker';
 
@@ -25,7 +26,7 @@ interface Props {
   draft: ProposalDraft;
   /** Called after the backend saved it, with a one-line confirmation to show */
   onDone: (message: string) => void;
-  /** Cancel or Esc: nothing is saved */
+  /** Close the dialog; after an uncertain response, retry unchanged or inspect Actions. */
   onClose: () => void;
 }
 
@@ -43,7 +44,7 @@ const readable = (value: string) =>
   new Date(value).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
 // Plan §7.5: a proposal is carried out only when the manager confirms. Confirm here creates the
-// proposal and confirms it in one step; Cancel or Esc saves nothing.
+// proposal and confirms it in one step, using the same request ID when a response is lost.
 export default function ConfirmModal({ draft, onDone, onClose }: Props) {
   const [order, setOrder] = useState<OrderChoice | null>(draft.order ?? null);
   const [subject, setSubject] = useState<string | null>(draft.kind === 'note' ? null : draft.subject ?? null);
@@ -55,6 +56,7 @@ export default function ConfirmModal({ draft, onDone, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const attemptRef = useRef<ProposalAttempt | null>(null);
   const target = order?.order_id ?? subject;
   const isReminder = draft.kind === 'reminder';
 
@@ -89,8 +91,7 @@ export default function ConfirmModal({ draft, onDone, onClose }: Props) {
       if (order) payload.order_id = order.order_id;
       else payload.subject = subject;
       if (isReminder) payload.when = when;
-      const proposal = await api.propose(draft.kind, payload, draft.reason);
-      await api.confirm(proposal.id);
+      await confirmProposalAttempt(attemptRef, api, draft.kind, payload, draft.reason);
       onDone(isReminder ? `Reminder saved for ${readable(when)}` : `Note saved on ${target}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unexpected error.');
@@ -112,7 +113,7 @@ export default function ConfirmModal({ draft, onDone, onClose }: Props) {
                 {order.customer && <> · {order.customer}</>}
                 {order.detail && <span className="chosen-detail">{order.detail}</span>}
               </span>
-              <button className="btn btn-ghost btn-small" onClick={() => setOrder(null)}>
+              <button className="btn btn-ghost btn-small" disabled={busy} onClick={() => setOrder(null)}>
                 Change
               </button>
             </div>
@@ -121,7 +122,7 @@ export default function ConfirmModal({ draft, onDone, onClose }: Props) {
               <span className="chosen-main">
                 <strong>{subject}</strong>
               </span>
-              <button className="btn btn-ghost btn-small" onClick={() => setSubject(null)}>
+              <button className="btn btn-ghost btn-small" disabled={busy} onClick={() => setSubject(null)}>
                 Pick an order instead
               </button>
             </div>
@@ -133,13 +134,13 @@ export default function ConfirmModal({ draft, onDone, onClose }: Props) {
 
         <label className="field">
           <span className="field-label">{isReminder ? 'Reminder' : 'Note'} text</span>
-          <textarea ref={textRef} value={text} rows={3} onChange={(e) => setText(e.target.value)} />
+          <textarea ref={textRef} value={text} rows={3} disabled={busy} onChange={(e) => setText(e.target.value)} />
         </label>
 
         {isReminder && (
           <label className="field">
             <span className="field-label">When (Singapore time)</span>
-            <input className="input" type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
+            <input className="input" type="datetime-local" value={when} disabled={busy} onChange={(e) => setWhen(e.target.value)} />
           </label>
         )}
 
@@ -163,11 +164,13 @@ export default function ConfirmModal({ draft, onDone, onClose }: Props) {
         {error && (
           <p className="picker-error small" role="alert">
             {error}
+            {' '}If a response was lost, retry with the same values to recover the saved result. Check Actions before
+            changing the request.
           </p>
         )}
         <div className="modal-actions">
           <button ref={cancelRef} className="btn" disabled={busy} onClick={onClose}>
-            Cancel — do nothing
+            {attemptRef.current ? 'Close' : 'Cancel — do nothing'}
           </button>
           <button
             className="btn btn-primary"

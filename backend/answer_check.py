@@ -8,24 +8,43 @@ Matching is forgiving about form, never about value: 18,326 = 18326, 11.8 matche
 the answer's precision), 9% matches a rate of 0.09, a fall of 11.8% matches -11.77, and "31 Mar" or
 "March 31" matches 2026-03-31. Small counts (0 to 10), years and times of day are not checked: they
 are too common in ordinary wording to be told apart from figures.
+
+Boundaries are ASCII-only, so figures inside Chinese text ("共有12个订单") are found too. A source row
+number vouches only for a figure cited as a row or line ("row 88", "第88行"), never for a count.
+This is a value-matching heuristic, not a check that each figure describes the correct entity.
 """
 
 import re
 from datetime import date
 
-ORDER = re.compile(r"\bORD[- ]?(\d{1,3})\b", re.IGNORECASE)
-ISO_DATE = re.compile(r"\b(20\d\d)-(\d\d)-(\d\d)\b")
+# Not preceded or followed by an ASCII letter or digit. Python's \b and \w treat CJK characters as
+# word characters, which would hide "12" in "共有12个".
+_START, _END = r"(?<![A-Za-z0-9_])", r"(?![A-Za-z0-9_])"
+ORDER = re.compile(_START + r"ORD[- ]?(\d{1,3})(?!\d)", re.IGNORECASE)
+ISO_DATE = re.compile(_START + r"(20\d\d)-(\d\d)-(\d\d)(?!\d)")
 MONTHS = {m: i for i, m in enumerate(("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct",
                                        "nov", "dec"), 1)}
-_MONTH = r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?"
-DAY_MONTH = re.compile(r"\b(\d{1,2})(?:st|nd|rd|th)? " + _MONTH + r"(?: (20\d\d))?", re.IGNORECASE)
-MONTH_DAY = re.compile(r"\b" + _MONTH + r" (\d{1,2})(?:st|nd|rd|th)?\b(?:,? (20\d\d))?", re.IGNORECASE)
+# Whole month names and their usual abbreviations only, so "decreased", "marked" or "separate" are not
+# months. Lower-case "may" is the verb ("12 may need a call"); only "May" names the month.
+_MONTH = (r"(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|(?-i:May|MAY)|june?|july?|aug(?:ust)?"
+          r"|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?(?![a-z])")
+DAY_MONTH = re.compile(_START + r"(\d{1,2})(?:st|nd|rd|th)? " + _MONTH + r"(?: (20\d\d))?", re.IGNORECASE)
+MONTH_DAY = re.compile(_START + _MONTH + r" (\d{1,2})(?:st|nd|rd|th)?(?!\d)(?:,? (20\d\d))?", re.IGNORECASE)
 # Day ranges: "27–31 March" or "March 27-31" name two dates.
-DAY_RANGE = re.compile(r"\b(\d{1,2})\s*[–-]\s*(\d{1,2}) " + _MONTH, re.IGNORECASE)
-RANGE_DAY = re.compile(r"\b" + _MONTH + r" (\d{1,2})\s*[–-]\s*(\d{1,2})\b", re.IGNORECASE)
-TIME = re.compile(r"\b\d{1,2}:\d{2}\b")
+DAY_RANGE = re.compile(_START + r"(\d{1,2})\s*[–-]\s*(\d{1,2}) " + _MONTH, re.IGNORECASE)
+RANGE_DAY = re.compile(_START + _MONTH + r" (\d{1,2})\s*[–-]\s*(\d{1,2})(?!\d)", re.IGNORECASE)
+TIME = re.compile(_START + r"\d{1,2}:\d{2}" + _END)
 LIST_MARKER = re.compile(r"(?m)^\s*\d+[.)]\s")
-NUMBER = re.compile(r"(?<![\w.])-?\d{1,3}(?:,\d{3})+(?:\.\d+)?%?|(?<![\w.])-?\d+(?:\.\d+)?%?")
+NUMBER = re.compile(r"(?<![A-Za-z0-9_.])-?\d{1,3}(?:,\d{3})+(?:\.\d+)?%?|(?<![A-Za-z0-9_.])-?\d+(?:\.\d+)?%?")
+# A figure the answer cites as a source row or file line.
+ROW_CITATION = re.compile(
+    r"\b(?:rows?|lines?)\s*(?:#|no\.?|number)?\s*(\d+)"
+    r"|(?<![A-Za-z0-9_])#\s*(\d+)"
+    r"|第\s*(\d+)\s*行",
+    re.IGNORECASE,
+)
+# Keys whose values are citations (file line numbers and evidence IDs), not facts.
+_CITATION_KEYS = {"row", "source_row", "id", "row_key"}
 YEAR = 2026
 
 
@@ -55,33 +74,40 @@ def _iso(year, month, day):
 
 
 def _strip_known(text):
-    """Remove the parts that are not figures: order IDs, dates, times and list numbering."""
+    """Mask non-figures without moving the original text spans."""
     for pattern in (ORDER, ISO_DATE, DAY_RANGE, RANGE_DAY, DAY_MONTH, MONTH_DAY, TIME, LIST_MARKER):
-        text = pattern.sub(" ", text)
+        text = pattern.sub(lambda match: " " * len(match.group()), text)
     return text
 
 
-def _numbers_in(text):
-    values = []
-    for token in NUMBER.findall(_strip_known(text)):
+def _number_mentions(text):
+    for match in NUMBER.finditer(_strip_known(text)):
+        token = match.group()
         percent = token.endswith("%")
         raw = token.rstrip("%").replace(",", "")
         decimals = len(raw.split(".")[1]) if "." in raw else 0
-        values.append((token, float(raw), decimals, percent))
-    return values
+        yield token, float(raw), decimals, percent, match.span()
+
+
+def _numbers_in(text):
+    return [mention[:4] for mention in _number_mentions(text)]
 
 
 class _Known:
     """Everything the tool results (and the manager's message) state."""
 
     def __init__(self, sources):
-        self.orders, self.dates, self.numbers = set(), set(), []
+        self.orders, self.dates, self.numbers, self.rows = set(), set(), [], set()
         for source in sources:
             self._walk(source)
 
     def _walk(self, value):
         if isinstance(value, dict):
-            for item in value.values():
+            for key, item in value.items():
+                if key in _CITATION_KEYS:
+                    if key in ("row", "source_row") and isinstance(item, int) and not isinstance(item, bool):
+                        self.rows.add(item)
+                    continue
                 self._walk(item)
         elif isinstance(value, (list, tuple)):
             for item in value:
@@ -123,12 +149,21 @@ def check(answer, tool_results, question="", today=None, earlier_results=()):
         if day not in known.dates:
             unverified.append({"kind": "date", "text": day})
     seen = set()
-    for token, value, decimals, percent in _numbers_in(answer):
-        year = re.fullmatch(r"20\d\d", token) is not None  # "2026", but not "2,000"
-        if token in seen or (not percent and decimals == 0 and (0 <= value <= 10 or year)):
+    row_citations = {
+        match.span(group)
+        for match in ROW_CITATION.finditer(answer)
+        for group in range(1, ROW_CITATION.groups + 1)
+        if match.group(group) is not None
+    }
+    for token, value, decimals, percent, span in _number_mentions(answer):
+        year = re.fullmatch(r"20[23]\d", token) is not None  # "2026", but not "2,000" or "2000" pieces
+        cited_row = span in row_citations and value in known.rows
+        # A verified row citation must not suppress a separate business figure of the same value.
+        seen_key = (token, cited_row)
+        if seen_key in seen or (not percent and decimals == 0 and (0 <= value <= 10 or year)):
             continue
-        seen.add(token)
+        seen.add(seen_key)
         checked += 1
-        if not known.has_number(value, decimals, percent):
+        if not cited_row and not known.has_number(value, decimals, percent):
             unverified.append({"kind": "number", "text": token})
     return {"checked": checked, "unverified": unverified}

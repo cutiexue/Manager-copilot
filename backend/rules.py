@@ -8,6 +8,8 @@ All rules evaluate against the dataset snapshot date; other dates are
 scenarios, not facts.
 """
 
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import date, timedelta
 
 SNAPSHOT = "2026-04-01"  # the course data date (snapshot v0)
@@ -16,19 +18,41 @@ SNAPSHOT = "2026-04-01"  # the course data date (snapshot v0)
 # (track1/scenarios/watch_snapshots.json), then that snapshot. ActionStore keeps this in step with the
 # version saved in SQLite; every business rule reads "today" from here.
 _current = {"version": "v0", "date": SNAPSHOT}
+_request_data = ContextVar("request_data_snapshot", default=None)
 
 
 def set_current_data(version, day):
-    _current.update(version=version, date=day)
+    # Replace the pair atomically; an in-flight request keeps its own immutable pair.
+    global _current
+    _current = {"version": version, "date": day}
+
+
+@contextmanager
+def data_context(version=None, day=None):
+    """Pin business reads to one snapshot for a request, including tool worker threads.
+
+    LangChain propagates ContextVars to its tool executor. Updating the app's selected
+    snapshot affects subsequent requests, never the request already running here.
+    """
+    selected = dict(_request_data.get() or _current)
+    if version is not None or day is not None:
+        if version is None or day is None:
+            raise ValueError("A data context needs both version and date.")
+        selected = {"version": version, "date": day}
+    token = _request_data.set(selected)
+    try:
+        yield dict(selected)
+    finally:
+        _request_data.reset(token)
 
 
 def current_version():
-    return _current["version"]
+    return (_request_data.get() or _current)["version"]
 
 
 def today_iso():
     """Today for business facts: the date of the data currently loaded (2026-04-01 for the course data)."""
-    return _current["date"]
+    return (_request_data.get() or _current)["date"]
 
 # The factory works Monday to Saturday and is closed on Sundays.
 REST_WEEKDAY = 6
@@ -128,11 +152,16 @@ def risk_reasons(order, ref, due_within_days=DUE_SOON_DAYS):
     reasons = []
     if is_overdue(order, ref):
         days = (ref - parse_date(order["due_date"])).days
-        reasons.append(f"overdue by {days} calendar days")
+        reasons.append(f"overdue by {_calendar_days(days)}")
     elif is_due_soon(order, ref, due_within_days):
         days = (parse_date(order["due_date"]) - ref).days
-        reasons.append(f"due in {days} calendar days, still at stage {order['current_stage']}")
+        when = "due today" if days == 0 else f"due in {_calendar_days(days)}"
+        reasons.append(f"{when}, still at stage {order['current_stage']}")
     if is_quiet(order, ref):
         days = (ref - parse_date(order["last_activity_date"])).days
-        reasons.append(f"no recorded activity for {days} calendar days")
+        reasons.append(f"no recorded activity for {_calendar_days(days)}")
     return reasons
+
+
+def _calendar_days(days):
+    return f"{days} calendar day{'' if days == 1 else 's'}"

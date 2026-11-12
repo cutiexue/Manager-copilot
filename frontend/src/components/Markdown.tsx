@@ -46,7 +46,7 @@ const startsBlock = (line: string, next?: string) =>
   (line.includes('|') && next !== undefined && isDivider(next));
 
 export default function Markdown({ text }: { text: string }) {
-  const lines = text.replace(/\r\n?/g, '\n').split('\n');
+  const lines = (text ?? '').replace(/\r\n?/g, '\n').split('\n');
   const blocks: ReactNode[] = [];
   let i = 0;
   while (i < lines.length) {
@@ -81,19 +81,38 @@ export default function Markdown({ text }: { text: string }) {
       const ordered = NUMBER.test(line);
       const marker = ordered ? NUMBER : BULLET;
       const items: string[] = [];
-      while (i < lines.length && lines[i].trim()) {
+      while (i < lines.length) {
+        if (!lines[i].trim()) {
+          // Blank lines between items ("1. …\n\n2. …") keep the list going, so numbering continues.
+          let next = i + 1;
+          while (next < lines.length && !lines[next].trim()) next += 1;
+          if (next < lines.length && marker.test(lines[next])) {
+            i = next;
+            continue;
+          }
+          break;
+        }
         if (marker.test(lines[i])) items.push(lines[i].replace(marker, ''));
         else if (/^\s{2,}\S/.test(lines[i]) && items.length) items[items.length - 1] += ` ${lines[i].trim()}`;
         else break;
         i += 1;
       }
-      const List = ordered ? 'ol' : 'ul';
+      // A numbered list that resumes after a paragraph starts at its own first number.
+      const start = ordered ? Number(line.match(/\d+/)?.[0] ?? 1) : undefined;
       blocks.push(
-        <List key={key}>
-          {items.map((item, n) => (
-            <li key={n}>{inline(item, `${key}i${n}`)}</li>
-          ))}
-        </List>,
+        ordered ? (
+          <ol key={key} start={start !== 1 ? start : undefined}>
+            {items.map((item, n) => (
+              <li key={n}>{inline(item, `${key}i${n}`)}</li>
+            ))}
+          </ol>
+        ) : (
+          <ul key={key}>
+            {items.map((item, n) => (
+              <li key={n}>{inline(item, `${key}i${n}`)}</li>
+            ))}
+          </ul>
+        ),
       );
     } else {
       const para: string[] = [];

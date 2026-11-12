@@ -126,3 +126,29 @@ def test_agent_gets_the_narrative_without_repeating_its_rows():
     page = get_morning_briefing(narrative_rows=True)["narrative"]
     assert tool["text"] == page["text"]
     assert all(set(s) == {"topic", "text"} for s in tool["sentences"])
+
+
+def test_a_loaded_snapshot_without_production_records_is_not_read_as_all_clear():
+    import rules
+    with rules.data_context("v1", "2026-04-02"):  # the production log ends 2026-03-31
+        briefing = get_morning_briefing()
+    production = next(c for c in briefing["checks"] if c["type"] == "stage_output_drop")
+    assert production["total"] == 0
+    assert [gap["stage"] for gap in production["not_checked"]] == ["KNITTING", "ASSEMBLY", "WASHING", "PACKING"]
+    # One gap per stage for the comparison window and one for the last workday, not two each.
+    assert len(briefing["data_gaps"]) == 8
+    assert not any("data_gaps" in warning for warning in briefing["warnings"])
+    from briefing import render_briefing_text
+    rendered = render_briefing_text(briefing)
+    assert "vs baseline:" not in rendered and "not_found" not in rendered
+    assert "8 checks could not be completed" in rendered
+
+
+def test_risk_reasons_read_naturally():
+    from rules import SNAPSHOT, risk_reasons
+    from datetime import date
+    ref = date.fromisoformat(SNAPSHOT)
+    order = {"status": "IN_PROGRESS", "due_date": "2026-03-31", "last_activity_date": "2026-03-31",
+             "current_stage": "PACKING"}
+    assert risk_reasons(order, ref) == ["overdue by 1 calendar day"]
+    assert risk_reasons({**order, "due_date": "2026-04-01"}, ref) == ["due today, still at stage PACKING"]

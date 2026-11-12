@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-26T03:32:21+00:00",
+ "generated_at": "2026-11-12T00:56:27+00:00",
  "generator": "briefing.get_morning_briefing()",
- "backend_commit": "be265f1",
+ "backend_commit": "7d4f16f",
  "briefing": {
   "status": "ok",
   "as_of_date": "2026-04-01",
@@ -294,7 +294,7 @@
      "customer": "TrendCart",
      "current_stage": "WASHING",
      "risk_reasons": [
-      "overdue by 1 calendar days"
+      "overdue by 1 calendar day"
      ]
     },
     {
@@ -310,7 +310,7 @@
      "customer": "Northwind Apparel",
      "current_stage": "WASHING",
      "risk_reasons": [
-      "due in 0 calendar days, still at stage WASHING"
+      "due today, still at stage WASHING"
      ]
     },
     {
@@ -326,7 +326,7 @@
      "customer": "Cotton Club",
      "current_stage": "ASSEMBLY",
      "risk_reasons": [
-      "overdue by 1 calendar days"
+      "overdue by 1 calendar day"
      ]
     },
     {
@@ -1370,11 +1370,11 @@
        "type": "order_at_risk",
        "severity": 2,
        "severity_basis": "2 x overdue calendar days + idle calendar days",
-       "summary": "ORD-020 (TrendCart, 1200 pcs, stage WASHING): overdue by 1 calendar days.",
+       "summary": "ORD-020 (TrendCart, 1200 pcs, stage WASHING): overdue by 1 calendar day.",
        "details": {
         "order_id": "ORD-020",
         "risk_reasons": [
-         "overdue by 1 calendar days"
+         "overdue by 1 calendar day"
         ],
         "customer": "TrendCart",
         "current_stage": "WASHING",
@@ -1406,11 +1406,11 @@
        "type": "order_at_risk",
        "severity": 2,
        "severity_basis": "2 x overdue calendar days + idle calendar days",
-       "summary": "ORD-055 (Cotton Club, 800 pcs, stage ASSEMBLY): overdue by 1 calendar days.",
+       "summary": "ORD-055 (Cotton Club, 800 pcs, stage ASSEMBLY): overdue by 1 calendar day.",
        "details": {
         "order_id": "ORD-055",
         "risk_reasons": [
-         "overdue by 1 calendar days"
+         "overdue by 1 calendar day"
         ],
         "customer": "Cotton Club",
         "current_stage": "ASSEMBLY",
@@ -1442,11 +1442,11 @@
        "type": "order_at_risk",
        "severity": 0,
        "severity_basis": "2 x overdue calendar days + idle calendar days",
-       "summary": "ORD-029 (Northwind Apparel, 1500 pcs, stage WASHING): due in 0 calendar days, still at stage WASHING.",
+       "summary": "ORD-029 (Northwind Apparel, 1500 pcs, stage WASHING): due today, still at stage WASHING.",
        "details": {
         "order_id": "ORD-029",
         "risk_reasons": [
-         "due in 0 calendar days, still at stage WASHING"
+         "due today, still at stage WASHING"
         ],
         "customer": "Northwind Apparel",
         "current_stage": "WASHING",
@@ -1539,7 +1539,8 @@
        }
       }
      }
-    ]
+    ],
+    "not_checked": []
    },
    {
     "type": "stage_output_drop",
@@ -1633,7 +1634,8 @@
        }
       }
      }
-    ]
+    ],
+    "not_checked": []
    },
    {
     "type": "customer_slipping",
@@ -1686,7 +1688,8 @@
        }
       }
      }
-    ]
+    ],
+    "not_checked": []
    }
   ],
   "act_count": 8,

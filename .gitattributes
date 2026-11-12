@@ -1,0 +1,8 @@
+# Windows batch files need CRLF: cmd.exe can miss `goto` labels in LF files, which a GitHub ZIP
+# download would otherwise keep.
+*.bat text eol=crlf
+
+# Data and evaluation sets are hashed in every evaluation report (data_sha256, set_sha256), so their
+# bytes must not change with the platform's line-ending settings.
+*.csv -text
+*.jsonl -text

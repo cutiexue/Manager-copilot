@@ -27,6 +27,7 @@ const when = (iso: string) =>
 const ACTOR: Record<AuditEvent['actor'], string> = { agent: 'Co-Pilot', user: 'You', system: 'System', scheduler: 'Scheduler' };
 const EVENT: Record<string, string> = {
   proposal_created: 'Proposed', confirmed: 'Confirmed', executed: 'Saved', cancelled: 'Cancelled',
+  proposal_ready: 'Ready for confirmation', proposal_invalidated: 'Proposal invalidated', turn_failed: 'Chat turn failed',
   proposal_expired: 'Expired', failed: 'Failed', reminder_due: 'Reminder due', reminder_dismissed: 'Reminder dismissed',
   watch_triggered: 'Watch triggered', watch_resolved: 'Watch closed', watch_paused: 'Watch paused',
   watch_resumed: 'Watch resumed', watch_cancelled: 'Watch cancelled', alert_raised: 'Alert',

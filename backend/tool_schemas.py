@@ -77,7 +77,7 @@ register_tool(
                        'description': 'Required inclusive calendar days; start date is day one.'},
      'scope': {'type': 'string', 'enum': ['selected', 'all']},
      'order_ids': {'type': 'array', 'items': {'type': 'string'}},
-     'start_date': {'type': 'string', 'description': 'YYYY-MM-DD; default 2026-04-01.'}},
+     'start_date': {'type': 'string', 'description': 'YYYY-MM-DD; omit to start on the current data date. Capacity and queues remain the 2026-04-01 reference data.'}},
     ['quantity_basis', 'deadline_days', 'expected_order_count'],
 )
 
@@ -91,7 +91,7 @@ register_tool(
     {'quantity_basis': {'type': 'string', 'enum': ['original_order_pieces']},
      'scope': {'type': 'string', 'enum': ['selected', 'all']},
      'order_ids': {'type': 'array', 'items': {'type': 'string'}},
-     'start_date': {'type': 'string', 'description': 'YYYY-MM-DD; default 2026-04-01.'}},
+     'start_date': {'type': 'string', 'description': 'YYYY-MM-DD; omit to start on the current data date. Capacity and queues remain the 2026-04-01 reference data.'}},
     ['quantity_basis', 'expected_order_count'],
 )
 
@@ -249,7 +249,7 @@ _QUEUE = ("Omit (default) to queue in-house work behind the unfinished orders, s
 _common = {
     "pieces": {"type": "integer", "minimum": 0, "maximum": MAX_SCENARIO_PIECES},
     "category": {"type": "string", "enum": ["TOPS", "ACCESSORIES"]},
-    "start_date": {"type": "string", "description": "YYYY-MM-DD; default scenario date is 2026-04-01."},
+    "start_date": {"type": "string", "description": "YYYY-MM-DD; omit to start on the current data date. Capacity and queues remain the 2026-04-01 reference data."},
 }
 for _name, _function in ESTIMATION_FUNCTIONS.items():
     if _name == "estimate_in_house":
