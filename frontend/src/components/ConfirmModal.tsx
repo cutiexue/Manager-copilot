@@ -43,7 +43,7 @@ function tomorrowNine() {
 const readable = (value: string) =>
   new Date(value).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
-// Plan §7.5: a proposal is carried out only when the manager confirms. Confirm here creates the
+// A proposal is carried out only when the manager confirms. Confirm here creates the
 // proposal and confirms it in one step, using the same request ID when a response is lost.
 export default function ConfirmModal({ draft, onDone, onClose }: Props) {
   const [order, setOrder] = useState<OrderChoice | null>(draft.order ?? null);

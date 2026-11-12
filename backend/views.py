@@ -1,5 +1,5 @@
 """Read-only views behind the HTTP API: one order, one stage's output, a feasibility estimate and
-one cited source row (plan §11). They call the agent's own tools, so the API and the chat agree,
+one cited source row. They call the agent's own tools, so the API and the chat agree,
 and return evidence in the same {refs, rows} shape as a chat turn.
 """
 

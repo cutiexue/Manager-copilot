@@ -1,5 +1,5 @@
 // Turn tool outputs into what the evidence drawer shows.
-// Rule from the implementation plan: the frontend never computes business numbers.
+// Rule: the frontend never computes business numbers.
 // Every value below is copied (and only formatted) from fields the backend returned.
 import type { Briefing, Decision, Finding, SourceRef, YesterdayStage } from './types';
 

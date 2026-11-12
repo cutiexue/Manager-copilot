@@ -1,4 +1,4 @@
-"""Sanity checks on the read-only Track 1 CSVs (plan §6.5)."""
+"""Sanity checks on the read-only Track 1 CSVs."""
 
 from datetime import date
 from pathlib import Path

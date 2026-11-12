@@ -4,7 +4,7 @@ DSS5105 Capstone Project — **Track 1: The General Manager's Co-Pilot**
 
 Manager Co-Pilot is an AI-assisted decision-support system for factory general managers. It helps users understand current operations, identify risks, estimate feasibility, and take controlled actions based on traceable production data.
 
-> **Current phase:** Sprint 3 — all six workflows are built, with local reliability fixes described in [Final fixes](./docs/FINAL_FIXES_2026-11-11.md). Historical real-model runs passed all automated checks in 29/30 evaluation-suite and 15/17 development cases. These are provisional development results: labels await independent review, and the current code/Skills have not yet been rerun with a real model. See [Evaluation](./evaluation/README.md).
+> All six workflows are built. Historical real-model runs passed all automated checks in 29/30 evaluation-suite and 15/17 development cases. These are provisional development results: labels await independent review, and the current code/Skills have not yet been rerun with a real model. See [Evaluation](./evaluation/README.md).
 
 ## Quick Start
 
@@ -26,8 +26,7 @@ Manager-copilot/
 │   ├── track1/scenarios/    # scripted, versioned data snapshots for standing watches and demos
 │   └── tests/               # pytest suite, no API key needed
 ├── frontend/                # React + TypeScript + Vite (see frontend/README.md)
-├── evaluation/              # question sets, runner, failure ledger and real-model reports
-└── docs/                    # implementation plan and sprint change logs
+└── evaluation/              # question sets, runner, failure ledger and real-model reports
 ```
 
 Backend and tests:
@@ -96,8 +95,7 @@ Why this split:
   repeated check or a restart never repeats it.
 - **No outside channel.** Alerts stay in the app; nothing is emailed or messaged.
 
-Not done: severity-based alerts for findings (planned in `docs/TRACK1_IMPLEMENTATION_PLAN.md` 12.4),
-and a user setting for alert sensitivity.
+Not done: severity-based alerts for findings, and a user setting for alert sensitivity.
 
 ## Voice
 
@@ -140,7 +138,7 @@ The project focuses on five tool families:
 
 ## Project Objectives
 
-The project aims to deliver six core capabilities:
+The system delivers six core capabilities:
 
 1. Generate a scheduled morning operations briefing.
 2. Support multi-turn operational Q&A using the latest available data.
@@ -149,7 +147,7 @@ The project aims to deliver six core capabilities:
 5. Require user confirmation before executing or recording actions.
 6. Trace important claims back to the supporting source rows.
 
-## MVP Architecture
+## Architecture
 
 | Component | Technology / Approach |
 |---|---|
@@ -164,7 +162,7 @@ The project aims to deliver six core capabilities:
 | Testing | pytest |
 | Evaluation | Fixed evaluation dataset + independent evaluation scripts |
 
-The initial MVP uses a single-agent workflow.
+The system uses a single-agent workflow.
 
 The project does not train a model, build custom multi-agent/LangGraph orchestration, discover skills
 dynamically, or add a separate vector RAG service. LangChain's agent uses LangGraph internally as
@@ -172,7 +170,7 @@ its execution runtime.
 
 ## Data
 
-The initial system uses the provided Track 1 datasets:
+The system uses the provided Track 1 datasets:
 
 - `orders.csv`
 - `production_log.csv`
@@ -189,101 +187,30 @@ SQLite is used only for application state, including:
 - Actions
 - Audit records
 
-## Course Milestones
-
-All times are Singapore Time (SGT).
-
-| Date | Milestone |
-|---|---|
-| 16 October 2026, 3:00 PM | Sprint 1 submission |
-| 16 October 2026, 7:00 PM | Sprint 1 live presentation |
-| 30 October 2026, 3:00 PM | Sprint 2 presentation and video submission |
-| 13 November 2026, 3:00 PM | Sprint 3 presentation and video submission |
-| 15 November 2026, 11:59 PM | Final project submission |
-| 25 November 2026, 11:59 PM | Reimbursement submission |
-
-Detailed weekly tasks, deliverables, and acceptance criteria are maintained in the [Track 1 Implementation Plan](./docs/TRACK1_IMPLEMENTATION_PLAN.md).
-
 ## Team Responsibilities
-
-Member labels A–F are temporary and will be replaced with the team members' names.
 
 | Member | Primary Responsibility | Main Deliverables |
 |---|---|---|
-| A | Product, architecture, integration, and evaluation coordination | Project scope, API contract, architecture, sprint coordination, system integration, course requirement checks, and final delivery |
-| B | Data, retrieval, and traceability tools | CSV validation, data access layer, retrieval tools, source-row citations, and tool tests |
-| C | Judgement, discovery, and feasibility tools | Operational rules, discovery tools, feasibility calculations, assumptions, business logic, and tests |
-| D | LLM, LangChain, and static skills | Structured request parsing, agent workflow, clarification and refusal behaviour, faithful explanations, and language evaluation cases |
-| E | State, scheduling, watches, and action safety | SQLite state, APScheduler jobs, standing watches, confirmation workflow, action logging, and audit records |
-| F | React, UX, demo, and usability | User interface, morning briefing and Q&A views, evidence display, confirmation flow, usability testing, screenshots, and demo video |
+| Zhang Shilong (A) | Product, architecture, integration, and evaluation coordination | Project scope, API contract, architecture, sprint coordination, system integration, course requirement checks, and final delivery |
+| Wang Zihao (B) | Data, retrieval, and traceability tools | CSV validation, data access layer, retrieval tools, source-row citations, and tool tests |
+| Wan Jiahe (C) | Judgement, discovery, and feasibility tools | Operational rules, discovery tools, feasibility calculations, assumptions, business logic, and tests |
+| Wang Ru (D) | LLM, LangChain, and static skills | Structured request parsing, agent workflow, clarification and refusal behaviour, faithful explanations, and language evaluation cases |
+| Liu Weiye (E) | State, scheduling, watches, and action safety | SQLite state, APScheduler jobs, standing watches, confirmation workflow, action logging, and audit records |
+| Hua Yuqing (F) | React, UX, demo, and usability | User interface, morning briefing and Q&A views, evidence display, confirmation flow, usability testing, screenshots, and demo video |
 
-Every pull request should be reviewed by at least one other team member.
+The letters are the case-owner labels used in `evaluation/`.
 
 ## Evaluation
 
-The project will be evaluated through:
-
-- Unit tests for deterministic Python tools
-- Integration tests for the end-to-end workflow
-- At least 30 verified operational questions
-- At least 5 ambiguous, unanswerable, or hallucination-bait cases
-- At least 5 feasibility or action-safety cases
-- Traceability checks from generated claims to source rows
-- Individual analysis of at least 10 failure cases
-- Usability testing of the complete manager workflow
-
-Evaluation results will be reported by category rather than only as a single overall score.
-
-## Current Progress
-
-- [x] Track 1 selected
-- [x] MVP scope and architecture defined
-- [x] Initial implementation plan created
-- [x] Repository structure and development environment
-- [x] Data access layer and deterministic tools (read-only)
-- [x] Agent workflow and static skills
-- [x] SQLite application state (sessions, follow-ups, watches, alerts, audit)
-- [x] Scheduler and standing watches
-- [x] React user interface (chat, briefing, orders, actions, watches and alerts)
-- [x] End-to-end system integration (merged on `main` in PR #3; real-model smoke test passed 11 Nov 2026)
-- [x] Historical real-model development runs (latest stored scores 29/30 and 15/17)
-- [ ] Independently reviewed labels and held-out evaluation on the final clean commit
-- [ ] Failure analysis write-up and team review of the cases
-- [ ] Final documentation and demonstration
+- CI runs on Ubuntu and Windows for every push (`.github/workflows/checks.yml`): backend tests with no
+  API key, validation of the evaluation case files, an offline run of the evaluation plumbing (not
+  model scores), and the frontend type check, build and regression tests.
+- The language evaluation has 30 evaluation-suite and 17 development cases, scored against facts taken
+  from the CSVs and the deterministic tools. See [Evaluation](./evaluation/README.md) for the case
+  format, running, scoring and its limits.
 
 ## Documentation
 
-- [Sprint 3 Changes](./docs/SPRINT3_CHANGES.md) — data date, outsourcing risk, answer check, evaluation runs, new interface
-- [Final fixes](./docs/FINAL_FIXES_2026-11-11.md) — local reliability fixes, validation and remaining release work
-- [Sprint 2 Changes](./docs/SPRINT2_CHANGES.md) — everything changed on the integration branch, how it was checked, and what is open
-- [Track 1 Implementation Plan](./docs/TRACK1_IMPLEMENTATION_PLAN.md)
 - [Backend module map](./backend/README.md) and [Frontend](./frontend/README.md)
-- Contribution guidelines — to be added
 - API documentation — generated by FastAPI at `/docs` while the backend runs
 - [Evaluation](./evaluation/README.md) — case format, running, scoring and its limits; reports go to `evaluation/reports/`
-
-## Repository Workflow
-
-Development follows this workflow:
-
-1. Create or select a GitHub Issue.
-2. Create a short-lived branch from the latest `main`.
-3. Implement the change and add relevant tests.
-4. Open a pull request.
-5. Complete peer review and required checks.
-6. Merge the pull request into `main`.
-7. Delete the merged source branch.
-
-Direct development on `main` should be avoided.
-
-## Definition of Done
-
-A task is considered complete only when it includes:
-
-- Working implementation
-- Relevant tests
-- Supporting evidence
-- Updated documentation
-- Reviewer approval
-
-“Works on my computer” alone is not considered complete.

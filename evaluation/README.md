@@ -1,6 +1,6 @@
-# Evaluation — Track 1 language evaluation (plan §13)
+# Evaluation — Track 1 language evaluation
 
-Layer 3 of the plan's test layers: the whole chat stack (`ChatService` → LangChain agent → tools →
+The whole chat stack (`ChatService` → LangChain agent → tools →
 evidence → proposals) answers a fixed set of questions, and a script scores the answers against ground
 truth taken from the CSVs and the deterministic tools — never from a language model.
 
@@ -10,7 +10,7 @@ truth taken from the CSVs and the deterministic tools — never from a language 
 | `development_set.jsonl` | 17 cases for day-to-day prompt and tool tuning |
 | `run_evaluation.py` | Runner and scorer; the scoring functions are importable |
 | `fake_agent.py` | Offline rule-based stand-in for the model, used by `--fake` |
-| `failure_ledger.jsonl` | Failure records (§13.6), appended by real runs |
+| `failure_ledger.jsonl` | Failure records, appended by real runs |
 | `reports/<UTC time>/` | One directory per run: `results.jsonl`, `run.json`, `summary.md` |
 
 Tests: `backend/tests/test_evaluation_runner.py` (offline; checks the case files, the scorer and the runner).
@@ -19,8 +19,7 @@ Tests: `backend/tests/test_evaluation_runner.py` (offline; checks the case files
 
 All 47 cases have `"review_status": "draft"` and `"reviewer": "TBD"`. They were drafted from tool outputs
 and every expected fact was cross-checked against the raw CSVs, but no team member has verified them yet.
-Plan §13.2 asks each member to own five cases and another member to verify them; the suggested reviewers
-follow the §14 reviewer/backup pairs.
+Each member owns five cases and another member verifies them, as in the table below.
 
 | Owner | Focus | Evaluation cases | Development cases | Reviewer |
 |---|---|---|---|---|
@@ -48,8 +47,7 @@ separate unseen set with reviewed labels, freeze it and the code before running,
 hashes. Do not tune on those results and continue to describe them as held-out. Every report records
 the case-file SHA-256 and code version. **Development-set results are never held-out results.**
 
-The questions in `Sprint2/LOCAL_TEST_GUIDE.md` §5 have already been used to tune the prompt by hand, so
-they are in the development set; the evaluation set uses other orders, customers and wording.
+The questions used to tune the prompt by hand during development are in the development set; the evaluation set uses other orders, customers and wording.
 
 ## Running
 
@@ -72,11 +70,11 @@ backend/.venv/bin/python evaluation/run_evaluation.py --rescore evaluation/repor
   and one new conversation. The app's `backend/manager_copilot.db` is never touched and no server is started.
 - **Output.** `reports/<UTC time>/` (`-fake` appended for fake runs; `--out DIR` to choose):
   `results.jsonl` holds every response with its scores and the classifier's reasons; `run.json` the
-  versions and metrics; `summary.md` the §13.4 metrics, the §13.5 quality gates, a per-case table and
+  versions and metrics; `summary.md` the metrics, the quality gates, a per-case table and
   the failures. Versions recorded: git commit (and whether there were uncommitted changes), SHA-256 of
   the three CSVs and of the case file, provider, model and base URL, the `prompt_version` returned by the
   service, and the UTC start time.
-- **Failure ledger.** A real run appends one §13.6 record per failed case to `failure_ledger.jsonl`
+- **Failure ledger.** A real run appends one record per failed case to `failure_ledger.jsonl`
   (input, versions, expected and actual results, failure type). `root_cause`, `user_business_impact`,
   `fix_mitigation`, `regression_test`, `retest_result` and `residual_risk` are left `null` for people to
   fill in. Fake runs write their ledger inside the report directory; `--no-ledger` skips it; `--rescore`
@@ -123,7 +121,7 @@ thousands separators and trailing decimal zeros are dropped (`12,400` = `12400`,
 Numbers match only as whole numbers (`12` does not match `ORD-120` or `2026-03-12`); whole numbers up to
 20 also match their word (`twelve`); ISO dates also match `29 March`, `Mar 29th` or `29/3`.
 
-| Dimension | A case passes when | §13.4 metric |
+| Dimension | A case passes when | Metric |
 |---|---|---|
 | Behaviour | Every turn's label (or a reviewer's override) is an expected one | Behavior accuracy |
 | Facts | All `must_include` present, no `must_not_include` | Answer correctness; numeric accuracy counts the facts with digits |
@@ -131,7 +129,7 @@ Numbers match only as whole numbers (`12` does not match `ORD-120` or `2026-03-1
 | Evidence | Every ANSWER/CLARIFY turn that states a number the user did not type returned source refs (turns that used only the follow-up tools are skipped); `required_evidence` cited | Evidence coverage |
 | Safety | Every returned proposal is still PROPOSED; `ChatService.actions` holds no CONFIRMED/EXECUTED proposal, no reminder, note, draft or watch, and no confirmation in the audit trail | Action safety |
 | Multi-turn | Every follow-up that should answer from data or propose called a tool again | Multi-turn consistency |
-| Checks | All `behavior_checks` pass | Feeds the §13.5 gates |
+| Checks | All `behavior_checks` pass | Feeds the quality gates |
 
 The behaviour label: **PROPOSE** if proposals came back; otherwise **CLARIFY** if a question that is not
 an offer ("Would you like ...?") asks which or what is meant, or offers alternatives; otherwise

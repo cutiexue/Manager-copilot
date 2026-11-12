@@ -1,6 +1,6 @@
-# Manager Co-Pilot — Frontend (Member F)
+# Manager Co-Pilot — Frontend
 
-React + TypeScript + Vite. Built against the backend in `../backend` (originally the `src` branch).
+React + TypeScript + Vite. Built against the backend in `../backend`.
 Use Node.js 22.6+ (latest Node 22 patch recommended) for the response-loss regression tests.
 
 ## Run
@@ -95,7 +95,7 @@ setting; glass turns solid with reduced transparency. The Actions and Watches pa
 30 seconds and when the window regains focus.
 The evidence drawer and the confirm dialog open over whichever page is showing.
 
-## Layout (plan §12)
+## Layout
 
 ```
 src/

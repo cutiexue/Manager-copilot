@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Track 1 language evaluation (plan §13.2 Layer 3) and score every answer.
+"""Run the Track 1 language evaluation and score every answer.
 
 From the repository root:
 
@@ -11,8 +11,7 @@ From the repository root:
 
 Each case runs in a fresh temporary SQLite database and conversation, so no case sees another
 case's history, proposals or the app's own database. Every response is kept in results.jsonl,
-summary.md holds the §13.4 metrics, and every failed case is appended to failure_ledger.jsonl
-(§13.6) with the human fields (root cause, fix, ...) left empty.
+summary.md holds the metrics, and every failed case is appended to failure_ledger.jsonl with the human fields (root cause, fix, ...) left empty.
 
 Expected facts were computed from the CSVs and the deterministic tools, never by a model. The
 scoring is heuristic: it normalises text and looks for tokens and phrases. It flags; it does not
@@ -64,7 +63,7 @@ EXECUTED_STATUSES = {"CONFIRMED", "EXECUTED"}  # nobody presses Confirm during a
 CHECKS = ("asks_for_confirmation", "no_execution_claim", "states_assumptions", "no_guarantee",
           "max_words", "first_sentence_includes")
 
-# Minimum coverage of the locked evaluation set (plan §13.2 Layer 3).
+# Minimum coverage of the locked evaluation set.
 EVAL_MIN_CASES = 30
 EVAL_PER_OWNER = 5
 EVAL_MIN_GROUPS = {
@@ -893,7 +892,7 @@ def compute_metrics(results):
 
 
 def quality_gates(results, metrics):
-    """Plan §13.5 internal targets; None means the run cannot tell."""
+    """Internal quality targets; None means the run cannot tell."""
     def group(labels):
         return [r for r in results if set(r["labels"]) & set(labels)]
 
@@ -965,7 +964,7 @@ def render_summary(results, versions, metrics):
         f"| Code commit | {v['code_commit']}{' (with uncommitted changes)' if v.get('code_dirty') else ''} |",
         f"| Case file | {v['set_file']} `{v['set_sha256'][:12]}` |",
         f"| Data SHA-256 | {data} |",
-        "", "## Metrics (plan §13.4)", "",
+        "", "## Metrics", "",
         "| Metric | Result | How it is measured |", "|---|---|---|",
         f"| Behavior accuracy | {_fraction(metrics['behavior_turns'])} turns; {_fraction(metrics['behavior_cases'])} cases | Heuristic ANSWER/CLARIFY/DECLINE/PROPOSE label per turn vs expected; reasons in results.jsonl |",
         f"| Answer correctness | {_fraction(metrics['answer_correctness'])} cases | Every must_include token present and no must_not_include token, after normalisation |",
@@ -979,7 +978,7 @@ def render_summary(results, versions, metrics):
         f"| Task success/time | median turn latency {metrics['median_turn_latency_s']} s | Model turn latency only; user task success is the Layer 5 usability study |",
         f"| Grounded figures | {_fraction(metrics['grounded_figures'])} figures; {metrics['grounded_figures']['turns_with_unverified']} turns with unverified | answer_check.py: order IDs, dates and figures in each answer found in that turn's tool results |",
         "", f"Behaviour checks (assumptions, guarantees, confirmation wording, length): {_fraction(metrics['behavior_checks'])}.",
-        "", "## Internal quality gates (plan §13.5)", "", "| Gate | Result | Met |", "|---|---|---|",
+        "", "## Internal quality gates", "", "| Gate | Result | Met |", "|---|---|---|",
     ]
     for gate, result, met in quality_gates(results, metrics):
         lines.append(f"| {gate} | {result} | {({True: 'yes', False: 'no', None: 'n/a'})[met]} |")
@@ -1006,7 +1005,7 @@ def render_summary(results, versions, metrics):
 
 
 def ledger_entries(results, versions, report_dir):
-    """Plan §13.6 records for failed cases; the analysis fields are left for people to fill in."""
+    """Records for failed cases; the analysis fields are left for people to fill in."""
     entries = []
     for r in results:
         if r["scores"]["passed"]:

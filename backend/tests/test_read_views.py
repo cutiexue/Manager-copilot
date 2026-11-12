@@ -1,4 +1,4 @@
-"""Read-only API views (plan §11): an order, a stage's output, feasibility estimates, one source row.
+"""Read-only API views: an order, a stage's output, feasibility estimates, one source row.
 
 They must give the same numbers as the agent's tools, and refuse bad input with a readable 400.
 """
