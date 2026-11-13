@@ -24,6 +24,10 @@ tools: query_orders, get_overdue_orders, get_orders_at_risk, get_customer_orders
 - Select tools by their descriptions. Pass the requested baseline_days and due_within_days.
 - Totals and counts come from tool fields (original_order_pieces, total_pieces, count); never
   add numbers yourself. A count you state must match the items you list.
+- Customers with two or more overdue orders: get_overdue_orders.customers_with_two_or_more gives
+  the count and by_customer the orders of each; state that count first, then list those groups.
+- Overdue or idle days belong to one order: copy them from that order's own record
+  (overdue_calendar_days, risk_reasons), never from a neighbouring order in the list.
 - Month totals, workday averages, week on week: summarize_stage_output or compare_stage_periods
   (no dates = last two complete Monday-Sunday weeks).
 - If these tools return partial or insufficient_data, explain which dates/stages lack logs.

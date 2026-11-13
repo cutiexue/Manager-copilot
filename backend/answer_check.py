@@ -11,7 +11,10 @@ are too common in ordinary wording to be told apart from figures.
 
 Boundaries are ASCII-only, so figures inside Chinese text ("共有12个订单") are found too. A source row
 number vouches only for a figure cited as a row or line ("row 88", "第88行"), never for a count.
-This is a value-matching heuristic, not a check that each figure describes the correct entity.
+Overdue days are also checked against their order: in "ORD-107 is 9 days overdue" the 9 must be
+ORD-107's own overdue figure in the tool results, not another order's (a figure stated for an order
+attaches to the nearest order ID before it in the same line or sentence). Apart from that, this is
+a value-matching heuristic, not a check that each figure describes the correct entity.
 """
 
 import re
@@ -43,6 +46,15 @@ ROW_CITATION = re.compile(
     r"|第\s*(\d+)\s*行",
     re.IGNORECASE,
 )
+# "9 days overdue", "overdue by 9 calendar days", "9 days late", "逾期9天".
+OVERDUE = re.compile(
+    r"(?<![A-Za-z0-9_.])(\d+)\s*(?:calendar\s+|working\s+)?days?\s+(?:overdue|late|past\s+due)"
+    r"|overdue\s+(?:by\s+)?(\d+)\s*(?:calendar\s+)?days?"
+    r"|逾期\s*(\d+)\s*(?:个)?(?:自然)?天",
+    re.IGNORECASE,
+)
+REASON_OVERDUE = re.compile(r"overdue by (\d+) calendar day", re.IGNORECASE)
+SENTENCE = re.compile(r"(?<=[.!?;。；！？])\s+|\n")
 # Keys whose values are citations (file line numbers and evidence IDs), not facts.
 _CITATION_KEYS = {"row", "source_row", "id", "row_key"}
 YEAR = 2026
@@ -98,11 +110,13 @@ class _Known:
 
     def __init__(self, sources):
         self.orders, self.dates, self.numbers, self.rows = set(), set(), [], set()
+        self.overdue = {}  # order ID -> the overdue day counts its own records state
         for source in sources:
             self._walk(source)
 
     def _walk(self, value):
         if isinstance(value, dict):
+            self._overdue_of(value)
             for key, item in value.items():
                 if key in _CITATION_KEYS:
                     if key in ("row", "source_row") and isinstance(item, int) and not isinstance(item, bool):
@@ -120,6 +134,20 @@ class _Known:
             self.orders.update(_order_id(d) for d in ORDER.findall(value))
             self.dates.update(_dates_in(value))
             self.numbers.extend(number for _, number, _, _ in _numbers_in(value))
+
+    def _overdue_of(self, record):
+        order = record.get("order_id")
+        if not isinstance(order, str) or not ORDER.search(order):
+            return
+        values = set()
+        days = record.get("overdue_calendar_days")
+        if isinstance(days, int) and not isinstance(days, bool):
+            values.add(days)
+        for reason in record.get("risk_reasons") or []:
+            if isinstance(reason, str):
+                values.update(int(d) for d in REASON_OVERDUE.findall(reason))
+        if values:
+            self.overdue.setdefault(_order_id(ORDER.search(order).group(1)), set()).update(values)
 
     def has_number(self, value, decimals, percent):
         targets = {abs(value)} | ({abs(value) / 100} if percent else set())
@@ -166,4 +194,23 @@ def check(answer, tool_results, question="", today=None, earlier_results=()):
         checked += 1
         if not cited_row and not known.has_number(value, decimals, percent):
             unverified.append({"kind": "number", "text": token})
+    for order, days in _overdue_claims(answer):
+        if order in known.overdue:
+            checked += 1
+            if days not in known.overdue[order]:
+                unverified.append({"kind": "attribution", "text": f"{order}: {days} days overdue"})
     return {"checked": checked, "unverified": unverified}
+
+
+def _overdue_claims(answer):
+    """(order ID, days) for each overdue figure, tied to the nearest order ID before it in its sentence."""
+    claims = []
+    for sentence in SENTENCE.split(answer):
+        orders = [(match.start(), _order_id(match.group(1))) for match in ORDER.finditer(sentence)]
+        for match in OVERDUE.finditer(sentence):
+            before = [order for start, order in orders if start < match.start()]
+            after = [order for start, order in orders if start >= match.end()]
+            owner = before[-1] if before else (after[0] if after else None)
+            if owner:
+                claims.append((owner, int(next(g for g in match.groups() if g is not None))))
+    return claims

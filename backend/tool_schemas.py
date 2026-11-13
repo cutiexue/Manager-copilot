@@ -2,7 +2,7 @@
 
 from tools import (get_order_status, get_customer_orders, get_overdue_orders,
                    get_orders_at_risk, get_stage_output, compare_stage_output,
-                   trace_order, query_orders)
+                   trace_order, query_orders, list_workshops)
 from discovery import FINDING_TYPES, discover_issues
 from period_output import compare_stage_periods, summarize_stage_output
 from briefing import get_morning_briefing
@@ -141,6 +141,19 @@ register_tool(
 )
 
 register_tool(
+    list_workshops,
+    'List the outside workshops in the profile data: what each makes, status, daily capacity, batch cap, '
+    'queue, pickup lead days, charge per piece and defect rate. Use it for any catalog question such as '
+    'which workshops can make a category; plan and estimate results show only the workshops a plan used. '
+    'Filters intersect. Read-only.',
+    {'category': {'type': 'string', 'enum': ['TOPS', 'ACCESSORIES'],
+                  'description': 'Workshops that make this category. Omit for all.'},
+     'status': {'type': 'string', 'enum': ['ACTIVE', 'SUSPENDED'],
+                'description': 'Omit to include suspended workshops, which may not take new work.'}},
+    [],
+)
+
+register_tool(
     get_stage_output,
     'Read factory-wide output for one stage on one date. Not order-level output or a forecast. Missing records are not zero output.',
     {'stage': {'type': 'string',
@@ -148,7 +161,8 @@ register_tool(
                'description': 'The production stage.'},
      'production_date': {'type': 'string',
                          'description': 'YYYY-MM-DD. Yesterday means the workday before today\'s data date '
-                                        '(2026-03-31 for the course data). Records cover 2026-01-01 through '
+                                        '(2026-03-31 for the course data); if the manager states a different '
+                                        'today, count back from that day instead. Records cover 2026-01-01 through '
                                         '2026-03-31.'}},
     ['stage', 'production_date'],
 )
@@ -159,7 +173,8 @@ register_tool(
     {'stage': {'type': 'string', 'enum': ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING']},
      'production_date': {'type': 'string',
                          'description': 'YYYY-MM-DD. Yesterday means the workday before today\'s data date '
-                                        '(2026-03-31 for the course data).'},
+                                        '(2026-03-31 for the course data); if the manager states a different '
+                                        'today, count back from that day instead.'},
      'baseline_days': {'type': 'integer',
                        'minimum': 1,
                        'description': 'Number of previous workdays requested by the user, for '

@@ -132,6 +132,13 @@ def is_overdue(order, ref):
     return order["status"] == "IN_PROGRESS" and parse_date(order["due_date"]) < ref
 
 
+def overdue_days(order, ref):
+    """Calendar days an unfinished order is past due (0 if not yet due); None for a completed order."""
+    if order["status"] != "IN_PROGRESS":
+        return None
+    return max(0, (ref - parse_date(order["due_date"])).days)
+
+
 def is_quiet(order, ref):
     if order["status"] != "IN_PROGRESS":
         return False

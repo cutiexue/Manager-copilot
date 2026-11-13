@@ -1,7 +1,7 @@
 ---
 title: Feasibility and production scenarios
-when: Can we take a new order or batch, by when, how cheaply, or how to allocate work between in-house production and workshops.
-tools: estimate_in_house, estimate_production_plan, estimate_quickstitch, estimate_steadyhands, estimate_budgetworks, estimate_little_loom, estimate_giantweave, estimate_nimble_needle, estimate_oldmill, estimate_freshstart, optimize_fastest_plan, optimize_cheapest_plan, optimize_orders_cheapest, optimize_orders_outsourced, get_current_plan, revise_order_plan, query_orders
+when: Can we take a new order or batch, by when, how cheaply, how to allocate work between in-house production and workshops, or which workshops can make what.
+tools: estimate_in_house, estimate_production_plan, estimate_quickstitch, estimate_steadyhands, estimate_budgetworks, estimate_little_loom, estimate_giantweave, estimate_nimble_needle, estimate_oldmill, estimate_freshstart, optimize_fastest_plan, optimize_cheapest_plan, optimize_orders_cheapest, optimize_orders_outsourced, get_current_plan, revise_order_plan, query_orders, list_workshops
 ---
 - Use get_current_plan to inspect the last successful multi-order plan. For 'five more days'
   use revise_order_plan with extra_days=5: completion_date for explicitly later than completion,
@@ -45,6 +45,9 @@ tools: estimate_in_house, estimate_production_plan, estimate_quickstitch, estima
   load still use the 2026-04-01 data. Historical plans keep their saved start when revised.
   The fastest plan may use in-house production. Historical throughput is a scenario rate, not verified free capacity.
   In-house whole-batch stages are sequential; eligible producers may work in parallel.
+- Which workshops can make something, or any other question about workshop profiles: call
+  list_workshops and name every row it returns, marking suspended ones. Never build the list from
+  plan or estimate results; they show only the workshops a plan used.
 - Never silently fill allocation gaps unless the user assigns the remainder in-house. Resolve
   ambiguous workshop names; A/B/C are not known IDs. W1 QuickStitch, W2 SteadyHands, W3 BudgetWorks,
   W4 Little Loom, W5 GiantWeave, W6 Nimble Needle, W7 OldMill, W8 FreshStart.

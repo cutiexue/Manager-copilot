@@ -11,11 +11,13 @@ A module only imports from its own layer or the layers above it in this list.
 | Planning | `production_estimates.py`, `production_optimizer.py`, `outsourcing_risk.py`, `plan_context.py` | Feasibility of assigned batches, fastest and cheapest plans, outsourcing risk from `workshops.csv`, revising the last plan in a conversation |
 | Briefing and watches | `briefing.py`, `watches.py`, `scheduler.py` | The morning briefing; standing watches checked against `track1/scenarios/`; the 07:00 job, reminders, watch checks |
 | Follow-ups and state | `actions.py`, `action_tools.py`, `storage.py` | Proposals that only Confirm carries out, reminders, notes, drafts, alerts (only the manager's watches and reminders alert; see the main README), the audit log; conversation history (SQLite) |
-| Agent | `skills.py` + `skills/`, `tool_schemas.py`, `llm.py`, `order_selection.py`, `answer_check.py`, `service.py` | Skills and 34 tool schemas; conversational selection; heuristic value-presence checks (not semantic verification); per-turn data snapshots and persisted historical evidence; shared CLI/API service |
+| Agent | `skills.py` + `skills/`, `tool_schemas.py`, `llm.py`, `order_selection.py`, `answer_check.py`, `service.py` | Skills and 35 tool schemas; conversational selection; heuristic value-presence and overdue-attribution checks (not semantic verification); per-turn data snapshots and persisted historical evidence; shared CLI/API service |
 | Entry points | `main.py`, `api.py`, `views.py`, `config.py`, `demo_backend.py` | CLI and `--api` server; HTTP routes; read-only views for the UI; model settings from `.env`; the same API with a keyword demo model (no API key) |
 
 Data: `track1/data/` holds the course CSVs and their data dictionary (read-only, never edited);
 `track1/scenarios/watch_snapshots.json` holds the scripted later days used for watches and demos.
+
+Every tool the agent can call is specified in [TOOLS.md](./TOOLS.md).
 
 Tests: `python -m pytest` from this folder (no API key needed). Each test file is named after the
 module or workflow it covers.

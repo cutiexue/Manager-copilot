@@ -10,7 +10,7 @@ import re
 from datetime import date
 
 from data_loader import ORDERS_SOURCE, STAGES, load_orders, order_row_numbers, source_ref
-from rules import risk_reasons, today_iso
+from rules import overdue_days, risk_reasons, today_iso
 
 MAX_LIMIT = 50
 MAX_QUERY_LENGTH = 200
@@ -79,6 +79,7 @@ def search_orders(query="", limit=8, as_of_date=None):
                 "category": order["category"], "pieces": int(order["pieces"]), "due_date": order["due_date"],
                 "status": order["status"], "current_stage": order["current_stage"],
                 "last_activity_date": order["last_activity_date"], "risk_reasons": reasons,
+                "overdue_calendar_days": overdue_days(order, ref),
                 "source_row": rows[order["order_id"]],
             }
             for _, order, reasons in selected

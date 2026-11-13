@@ -4,10 +4,10 @@ import difflib
 import re
 from datetime import date
 
-from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, load_orders,
-                         load_production, order_row_numbers,
-                         production_row_numbers, source_ref)
-from rules import (DUE_SOON_DAYS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, is_overdue, today_iso,
+from data_loader import (ORDERS_SOURCE, PRODUCTION_SOURCE, WORKSHOPS_SOURCE, load_orders,
+                         load_production, load_workshops, order_row_numbers,
+                         production_row_numbers, source_ref, workshop_row_numbers)
+from rules import (DUE_SOON_DAYS, QUIET_ORDER_DAYS, RECENT_WORKDAYS, is_overdue, overdue_days, today_iso,
                    previous_workdays, risk_reasons)
 from order_selection import current_selection
 from order_search import search_orders
@@ -157,7 +157,16 @@ def get_customer_orders(customer):
     match = resolve_customer(customer)
     if match["status"] != "ok":
         return {**match, "count": 0, "data": []}
-    matched_orders = [order for order in load_orders() if order["customer"] == match["customer"]]
+    reference_date = date.fromisoformat(today_iso())
+    matched_orders = []
+    for order in load_orders():
+        if order["customer"] == match["customer"]:
+            order = order.copy()
+            if order["status"] == "IN_PROGRESS":
+                # Each order's own delay and reasons, so an answer never moves a figure to another order.
+                order["overdue_calendar_days"] = overdue_days(order, reference_date)
+                order["risk_reasons"] = risk_reasons(order, reference_date)
+            matched_orders.append(order)
     unfinished = [order for order in matched_orders if order["status"] == "IN_PROGRESS"]
     # Totals computed here, so an answer never adds pieces up itself.
     result = {"status": "ok", "customer": match["customer"], "count": len(matched_orders),
@@ -306,18 +315,48 @@ def get_overdue_orders(as_of_date=None):
             result["overdue_calendar_days"] = (reference_date - date.fromisoformat(order["due_date"])).days
             overdue_orders.append(result)
 
+    # Grouped here so a stated customer count always matches the customers listed.
+    groups = {}
+    for order in overdue_orders:
+        groups.setdefault(order["customer"], []).append(order["order_id"])
+    by_customer = sorted(({"customer": name, "count": len(ids), "order_ids": ids} for name, ids in groups.items()),
+                         key=lambda group: (-group["count"], group["customer"]))
+    several = [group["customer"] for group in by_customer if group["count"] >= 2]
     return {
         "status": "ok",
         "as_of_date": reference_date.isoformat(),
         "snapshot_date": today_iso(),
         "count": len(overdue_orders),
         "original_order_pieces": sum(int(order['pieces']) for order in overdue_orders),
+        "by_customer": by_customer,
+        "customers_with_two_or_more": {"count": len(several), "customers": several},
         "data": overdue_orders,
         "source": ORDERS_SOURCE,
         "source_rows": _order_refs(overdue_orders),
         "warnings": [] if reference_date.isoformat() == today_iso() else [
             f"Uses order statuses from the {today_iso()} snapshot; other dates are scenarios, not historical or future facts."
         ],
+    }
+
+
+def list_workshops(category=None, status=None):
+    """List every outside workshop profile that matches the filters, with its source row."""
+    if category not in (None, "TOPS", "ACCESSORIES") or status not in (None, "ACTIVE", "SUSPENDED"):
+        return {"status": "error", "message": "category must be TOPS or ACCESSORIES; status must be ACTIVE or SUSPENDED."}
+    rows = workshop_row_numbers()
+    matches = [workshop.copy() for workshop in load_workshops()
+               if (category is None or category in workshop["makes"].split("+"))
+               and (status is None or workshop["status"] == status)]
+    return {
+        "status": "ok",
+        "filters": {"category": category, "status": status},
+        "count": len(matches),
+        "active_count": sum(workshop["status"] == "ACTIVE" for workshop in matches),
+        "workshop_ids": [workshop["workshop_id"] for workshop in matches],
+        "data": matches,
+        "source": WORKSHOPS_SOURCE,
+        "source_rows": [source_ref(WORKSHOPS_SOURCE, rows[w["workshop_id"]], w["workshop_id"]) for w in matches],
+        "warnings": ["SUSPENDED workshops may not take new work. A profile is not a booking or a delivery date."],
     }
 
 

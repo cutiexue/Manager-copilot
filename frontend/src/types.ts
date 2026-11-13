@@ -220,7 +220,7 @@ export interface ChatMessage {
 /** answer_check.py: the order IDs, dates and figures in an answer that the turn's tool results lack */
 export interface AnswerCheck {
   checked: number;
-  unverified: { kind: 'order' | 'date' | 'number'; text: string }[];
+  unverified: { kind: 'order' | 'date' | 'number' | 'attribution'; text: string }[];
 }
 
 export interface SendMessageResponse {

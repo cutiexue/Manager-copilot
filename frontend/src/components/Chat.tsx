@@ -387,7 +387,7 @@ function CheckNote({ check }: { check?: AnswerCheck }) {
   if (!check) return null;
   if (check.checked === 0) return <p className="check-note small">No supported values were checked. This is not a factual verification.</p>;
   if (check.unverified.length === 0) {
-    return <p className="check-note small">{check.checked} supported values checked; no unmatched values found. Sources can include your request. Meaning, value-to-order relationships and small counts are not verified.</p>;
+    return <p className="check-note small">{check.checked} supported values checked; no unmatched values found. Sources can include your request. Meaning, small counts and value-to-order links other than overdue days are not verified.</p>;
   }
   return (
     <p className="check-note check-warn small" role="note">

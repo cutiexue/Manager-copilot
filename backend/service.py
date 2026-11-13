@@ -97,6 +97,17 @@ RETRY_NOTE = ('Your last draft stated figures or order IDs without looking anyth
               'answer again.')
 
 
+ATTRIBUTION_NOTE = ('Your last draft gave an order an overdue figure that is not its own ({items}). Each order\'s '
+                    'overdue days are in its own record (overdue_calendar_days, risk_reasons): look them up again '
+                    'and answer again.')
+
+
+def misattributed(answer, messages, question, earlier):
+    """Overdue figures the answer attaches to the wrong order, e.g. 'ORD-107: 9 days overdue'."""
+    return [item['text'] for item in checked(answer, messages, question, earlier)['unverified']
+            if item['kind'] == 'attribution']
+
+
 def needs_lookup(answer, messages, question, earlier):
     """An answer that states unverified figures while calling no tool at all is answered again once."""
     if any(m.type == 'tool' for m in messages):
@@ -225,10 +236,10 @@ class ChatService:
         turn = {}
         snapshot = watches.version_info(self.actions.data_version())
 
-        def ask(history, retry=False):
+        def ask(history, retry=None):
             note = today_note(self.actions, session_id)
             if retry:
-                note = SystemMessage(content=f'{note.content}\n{RETRY_NOTE}', name='data_date')
+                note = SystemMessage(content=f'{note.content}\n{retry}', name='data_date')
             messages = history + [note, HumanMessage(content=question)]
             try:
                 with selection_context(messages), plan_context(messages), action_context(self.actions, session_id, turn_id):
@@ -253,7 +264,13 @@ class ChatService:
             # Figures stated with no lookup at all this turn: ask once more, telling the model to look them up.
             turn['retried'] = needs_lookup(content, new, question, history)
             if turn['retried']:
-                everything, new, content = ask(history, retry=True)
+                everything, new, content = ask(history, retry=RETRY_NOTE)
+            else:
+                # An overdue figure attached to the wrong order: ask once more with the order named.
+                wrong = misattributed(content, new, question, history)
+                if wrong:
+                    turn['retried'] = True
+                    everything, new, content = ask(history, retry=ATTRIBUTION_NOTE.format(items='; '.join(wrong)))
             turn['messages'], turn['earlier'] = new, history
             turn['answer'] = content
             # Store the normalized answer and frozen evidence before committing the turn.
