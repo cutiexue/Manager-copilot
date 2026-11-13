@@ -1,0 +1,1142 @@
+{
+  "scenario": "Q13",
+  "questions": [
+    "Q13"
+  ],
+  "adaptation": "",
+  "session_id": "d61d3067-4970-4530-bc86-0e0586b21682",
+  "started_at": "2026-11-13T11:53:44+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q13",
+      "message": "Comparing the two most recent complete calendar weeks, which stage had the largest output decline?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "d61d3067-4970-4530-bc86-0e0586b21682",
+        "answer": "Assembly had the largest decline: 4,781 pieces in the week of 16–22 March vs 3,214 in 23–29 March, down 1,567 (−32.8%). Washing was up 11.0%, knitting 5.8% and packing 2.9% (track1/data/production_log.csv).",
+        "tool_calls": [
+          {
+            "name": "compare_stage_periods",
+            "arguments": {},
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "basis": "the two most recent complete Monday-to-Sunday weeks before today's data date",
+              "first_period": {
+                "date_from": "2026-03-16",
+                "date_to": "2026-03-22"
+              },
+              "second_period": {
+                "date_from": "2026-03-23",
+                "date_to": "2026-03-29"
+              },
+              "stages": [
+                {
+                  "stage": "KNITTING",
+                  "first_total": 5430,
+                  "second_total": 5744,
+                  "change": 314,
+                  "change_percent": 5.78,
+                  "first_recorded_total": 5430,
+                  "second_recorded_total": 5744,
+                  "comparable": true,
+                  "status": "ok",
+                  "first_missing_workdays": [],
+                  "second_missing_workdays": [],
+                  "source_rows": [
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 298,
+                      "key": "2026-03-16 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 302,
+                      "key": "2026-03-17 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 306,
+                      "key": "2026-03-18 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 310,
+                      "key": "2026-03-19 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 314,
+                      "key": "2026-03-20 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 318,
+                      "key": "2026-03-21 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 322,
+                      "key": "2026-03-22 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 326,
+                      "key": "2026-03-23 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 330,
+                      "key": "2026-03-24 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 334,
+                      "key": "2026-03-25 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 338,
+                      "key": "2026-03-26 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 342,
+                      "key": "2026-03-27 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 346,
+                      "key": "2026-03-28 KNITTING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 350,
+                      "key": "2026-03-29 KNITTING"
+                    }
+                  ]
+                },
+                {
+                  "stage": "ASSEMBLY",
+                  "first_total": 4781,
+                  "second_total": 3214,
+                  "change": -1567,
+                  "change_percent": -32.78,
+                  "first_recorded_total": 4781,
+                  "second_recorded_total": 3214,
+                  "comparable": true,
+                  "status": "ok",
+                  "first_missing_workdays": [],
+                  "second_missing_workdays": [],
+                  "source_rows": [
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 299,
+                      "key": "2026-03-16 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 303,
+                      "key": "2026-03-17 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 307,
+                      "key": "2026-03-18 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 311,
+                      "key": "2026-03-19 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 315,
+                      "key": "2026-03-20 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 319,
+                      "key": "2026-03-21 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 323,
+                      "key": "2026-03-22 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 327,
+                      "key": "2026-03-23 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 331,
+                      "key": "2026-03-24 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 335,
+                      "key": "2026-03-25 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 339,
+                      "key": "2026-03-26 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 343,
+                      "key": "2026-03-27 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 347,
+                      "key": "2026-03-28 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 351,
+                      "key": "2026-03-29 ASSEMBLY"
+                    }
+                  ]
+                },
+                {
+                  "stage": "WASHING",
+                  "first_total": 4069,
+                  "second_total": 4517,
+                  "change": 448,
+                  "change_percent": 11.01,
+                  "first_recorded_total": 4069,
+                  "second_recorded_total": 4517,
+                  "comparable": true,
+                  "status": "ok",
+                  "first_missing_workdays": [],
+                  "second_missing_workdays": [],
+                  "source_rows": [
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 300,
+                      "key": "2026-03-16 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 304,
+                      "key": "2026-03-17 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 308,
+                      "key": "2026-03-18 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 312,
+                      "key": "2026-03-19 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 316,
+                      "key": "2026-03-20 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 320,
+                      "key": "2026-03-21 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 324,
+                      "key": "2026-03-22 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 328,
+                      "key": "2026-03-23 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 332,
+                      "key": "2026-03-24 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 336,
+                      "key": "2026-03-25 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 340,
+                      "key": "2026-03-26 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 344,
+                      "key": "2026-03-27 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 348,
+                      "key": "2026-03-28 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 352,
+                      "key": "2026-03-29 WASHING"
+                    }
+                  ]
+                },
+                {
+                  "stage": "PACKING",
+                  "first_total": 3872,
+                  "second_total": 3983,
+                  "change": 111,
+                  "change_percent": 2.87,
+                  "first_recorded_total": 3872,
+                  "second_recorded_total": 3983,
+                  "comparable": true,
+                  "status": "ok",
+                  "first_missing_workdays": [],
+                  "second_missing_workdays": [],
+                  "source_rows": [
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 301,
+                      "key": "2026-03-16 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 305,
+                      "key": "2026-03-17 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 309,
+                      "key": "2026-03-18 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 313,
+                      "key": "2026-03-19 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 317,
+                      "key": "2026-03-20 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 321,
+                      "key": "2026-03-21 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 325,
+                      "key": "2026-03-22 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 329,
+                      "key": "2026-03-23 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 333,
+                      "key": "2026-03-24 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 337,
+                      "key": "2026-03-25 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 341,
+                      "key": "2026-03-26 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 345,
+                      "key": "2026-03-27 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 349,
+                      "key": "2026-03-28 PACKING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 353,
+                      "key": "2026-03-29 PACKING"
+                    }
+                  ]
+                }
+              ],
+              "largest_decline": "ASSEMBLY",
+              "largest_increase": "WASHING",
+              "complete_records": true,
+              "source": "track1/data/production_log.csv",
+              "warnings": [
+                "A change in output is not a diagnosis of its cause."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 298,
+              "key": "2026-03-16 KNITTING",
+              "id": "production_log.csv:298@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#298@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 302,
+              "key": "2026-03-17 KNITTING",
+              "id": "production_log.csv:302@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#302@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 306,
+              "key": "2026-03-18 KNITTING",
+              "id": "production_log.csv:306@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#306@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 310,
+              "key": "2026-03-19 KNITTING",
+              "id": "production_log.csv:310@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#310@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 314,
+              "key": "2026-03-20 KNITTING",
+              "id": "production_log.csv:314@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#314@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 318,
+              "key": "2026-03-21 KNITTING",
+              "id": "production_log.csv:318@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#318@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 322,
+              "key": "2026-03-22 KNITTING",
+              "id": "production_log.csv:322@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#322@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 326,
+              "key": "2026-03-23 KNITTING",
+              "id": "production_log.csv:326@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#326@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 330,
+              "key": "2026-03-24 KNITTING",
+              "id": "production_log.csv:330@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#330@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 334,
+              "key": "2026-03-25 KNITTING",
+              "id": "production_log.csv:334@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#334@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 338,
+              "key": "2026-03-26 KNITTING",
+              "id": "production_log.csv:338@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#338@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 342,
+              "key": "2026-03-27 KNITTING",
+              "id": "production_log.csv:342@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#342@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 346,
+              "key": "2026-03-28 KNITTING",
+              "id": "production_log.csv:346@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#346@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 350,
+              "key": "2026-03-29 KNITTING",
+              "id": "production_log.csv:350@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#350@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 299,
+              "key": "2026-03-16 ASSEMBLY",
+              "id": "production_log.csv:299@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#299@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 303,
+              "key": "2026-03-17 ASSEMBLY",
+              "id": "production_log.csv:303@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#303@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 307,
+              "key": "2026-03-18 ASSEMBLY",
+              "id": "production_log.csv:307@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#307@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 311,
+              "key": "2026-03-19 ASSEMBLY",
+              "id": "production_log.csv:311@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#311@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 315,
+              "key": "2026-03-20 ASSEMBLY",
+              "id": "production_log.csv:315@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#315@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 319,
+              "key": "2026-03-21 ASSEMBLY",
+              "id": "production_log.csv:319@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#319@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 323,
+              "key": "2026-03-22 ASSEMBLY",
+              "id": "production_log.csv:323@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#323@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 327,
+              "key": "2026-03-23 ASSEMBLY",
+              "id": "production_log.csv:327@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#327@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 331,
+              "key": "2026-03-24 ASSEMBLY",
+              "id": "production_log.csv:331@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#331@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 335,
+              "key": "2026-03-25 ASSEMBLY",
+              "id": "production_log.csv:335@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#335@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 339,
+              "key": "2026-03-26 ASSEMBLY",
+              "id": "production_log.csv:339@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#339@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 343,
+              "key": "2026-03-27 ASSEMBLY",
+              "id": "production_log.csv:343@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#343@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 347,
+              "key": "2026-03-28 ASSEMBLY",
+              "id": "production_log.csv:347@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#347@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 351,
+              "key": "2026-03-29 ASSEMBLY",
+              "id": "production_log.csv:351@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#351@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 300,
+              "key": "2026-03-16 WASHING",
+              "id": "production_log.csv:300@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#300@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 304,
+              "key": "2026-03-17 WASHING",
+              "id": "production_log.csv:304@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#304@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 308,
+              "key": "2026-03-18 WASHING",
+              "id": "production_log.csv:308@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#308@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 312,
+              "key": "2026-03-19 WASHING",
+              "id": "production_log.csv:312@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#312@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 316,
+              "key": "2026-03-20 WASHING",
+              "id": "production_log.csv:316@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#316@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 320,
+              "key": "2026-03-21 WASHING",
+              "id": "production_log.csv:320@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#320@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 324,
+              "key": "2026-03-22 WASHING",
+              "id": "production_log.csv:324@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#324@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 328,
+              "key": "2026-03-23 WASHING",
+              "id": "production_log.csv:328@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#328@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 332,
+              "key": "2026-03-24 WASHING",
+              "id": "production_log.csv:332@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#332@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 336,
+              "key": "2026-03-25 WASHING",
+              "id": "production_log.csv:336@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#336@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 340,
+              "key": "2026-03-26 WASHING",
+              "id": "production_log.csv:340@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#340@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 344,
+              "key": "2026-03-27 WASHING",
+              "id": "production_log.csv:344@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#344@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 348,
+              "key": "2026-03-28 WASHING",
+              "id": "production_log.csv:348@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#348@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 352,
+              "key": "2026-03-29 WASHING",
+              "id": "production_log.csv:352@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#352@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 301,
+              "key": "2026-03-16 PACKING",
+              "id": "production_log.csv:301@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#301@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 305,
+              "key": "2026-03-17 PACKING",
+              "id": "production_log.csv:305@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#305@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 309,
+              "key": "2026-03-18 PACKING",
+              "id": "production_log.csv:309@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#309@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 313,
+              "key": "2026-03-19 PACKING",
+              "id": "production_log.csv:313@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#313@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 317,
+              "key": "2026-03-20 PACKING",
+              "id": "production_log.csv:317@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#317@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 321,
+              "key": "2026-03-21 PACKING",
+              "id": "production_log.csv:321@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#321@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 325,
+              "key": "2026-03-22 PACKING",
+              "id": "production_log.csv:325@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#325@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 329,
+              "key": "2026-03-23 PACKING",
+              "id": "production_log.csv:329@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#329@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 333,
+              "key": "2026-03-24 PACKING",
+              "id": "production_log.csv:333@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#333@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 337,
+              "key": "2026-03-25 PACKING",
+              "id": "production_log.csv:337@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#337@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 341,
+              "key": "2026-03-26 PACKING",
+              "id": "production_log.csv:341@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#341@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 345,
+              "key": "2026-03-27 PACKING",
+              "id": "production_log.csv:345@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#345@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 349,
+              "key": "2026-03-28 PACKING",
+              "id": "production_log.csv:349@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#349@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 353,
+              "key": "2026-03-29 PACKING",
+              "id": "production_log.csv:353@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#353@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/production_log.csv#298@v0": {
+              "date": "2026-03-16",
+              "stage": "KNITTING",
+              "pieces_completed": "867"
+            },
+            "track1/data/production_log.csv#302@v0": {
+              "date": "2026-03-17",
+              "stage": "KNITTING",
+              "pieces_completed": "909"
+            },
+            "track1/data/production_log.csv#306@v0": {
+              "date": "2026-03-18",
+              "stage": "KNITTING",
+              "pieces_completed": "960"
+            },
+            "track1/data/production_log.csv#310@v0": {
+              "date": "2026-03-19",
+              "stage": "KNITTING",
+              "pieces_completed": "956"
+            },
+            "track1/data/production_log.csv#314@v0": {
+              "date": "2026-03-20",
+              "stage": "KNITTING",
+              "pieces_completed": "867"
+            },
+            "track1/data/production_log.csv#318@v0": {
+              "date": "2026-03-21",
+              "stage": "KNITTING",
+              "pieces_completed": "871"
+            },
+            "track1/data/production_log.csv#322@v0": {
+              "date": "2026-03-22",
+              "stage": "KNITTING",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#326@v0": {
+              "date": "2026-03-23",
+              "stage": "KNITTING",
+              "pieces_completed": "891"
+            },
+            "track1/data/production_log.csv#330@v0": {
+              "date": "2026-03-24",
+              "stage": "KNITTING",
+              "pieces_completed": "992"
+            },
+            "track1/data/production_log.csv#334@v0": {
+              "date": "2026-03-25",
+              "stage": "KNITTING",
+              "pieces_completed": "915"
+            },
+            "track1/data/production_log.csv#338@v0": {
+              "date": "2026-03-26",
+              "stage": "KNITTING",
+              "pieces_completed": "1033"
+            },
+            "track1/data/production_log.csv#342@v0": {
+              "date": "2026-03-27",
+              "stage": "KNITTING",
+              "pieces_completed": "882"
+            },
+            "track1/data/production_log.csv#346@v0": {
+              "date": "2026-03-28",
+              "stage": "KNITTING",
+              "pieces_completed": "1031"
+            },
+            "track1/data/production_log.csv#350@v0": {
+              "date": "2026-03-29",
+              "stage": "KNITTING",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#299@v0": {
+              "date": "2026-03-16",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "788"
+            },
+            "track1/data/production_log.csv#303@v0": {
+              "date": "2026-03-17",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "735"
+            },
+            "track1/data/production_log.csv#307@v0": {
+              "date": "2026-03-18",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "882"
+            },
+            "track1/data/production_log.csv#311@v0": {
+              "date": "2026-03-19",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "868"
+            },
+            "track1/data/production_log.csv#315@v0": {
+              "date": "2026-03-20",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "762"
+            },
+            "track1/data/production_log.csv#319@v0": {
+              "date": "2026-03-21",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "746"
+            },
+            "track1/data/production_log.csv#323@v0": {
+              "date": "2026-03-22",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#327@v0": {
+              "date": "2026-03-23",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "733"
+            },
+            "track1/data/production_log.csv#331@v0": {
+              "date": "2026-03-24",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "779"
+            },
+            "track1/data/production_log.csv#335@v0": {
+              "date": "2026-03-25",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "394"
+            },
+            "track1/data/production_log.csv#339@v0": {
+              "date": "2026-03-26",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "464"
+            },
+            "track1/data/production_log.csv#343@v0": {
+              "date": "2026-03-27",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "399"
+            },
+            "track1/data/production_log.csv#347@v0": {
+              "date": "2026-03-28",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "445"
+            },
+            "track1/data/production_log.csv#351@v0": {
+              "date": "2026-03-29",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#300@v0": {
+              "date": "2026-03-16",
+              "stage": "WASHING",
+              "pieces_completed": "679"
+            },
+            "track1/data/production_log.csv#304@v0": {
+              "date": "2026-03-17",
+              "stage": "WASHING",
+              "pieces_completed": "617"
+            },
+            "track1/data/production_log.csv#308@v0": {
+              "date": "2026-03-18",
+              "stage": "WASHING",
+              "pieces_completed": "723"
+            },
+            "track1/data/production_log.csv#312@v0": {
+              "date": "2026-03-19",
+              "stage": "WASHING",
+              "pieces_completed": "701"
+            },
+            "track1/data/production_log.csv#316@v0": {
+              "date": "2026-03-20",
+              "stage": "WASHING",
+              "pieces_completed": "628"
+            },
+            "track1/data/production_log.csv#320@v0": {
+              "date": "2026-03-21",
+              "stage": "WASHING",
+              "pieces_completed": "721"
+            },
+            "track1/data/production_log.csv#324@v0": {
+              "date": "2026-03-22",
+              "stage": "WASHING",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#328@v0": {
+              "date": "2026-03-23",
+              "stage": "WASHING",
+              "pieces_completed": "757"
+            },
+            "track1/data/production_log.csv#332@v0": {
+              "date": "2026-03-24",
+              "stage": "WASHING",
+              "pieces_completed": "741"
+            },
+            "track1/data/production_log.csv#336@v0": {
+              "date": "2026-03-25",
+              "stage": "WASHING",
+              "pieces_completed": "801"
+            },
+            "track1/data/production_log.csv#340@v0": {
+              "date": "2026-03-26",
+              "stage": "WASHING",
+              "pieces_completed": "801"
+            },
+            "track1/data/production_log.csv#344@v0": {
+              "date": "2026-03-27",
+              "stage": "WASHING",
+              "pieces_completed": "793"
+            },
+            "track1/data/production_log.csv#348@v0": {
+              "date": "2026-03-28",
+              "stage": "WASHING",
+              "pieces_completed": "624"
+            },
+            "track1/data/production_log.csv#352@v0": {
+              "date": "2026-03-29",
+              "stage": "WASHING",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#301@v0": {
+              "date": "2026-03-16",
+              "stage": "PACKING",
+              "pieces_completed": "631"
+            },
+            "track1/data/production_log.csv#305@v0": {
+              "date": "2026-03-17",
+              "stage": "PACKING",
+              "pieces_completed": "638"
+            },
+            "track1/data/production_log.csv#309@v0": {
+              "date": "2026-03-18",
+              "stage": "PACKING",
+              "pieces_completed": "707"
+            },
+            "track1/data/production_log.csv#313@v0": {
+              "date": "2026-03-19",
+              "stage": "PACKING",
+              "pieces_completed": "708"
+            },
+            "track1/data/production_log.csv#317@v0": {
+              "date": "2026-03-20",
+              "stage": "PACKING",
+              "pieces_completed": "627"
+            },
+            "track1/data/production_log.csv#321@v0": {
+              "date": "2026-03-21",
+              "stage": "PACKING",
+              "pieces_completed": "561"
+            },
+            "track1/data/production_log.csv#325@v0": {
+              "date": "2026-03-22",
+              "stage": "PACKING",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#329@v0": {
+              "date": "2026-03-23",
+              "stage": "PACKING",
+              "pieces_completed": "667"
+            },
+            "track1/data/production_log.csv#333@v0": {
+              "date": "2026-03-24",
+              "stage": "PACKING",
+              "pieces_completed": "671"
+            },
+            "track1/data/production_log.csv#337@v0": {
+              "date": "2026-03-25",
+              "stage": "PACKING",
+              "pieces_completed": "658"
+            },
+            "track1/data/production_log.csv#341@v0": {
+              "date": "2026-03-26",
+              "stage": "PACKING",
+              "pieces_completed": "673"
+            },
+            "track1/data/production_log.csv#345@v0": {
+              "date": "2026-03-27",
+              "stage": "PACKING",
+              "pieces_completed": "580"
+            },
+            "track1/data/production_log.csv#349@v0": {
+              "date": "2026-03-28",
+              "stage": "PACKING",
+              "pieces_completed": "734"
+            },
+            "track1/data/production_log.csv#353@v0": {
+              "date": "2026-03-29",
+              "stage": "PACKING",
+              "pieces_completed": "0"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 11,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.3
+    }
+  ],
+  "finished_at": "2026-11-13T11:53:47+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

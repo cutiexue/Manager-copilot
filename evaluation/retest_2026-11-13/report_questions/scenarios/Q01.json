@@ -1,0 +1,1432 @@
+{
+  "scenario": "Q01",
+  "questions": [
+    "Q01"
+  ],
+  "adaptation": "",
+  "session_id": "81edec51-5fa9-4d44-bdfb-c1f828dbf4ff",
+  "started_at": "2026-11-13T11:53:16+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q01",
+      "message": "How many orders are currently in progress, and what is their total order quantity?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "81edec51-5fa9-4d44-bdfb-c1f828dbf4ff",
+        "answer": "As of 2026-04-01, 34 orders are in progress, totalling 32,850 pieces: 22 tops orders (20,450 pieces) and 12 accessories orders (12,400 pieces) — original ordered quantities, not remaining work (track1/data/orders.csv).",
+        "tool_calls": [
+          {
+            "name": "query_orders",
+            "arguments": {
+              "status": "IN_PROGRESS",
+              "scope": "all"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "snapshot_date": "2026-04-01",
+              "count": 34,
+              "original_order_pieces": 32850,
+              "by_status": {
+                "IN_PROGRESS": {
+                  "order_count": 34,
+                  "original_order_pieces": 32850,
+                  "order_ids": [
+                    "ORD-120",
+                    "ORD-107",
+                    "ORD-114",
+                    "ORD-002",
+                    "ORD-083",
+                    "ORD-099",
+                    "ORD-020",
+                    "ORD-103",
+                    "ORD-029",
+                    "ORD-109",
+                    "ORD-061",
+                    "ORD-093",
+                    "ORD-055",
+                    "ORD-108",
+                    "ORD-081",
+                    "ORD-041",
+                    "ORD-096",
+                    "ORD-005",
+                    "ORD-045",
+                    "ORD-053",
+                    "ORD-073",
+                    "ORD-036",
+                    "ORD-062",
+                    "ORD-066",
+                    "ORD-008",
+                    "ORD-015",
+                    "ORD-017",
+                    "ORD-010",
+                    "ORD-024",
+                    "ORD-035",
+                    "ORD-040",
+                    "ORD-063",
+                    "ORD-082",
+                    "ORD-095"
+                  ]
+                }
+              },
+              "by_category": {
+                "TOPS": {
+                  "order_count": 22,
+                  "original_order_pieces": 20450,
+                  "order_ids": [
+                    "ORD-120",
+                    "ORD-107",
+                    "ORD-114",
+                    "ORD-002",
+                    "ORD-083",
+                    "ORD-099",
+                    "ORD-020",
+                    "ORD-109",
+                    "ORD-055",
+                    "ORD-081",
+                    "ORD-045",
+                    "ORD-053",
+                    "ORD-073",
+                    "ORD-066",
+                    "ORD-008",
+                    "ORD-015",
+                    "ORD-017",
+                    "ORD-010",
+                    "ORD-024",
+                    "ORD-040",
+                    "ORD-063",
+                    "ORD-095"
+                  ]
+                },
+                "ACCESSORIES": {
+                  "order_count": 12,
+                  "original_order_pieces": 12400,
+                  "order_ids": [
+                    "ORD-103",
+                    "ORD-029",
+                    "ORD-061",
+                    "ORD-093",
+                    "ORD-108",
+                    "ORD-041",
+                    "ORD-096",
+                    "ORD-005",
+                    "ORD-036",
+                    "ORD-062",
+                    "ORD-035",
+                    "ORD-082"
+                  ]
+                }
+              },
+              "order_ids": [
+                "ORD-120",
+                "ORD-107",
+                "ORD-114",
+                "ORD-002",
+                "ORD-083",
+                "ORD-099",
+                "ORD-020",
+                "ORD-103",
+                "ORD-029",
+                "ORD-109",
+                "ORD-061",
+                "ORD-093",
+                "ORD-055",
+                "ORD-108",
+                "ORD-081",
+                "ORD-041",
+                "ORD-096",
+                "ORD-005",
+                "ORD-045",
+                "ORD-053",
+                "ORD-073",
+                "ORD-036",
+                "ORD-062",
+                "ORD-066",
+                "ORD-008",
+                "ORD-015",
+                "ORD-017",
+                "ORD-010",
+                "ORD-024",
+                "ORD-035",
+                "ORD-040",
+                "ORD-063",
+                "ORD-082",
+                "ORD-095"
+              ],
+              "filters": {
+                "status": "IN_PROGRESS"
+              },
+              "scope": "all",
+              "orders": [
+                {
+                  "order_id": "ORD-120",
+                  "category": "TOPS",
+                  "customer": "TrendCart",
+                  "pieces": "1500",
+                  "due_date": "2026-03-17",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-107",
+                  "category": "TOPS",
+                  "customer": "Northwind Apparel",
+                  "pieces": "2000",
+                  "due_date": "2026-03-16",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-114",
+                  "category": "TOPS",
+                  "customer": "Northwind Apparel",
+                  "pieces": "2000",
+                  "due_date": "2026-03-23",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-002",
+                  "category": "TOPS",
+                  "customer": "Cotton Club",
+                  "pieces": "1000",
+                  "due_date": "2026-03-29",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-083",
+                  "category": "TOPS",
+                  "customer": "Maple & Co",
+                  "pieces": "1000",
+                  "due_date": "2026-03-23",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-099",
+                  "category": "TOPS",
+                  "customer": "Northwind Apparel",
+                  "pieces": "1500",
+                  "due_date": "2026-04-05",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-020",
+                  "category": "TOPS",
+                  "customer": "TrendCart",
+                  "pieces": "1200",
+                  "due_date": "2026-03-31",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-103",
+                  "category": "ACCESSORIES",
+                  "customer": "Bright Basics",
+                  "pieces": "2000",
+                  "due_date": "2026-04-04",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-029",
+                  "category": "ACCESSORIES",
+                  "customer": "Northwind Apparel",
+                  "pieces": "1500",
+                  "due_date": "2026-04-01",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-109",
+                  "category": "TOPS",
+                  "customer": "Harbor Knits",
+                  "pieces": "500",
+                  "due_date": "2026-04-13",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-061",
+                  "category": "ACCESSORIES",
+                  "customer": "Harbor Knits",
+                  "pieces": "800",
+                  "due_date": "2026-04-05",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-093",
+                  "category": "ACCESSORIES",
+                  "customer": "Maple & Co",
+                  "pieces": "100",
+                  "due_date": "2026-03-29",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-055",
+                  "category": "TOPS",
+                  "customer": "Cotton Club",
+                  "pieces": "800",
+                  "due_date": "2026-03-31",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-108",
+                  "category": "ACCESSORIES",
+                  "customer": "Harbor Knits",
+                  "pieces": "2000",
+                  "due_date": "2026-04-03",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-081",
+                  "category": "TOPS",
+                  "customer": "Harbor Knits",
+                  "pieces": "1500",
+                  "due_date": "2026-04-13",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-041",
+                  "category": "ACCESSORIES",
+                  "customer": "Harbor Knits",
+                  "pieces": "600",
+                  "due_date": "2026-04-21",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-096",
+                  "category": "ACCESSORIES",
+                  "customer": "TrendCart",
+                  "pieces": "1000",
+                  "due_date": "2026-04-17",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-005",
+                  "category": "ACCESSORIES",
+                  "customer": "TrendCart",
+                  "pieces": "500",
+                  "due_date": "2026-04-20",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-045",
+                  "category": "TOPS",
+                  "customer": "Cotton Club",
+                  "pieces": "150",
+                  "due_date": "2026-04-09",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-053",
+                  "category": "TOPS",
+                  "customer": "UrbanThread",
+                  "pieces": "800",
+                  "due_date": "2026-04-10",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-073",
+                  "category": "TOPS",
+                  "customer": "Loom & Leaf",
+                  "pieces": "400",
+                  "due_date": "2026-04-20",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-036",
+                  "category": "ACCESSORIES",
+                  "customer": "UrbanThread",
+                  "pieces": "1000",
+                  "due_date": "2026-04-26",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-062",
+                  "category": "ACCESSORIES",
+                  "customer": "Bright Basics",
+                  "pieces": "2000",
+                  "due_date": "2026-04-08",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-066",
+                  "category": "TOPS",
+                  "customer": "Northwind Apparel",
+                  "pieces": "1000",
+                  "due_date": "2026-04-26",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-008",
+                  "category": "TOPS",
+                  "customer": "Loom & Leaf",
+                  "pieces": "600",
+                  "due_date": "2026-04-09",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-015",
+                  "category": "TOPS",
+                  "customer": "UrbanThread",
+                  "pieces": "300",
+                  "due_date": "2026-04-16",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-017",
+                  "category": "TOPS",
+                  "customer": "TrendCart",
+                  "pieces": "800",
+                  "due_date": "2026-04-10",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-010",
+                  "category": "TOPS",
+                  "customer": "Cotton Club",
+                  "pieces": "1000",
+                  "due_date": "2026-04-25",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-024",
+                  "category": "TOPS",
+                  "customer": "Loom & Leaf",
+                  "pieces": "300",
+                  "due_date": "2026-04-15",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-035",
+                  "category": "ACCESSORIES",
+                  "customer": "Loom & Leaf",
+                  "pieces": "300",
+                  "due_date": "2026-04-29",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-040",
+                  "category": "TOPS",
+                  "customer": "Loom & Leaf",
+                  "pieces": "1200",
+                  "due_date": "2026-04-21",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-063",
+                  "category": "TOPS",
+                  "customer": "Loom & Leaf",
+                  "pieces": "100",
+                  "due_date": "2026-04-29",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-082",
+                  "category": "ACCESSORIES",
+                  "customer": "TrendCart",
+                  "pieces": "600",
+                  "due_date": "2026-05-01",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-095",
+                  "category": "TOPS",
+                  "customer": "Bright Basics",
+                  "pieces": "800",
+                  "due_date": "2026-04-26",
+                  "status": "IN_PROGRESS"
+                }
+              ],
+              "selection": {
+                "order_ids": [
+                  "ORD-120",
+                  "ORD-107",
+                  "ORD-114",
+                  "ORD-002",
+                  "ORD-083",
+                  "ORD-099",
+                  "ORD-020",
+                  "ORD-103",
+                  "ORD-029",
+                  "ORD-109",
+                  "ORD-061",
+                  "ORD-093",
+                  "ORD-055",
+                  "ORD-108",
+                  "ORD-081",
+                  "ORD-041",
+                  "ORD-096",
+                  "ORD-005",
+                  "ORD-045",
+                  "ORD-053",
+                  "ORD-073",
+                  "ORD-036",
+                  "ORD-062",
+                  "ORD-066",
+                  "ORD-008",
+                  "ORD-015",
+                  "ORD-017",
+                  "ORD-010",
+                  "ORD-024",
+                  "ORD-035",
+                  "ORD-040",
+                  "ORD-063",
+                  "ORD-082",
+                  "ORD-095"
+                ],
+                "filters": {
+                  "status": "IN_PROGRESS"
+                },
+                "source_tool": "query_orders"
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 76,
+                  "key": "ORD-120"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 81,
+                  "key": "ORD-107"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 85,
+                  "key": "ORD-114"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 86,
+                  "key": "ORD-002"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 88,
+                  "key": "ORD-083"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 89,
+                  "key": "ORD-099"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 90,
+                  "key": "ORD-020"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 91,
+                  "key": "ORD-103"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 92,
+                  "key": "ORD-029"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 93,
+                  "key": "ORD-109"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 97,
+                  "key": "ORD-061"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 99,
+                  "key": "ORD-093"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 100,
+                  "key": "ORD-055"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 101,
+                  "key": "ORD-108"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 102,
+                  "key": "ORD-081"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 103,
+                  "key": "ORD-041"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 104,
+                  "key": "ORD-096"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 105,
+                  "key": "ORD-005"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 106,
+                  "key": "ORD-045"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 107,
+                  "key": "ORD-053"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 108,
+                  "key": "ORD-073"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 109,
+                  "key": "ORD-036"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 110,
+                  "key": "ORD-062"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 111,
+                  "key": "ORD-066"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 112,
+                  "key": "ORD-008"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 113,
+                  "key": "ORD-015"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 114,
+                  "key": "ORD-017"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 115,
+                  "key": "ORD-010"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 116,
+                  "key": "ORD-024"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 117,
+                  "key": "ORD-035"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 118,
+                  "key": "ORD-040"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 119,
+                  "key": "ORD-063"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 120,
+                  "key": "ORD-082"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 121,
+                  "key": "ORD-095"
+                }
+              ],
+              "warnings": [
+                "Quantities are original ordered pieces, not remaining work. No remaining quantity is supplied."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 76,
+              "key": "ORD-120",
+              "id": "orders.csv:76@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#76@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 81,
+              "key": "ORD-107",
+              "id": "orders.csv:81@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#81@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 85,
+              "key": "ORD-114",
+              "id": "orders.csv:85@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#85@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 88,
+              "key": "ORD-083",
+              "id": "orders.csv:88@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#88@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 89,
+              "key": "ORD-099",
+              "id": "orders.csv:89@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#89@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 90,
+              "key": "ORD-020",
+              "id": "orders.csv:90@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#90@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 91,
+              "key": "ORD-103",
+              "id": "orders.csv:91@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#91@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 92,
+              "key": "ORD-029",
+              "id": "orders.csv:92@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#92@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 93,
+              "key": "ORD-109",
+              "id": "orders.csv:93@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#93@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 97,
+              "key": "ORD-061",
+              "id": "orders.csv:97@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#97@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 99,
+              "key": "ORD-093",
+              "id": "orders.csv:99@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#99@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 100,
+              "key": "ORD-055",
+              "id": "orders.csv:100@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#100@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 101,
+              "key": "ORD-108",
+              "id": "orders.csv:101@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#101@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 102,
+              "key": "ORD-081",
+              "id": "orders.csv:102@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#102@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 103,
+              "key": "ORD-041",
+              "id": "orders.csv:103@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#103@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 104,
+              "key": "ORD-096",
+              "id": "orders.csv:104@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#104@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 105,
+              "key": "ORD-005",
+              "id": "orders.csv:105@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#105@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 106,
+              "key": "ORD-045",
+              "id": "orders.csv:106@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#106@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 107,
+              "key": "ORD-053",
+              "id": "orders.csv:107@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#107@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 108,
+              "key": "ORD-073",
+              "id": "orders.csv:108@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#108@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 109,
+              "key": "ORD-036",
+              "id": "orders.csv:109@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#109@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 110,
+              "key": "ORD-062",
+              "id": "orders.csv:110@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#110@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 111,
+              "key": "ORD-066",
+              "id": "orders.csv:111@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#111@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 112,
+              "key": "ORD-008",
+              "id": "orders.csv:112@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#112@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 113,
+              "key": "ORD-015",
+              "id": "orders.csv:113@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#113@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 114,
+              "key": "ORD-017",
+              "id": "orders.csv:114@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#114@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 115,
+              "key": "ORD-010",
+              "id": "orders.csv:115@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#115@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 116,
+              "key": "ORD-024",
+              "id": "orders.csv:116@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#116@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 117,
+              "key": "ORD-035",
+              "id": "orders.csv:117@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#117@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 118,
+              "key": "ORD-040",
+              "id": "orders.csv:118@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#118@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 119,
+              "key": "ORD-063",
+              "id": "orders.csv:119@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#119@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 120,
+              "key": "ORD-082",
+              "id": "orders.csv:120@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#120@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 121,
+              "key": "ORD-095",
+              "id": "orders.csv:121@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#121@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#76@v0": {
+              "order_id": "ORD-120",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-02-27",
+              "due_date": "2026-03-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#81@v0": {
+              "order_id": "ORD-107",
+              "customer": "Northwind Apparel",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-01",
+              "due_date": "2026-03-16",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#85@v0": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-03",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#88@v0": {
+              "order_id": "ORD-083",
+              "customer": "Maple & Co",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-07",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#89@v0": {
+              "order_id": "ORD-099",
+              "customer": "Northwind Apparel",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-03-07",
+              "due_date": "2026-04-05",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#90@v0": {
+              "order_id": "ORD-020",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1200",
+              "order_date": "2026-03-08",
+              "due_date": "2026-03-31",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#91@v0": {
+              "order_id": "ORD-103",
+              "customer": "Bright Basics",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "2000",
+              "order_date": "2026-03-09",
+              "due_date": "2026-04-04",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#92@v0": {
+              "order_id": "ORD-029",
+              "customer": "Northwind Apparel",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1500",
+              "order_date": "2026-03-10",
+              "due_date": "2026-04-01",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#93@v0": {
+              "order_id": "ORD-109",
+              "customer": "Harbor Knits",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "500",
+              "order_date": "2026-03-10",
+              "due_date": "2026-04-13",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#97@v0": {
+              "order_id": "ORD-061",
+              "customer": "Harbor Knits",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "800",
+              "order_date": "2026-03-12",
+              "due_date": "2026-04-05",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#99@v0": {
+              "order_id": "ORD-093",
+              "customer": "Maple & Co",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "100",
+              "order_date": "2026-03-14",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#100@v0": {
+              "order_id": "ORD-055",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-15",
+              "due_date": "2026-03-31",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#101@v0": {
+              "order_id": "ORD-108",
+              "customer": "Harbor Knits",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "2000",
+              "order_date": "2026-03-17",
+              "due_date": "2026-04-03",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#102@v0": {
+              "order_id": "ORD-081",
+              "customer": "Harbor Knits",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-03-18",
+              "due_date": "2026-04-13",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#103@v0": {
+              "order_id": "ORD-041",
+              "customer": "Harbor Knits",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "600",
+              "order_date": "2026-03-19",
+              "due_date": "2026-04-21",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#104@v0": {
+              "order_id": "ORD-096",
+              "customer": "TrendCart",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1000",
+              "order_date": "2026-03-19",
+              "due_date": "2026-04-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#105@v0": {
+              "order_id": "ORD-005",
+              "customer": "TrendCart",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "500",
+              "order_date": "2026-03-21",
+              "due_date": "2026-04-20",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-24",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#106@v0": {
+              "order_id": "ORD-045",
+              "customer": "Cotton Club",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "150",
+              "order_date": "2026-03-21",
+              "due_date": "2026-04-09",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#107@v0": {
+              "order_id": "ORD-053",
+              "customer": "UrbanThread",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-21",
+              "due_date": "2026-04-10",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#108@v0": {
+              "order_id": "ORD-073",
+              "customer": "Loom & Leaf",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "400",
+              "order_date": "2026-03-21",
+              "due_date": "2026-04-20",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#109@v0": {
+              "order_id": "ORD-036",
+              "customer": "UrbanThread",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "1000",
+              "order_date": "2026-03-22",
+              "due_date": "2026-04-26",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#110@v0": {
+              "order_id": "ORD-062",
+              "customer": "Bright Basics",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "2000",
+              "order_date": "2026-03-22",
+              "due_date": "2026-04-08",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#111@v0": {
+              "order_id": "ORD-066",
+              "customer": "Northwind Apparel",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-22",
+              "due_date": "2026-04-26",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#112@v0": {
+              "order_id": "ORD-008",
+              "customer": "Loom & Leaf",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "600",
+              "order_date": "2026-03-23",
+              "due_date": "2026-04-09",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#113@v0": {
+              "order_id": "ORD-015",
+              "customer": "UrbanThread",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "300",
+              "order_date": "2026-03-23",
+              "due_date": "2026-04-16",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#114@v0": {
+              "order_id": "ORD-017",
+              "customer": "TrendCart",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-23",
+              "due_date": "2026-04-10",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#115@v0": {
+              "order_id": "ORD-010",
+              "customer": "Cotton Club",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-24",
+              "due_date": "2026-04-25",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#116@v0": {
+              "order_id": "ORD-024",
+              "customer": "Loom & Leaf",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "300",
+              "order_date": "2026-03-24",
+              "due_date": "2026-04-15",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#117@v0": {
+              "order_id": "ORD-035",
+              "customer": "Loom & Leaf",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "300",
+              "order_date": "2026-03-25",
+              "due_date": "2026-04-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#118@v0": {
+              "order_id": "ORD-040",
+              "customer": "Loom & Leaf",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "1200",
+              "order_date": "2026-03-25",
+              "due_date": "2026-04-21",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#119@v0": {
+              "order_id": "ORD-063",
+              "customer": "Loom & Leaf",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "100",
+              "order_date": "2026-03-27",
+              "due_date": "2026-04-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#120@v0": {
+              "order_id": "ORD-082",
+              "customer": "TrendCart",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "600",
+              "order_date": "2026-03-27",
+              "due_date": "2026-05-01",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#121@v0": {
+              "order_id": "ORD-095",
+              "customer": "Bright Basics",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-27",
+              "due_date": "2026-04-26",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 7,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.41
+    }
+  ],
+  "finished_at": "2026-11-13T11:53:18+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

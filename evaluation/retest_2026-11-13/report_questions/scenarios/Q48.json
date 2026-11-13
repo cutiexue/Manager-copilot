@@ -1,0 +1,248 @@
+{
+  "scenario": "Q48",
+  "questions": [
+    "Q48"
+  ],
+  "adaptation": "The proposal is expired by running the expiry sweep 25 hours later.",
+  "session_id": "33e59c5b-4d76-49e7-bcf5-726696c4db99",
+  "started_at": "2026-11-13T11:55:50+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "Add the note “check carton count” to ORD-001.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "33e59c5b-4d76-49e7-bcf5-726696c4db99",
+        "answer": "A note \"check carton count\" on ORD-001 is ready as a card — press Confirm in the app to save it; it isn't saved until you do.",
+        "tool_calls": [
+          {
+            "name": "propose_order_note",
+            "arguments": {
+              "order_id": "ORD-001",
+              "text": "check carton count"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "ffc34c46-aaa1-4617-be06-bf5f67059f44",
+                "kind": "note",
+                "status": "DRAFT",
+                "summary": "Note on ORD-001: check carton count",
+                "payload": {
+                  "order_id": "ORD-001",
+                  "text": "check carton count"
+                },
+                "expires_at": "2026-11-14T11:55:51+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "ffc34c46-aaa1-4617-be06-bf5f67059f44",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "33e59c5b-4d76-49e7-bcf5-726696c4db99",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "check carton count"
+            },
+            "summary": "Note on ORD-001: check carton count",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:51+08:00",
+            "expires_at": "2026-11-14T11:55:51+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "1637a5f89d0d41f550afc648ab743a5618f5dc04119d914130f0bfef534f31ea",
+            "turn_id": "5daec366-8005-4314-9e9d-00759b0fdc49"
+          }
+        ],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.91
+    },
+    {
+      "step": "expire",
+      "at": "2026-11-14T12:55:50+08:00",
+      "result": 1,
+      "seconds": 0.0
+    },
+    {
+      "step": "clock",
+      "clock": "2026-11-14T12:55:50+08:00",
+      "seconds": 0.0
+    },
+    {
+      "step": "chat",
+      "qid": "Q48",
+      "message": "Is this expired note proposal still waiting for my confirmation?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "33e59c5b-4d76-49e7-bcf5-726696c4db99",
+        "answer": "No — that note proposal on ORD-001 has expired unconfirmed, so it's no longer waiting for you. I can put the same note up again if you'd like a fresh card.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.02
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "note",
+        "order_id": "ORD-001",
+        "status": "EXPIRED"
+      },
+      "proposal": {
+        "id": "ffc34c46-aaa1-4617-be06-bf5f67059f44",
+        "kind": "note",
+        "status": "EXPIRED",
+        "source": "chat",
+        "session_id": "33e59c5b-4d76-49e7-bcf5-726696c4db99",
+        "payload": {
+          "order_id": "ORD-001",
+          "text": "check carton count"
+        },
+        "summary": "Note on ORD-001: check carton count",
+        "reason": null,
+        "created_at": "2026-11-13T11:55:51+08:00",
+        "expires_at": "2026-11-14T11:55:51+08:00",
+        "decided_at": "2026-11-14T12:55:50+08:00",
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "1637a5f89d0d41f550afc648ab743a5618f5dc04119d914130f0bfef534f31ea",
+        "turn_id": "5daec366-8005-4314-9e9d-00759b0fdc49"
+      },
+      "responses": [
+        {
+          "http_status": 409,
+          "body": {
+            "detail": "This proposal is expired and can no longer be confirmed.",
+            "code": "ACTION_STATE"
+          }
+        }
+      ],
+      "seconds": 0.01
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "ffc34c46-aaa1-4617-be06-bf5f67059f44",
+            "kind": "note",
+            "status": "EXPIRED",
+            "source": "chat",
+            "session_id": "33e59c5b-4d76-49e7-bcf5-726696c4db99",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "check carton count"
+            },
+            "summary": "Note on ORD-001: check carton count",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:51+08:00",
+            "expires_at": "2026-11-14T11:55:51+08:00",
+            "decided_at": "2026-11-14T12:55:50+08:00",
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "1637a5f89d0d41f550afc648ab743a5618f5dc04119d914130f0bfef534f31ea",
+            "turn_id": "5daec366-8005-4314-9e9d-00759b0fdc49"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 3,
+            "at": "2026-11-14T12:55:50+08:00",
+            "actor": "system",
+            "event": "proposal_expired",
+            "proposal_id": "ffc34c46-aaa1-4617-be06-bf5f67059f44",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:55:52+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "ffc34c46-aaa1-4617-be06-bf5f67059f44",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "5daec366-8005-4314-9e9d-00759b0fdc49"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:55:51+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "ffc34c46-aaa1-4617-be06-bf5f67059f44",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-001: check carton count",
+              "status": "DRAFT",
+              "turn_id": "5daec366-8005-4314-9e9d-00759b0fdc49"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    },
+    {
+      "step": "clock",
+      "clock": "real",
+      "seconds": 0.0
+    }
+  ],
+  "finished_at": "2026-11-13T11:55:53+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

@@ -1,0 +1,594 @@
+{
+  "scenario": "Q37",
+  "questions": [
+    "Q37"
+  ],
+  "adaptation": "Clarifying reply added: O1 = ORD-002, date-only deadline.",
+  "session_id": "1933a3c9-c696-4f39-aa49-c129a2d6c898",
+  "started_at": "2026-11-13T11:55:04+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q37",
+      "message": "Watch O1 and remind me if it has not been updated by 3 pm on 2 April 2026.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "1933a3c9-c696-4f39-aa49-c129a2d6c898",
+        "answer": "I can't find any order called \"O1\" — no match in the order data, so I can't propose a watch on it. Could you give the full order ID (format like ORD-107), or a customer/product name so I can search for it?",
+        "tool_calls": [
+          {
+            "name": "get_order_status",
+            "arguments": {
+              "order_id": "O1"
+            },
+            "status": "not_found",
+            "result": {
+              "status": "not_found",
+              "data": null,
+              "candidates": [],
+              "message": "No order 'O1' in the data."
+            }
+          },
+          {
+            "name": "search_orders",
+            "arguments": {
+              "query": "O1"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "query": "O1",
+              "as_of_date": "2026-04-01",
+              "snapshot_date": "2026-04-01",
+              "total": 0,
+              "count": 0,
+              "orders": [],
+              "source": "track1/data/orders.csv",
+              "source_rows": [],
+              "warnings": []
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [
+            {
+              "kind": "order",
+              "text": "ORD-107"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 3.36
+    },
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "O1 is ORD-002. A date-only deadline of 2 April 2026 is fine.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "1933a3c9-c696-4f39-aa49-c129a2d6c898",
+        "answer": "A watch is ready to confirm: alert if ORD-002 (Cotton Club, 1,000 crewneck sweaters, at WASHING, last activity 2026-03-23) has not moved by 2 April 2026. It starts only when you press Confirm on the card.\n\nOne caveat: watches work to the day, so this checks 2 April as a whole rather than 3 pm.",
+        "tool_calls": [
+          {
+            "name": "get_order_status",
+            "arguments": {
+              "order_id": "ORD-002"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-002",
+                "customer": "Cotton Club",
+                "product": "Crewneck sweater",
+                "category": "TOPS",
+                "pieces": "1000",
+                "order_date": "2026-03-06",
+                "due_date": "2026-03-29",
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 86,
+                  "key": "ORD-002"
+                }
+              ]
+            }
+          },
+          {
+            "name": "propose_watch",
+            "arguments": {
+              "order_id": "ORD-002",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+                "kind": "watch",
+                "status": "DRAFT",
+                "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+                "payload": {
+                  "order_id": "ORD-002",
+                  "condition": "not_moved_by",
+                  "deadline": "2026-04-02",
+                  "stage": null,
+                  "current": {
+                    "status": "IN_PROGRESS",
+                    "current_stage": "WASHING",
+                    "last_activity_date": "2026-03-23",
+                    "due_date": "2026-03-29",
+                    "customer": "Cotton Club"
+                  },
+                  "data_version": "v0"
+                },
+                "expires_at": "2026-11-14T11:55:09+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "kind": "watch",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "1933a3c9-c696-4f39-aa49-c129a2d6c898",
+            "payload": {
+              "order_id": "ORD-002",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02",
+              "stage": null,
+              "current": {
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "due_date": "2026-03-29",
+                "customer": "Cotton Club"
+              },
+              "data_version": "v0"
+            },
+            "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:09+08:00",
+            "expires_at": "2026-11-14T11:55:09+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "0bf4457df4988faa14a22420b3e85806b05adcdacd82beb20ff238b74af4b982",
+            "turn_id": "f35c6bd1-5f82-4eb4-b3ca-39218846eb70"
+          }
+        ],
+        "answer_check": {
+          "checked": 4,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 3.11
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "watch",
+        "order_id": "ORD-002"
+      },
+      "proposal": {
+        "id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+        "kind": "watch",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "1933a3c9-c696-4f39-aa49-c129a2d6c898",
+        "payload": {
+          "order_id": "ORD-002",
+          "condition": "not_moved_by",
+          "deadline": "2026-04-02",
+          "stage": null,
+          "current": {
+            "status": "IN_PROGRESS",
+            "current_stage": "WASHING",
+            "last_activity_date": "2026-03-23",
+            "due_date": "2026-03-29",
+            "customer": "Cotton Club"
+          },
+          "data_version": "v0"
+        },
+        "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+        "reason": null,
+        "created_at": "2026-11-13T11:55:09+08:00",
+        "expires_at": "2026-11-14T11:55:09+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "0bf4457df4988faa14a22420b3e85806b05adcdacd82beb20ff238b74af4b982",
+        "turn_id": "f35c6bd1-5f82-4eb4-b3ca-39218846eb70"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+              "kind": "watch",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "1933a3c9-c696-4f39-aa49-c129a2d6c898",
+              "payload": {
+                "order_id": "ORD-002",
+                "condition": "not_moved_by",
+                "deadline": "2026-04-02",
+                "stage": null,
+                "current": {
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-03-23",
+                  "due_date": "2026-03-29",
+                  "customer": "Cotton Club"
+                },
+                "data_version": "v0"
+              },
+              "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+              "reason": null,
+              "created_at": "2026-11-13T11:55:09+08:00",
+              "expires_at": "2026-11-14T11:55:09+08:00",
+              "decided_at": "2026-11-13T11:55:10+08:00",
+              "result_kind": "watch",
+              "result_id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "0bf4457df4988faa14a22420b3e85806b05adcdacd82beb20ff238b74af4b982",
+              "turn_id": "f35c6bd1-5f82-4eb4-b3ca-39218846eb70"
+            },
+            "result": {
+              "id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+              "proposal_id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+              "order_id": "ORD-002",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02",
+              "stage": null,
+              "baseline": {
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "due_date": "2026-03-29",
+                "customer": "Cotton Club"
+              },
+              "status": "ACTIVE",
+              "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+              "created_at": "2026-11-13T11:55:10+08:00",
+              "updated_at": "2026-11-13T11:55:10+08:00",
+              "last_checked_at": null,
+              "last_result": null,
+              "outcome": null
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.01
+    },
+    {
+      "step": "advance",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "current": {
+            "version": "v1",
+            "date": "2026-04-02",
+            "label": "Scripted update · Thu 2 Apr"
+          },
+          "next": {
+            "version": "v2",
+            "date": "2026-04-03",
+            "label": "Scripted update · Fri 3 Apr"
+          },
+          "versions": [
+            {
+              "version": "v0",
+              "date": "2026-04-01",
+              "label": "Course data"
+            },
+            {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            },
+            {
+              "version": "v2",
+              "date": "2026-04-03",
+              "label": "Scripted update · Fri 3 Apr"
+            }
+          ],
+          "check": {
+            "data_version": {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            },
+            "checked": 1,
+            "outcomes": [
+              {
+                "watch_id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+                "result": "met",
+                "detail": "ORD-002 has not moved by 2026-04-02: still WASHING, last activity 2026-03-23."
+              }
+            ]
+          },
+          "briefing_run": {
+            "id": "a92da31e-0858-4ae2-857b-b8da42678b62",
+            "run_key": "snapshot:2026-04-02:2026-11-13T11:55:10+08:00",
+            "as_of_date": "2026-04-02",
+            "trigger": "snapshot",
+            "generated_at": "2026-11-13T11:55:10+08:00"
+          }
+        }
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "kind": "watch",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "1933a3c9-c696-4f39-aa49-c129a2d6c898",
+            "payload": {
+              "order_id": "ORD-002",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02",
+              "stage": null,
+              "current": {
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "due_date": "2026-03-29",
+                "customer": "Cotton Club"
+              },
+              "data_version": "v0"
+            },
+            "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:09+08:00",
+            "expires_at": "2026-11-14T11:55:09+08:00",
+            "decided_at": "2026-11-13T11:55:10+08:00",
+            "result_kind": "watch",
+            "result_id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "0bf4457df4988faa14a22420b3e85806b05adcdacd82beb20ff238b74af4b982",
+            "turn_id": "f35c6bd1-5f82-4eb4-b3ca-39218846eb70"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [
+          {
+            "id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+            "proposal_id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "order_id": "ORD-002",
+            "condition": "not_moved_by",
+            "deadline": "2026-04-02",
+            "stage": null,
+            "baseline": {
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "due_date": "2026-03-29",
+              "customer": "Cotton Club"
+            },
+            "status": "TRIGGERED",
+            "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+            "created_at": "2026-11-13T11:55:10+08:00",
+            "updated_at": "2026-11-13T11:55:10+08:00",
+            "last_checked_at": "2026-11-13T11:55:10+08:00",
+            "last_result": "met",
+            "outcome": "ORD-002 has not moved by 2026-04-02: still WASHING, last activity 2026-03-23."
+          }
+        ],
+        "/alerts": [
+          {
+            "id": "45d9eb0d-606d-4088-8e39-2b4bf897325d",
+            "kind": "watch",
+            "ref_id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+            "title": "Watch · ORD-002",
+            "body": "ORD-002 has not moved by 2026-04-02: still WASHING, last activity 2026-03-23.",
+            "dedupe_key": "watch:c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+            "created_at": "2026-11-13T11:55:10+08:00",
+            "read_at": null
+          },
+          {
+            "id": "4cac21ae-b5cb-43c7-9b8e-d109372583ee",
+            "kind": "briefing",
+            "ref_id": "a92da31e-0858-4ae2-857b-b8da42678b62",
+            "title": "Morning briefing ready",
+            "body": "Data as of 2026-04-02",
+            "dedupe_key": "snapshot:2026-04-02:2026-11-13T11:55:10+08:00",
+            "created_at": "2026-11-13T11:55:10+08:00",
+            "read_at": null
+          }
+        ],
+        "/audit": [
+          {
+            "id": 9,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "system",
+            "event": "alert_raised",
+            "proposal_id": null,
+            "target_kind": "briefing",
+            "target_id": "a92da31e-0858-4ae2-857b-b8da42678b62",
+            "detail": {
+              "title": "Morning briefing ready"
+            }
+          },
+          {
+            "id": 8,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "user",
+            "event": "briefing_generated",
+            "proposal_id": null,
+            "target_kind": "briefing",
+            "target_id": "a92da31e-0858-4ae2-857b-b8da42678b62",
+            "detail": {
+              "run_key": "snapshot:2026-04-02:2026-11-13T11:55:10+08:00"
+            }
+          },
+          {
+            "id": 7,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "scheduler",
+            "event": "watch_triggered",
+            "proposal_id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "target_kind": "watch",
+            "target_id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+            "detail": {
+              "detail": "ORD-002 has not moved by 2026-04-02: still WASHING, last activity 2026-03-23.",
+              "data_version": "v1"
+            }
+          },
+          {
+            "id": 6,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "system",
+            "event": "alert_raised",
+            "proposal_id": null,
+            "target_kind": "watch",
+            "target_id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+            "detail": {
+              "title": "Watch · ORD-002"
+            }
+          },
+          {
+            "id": 5,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "user",
+            "event": "data_snapshot_loaded",
+            "proposal_id": null,
+            "target_kind": null,
+            "target_id": null,
+            "detail": {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            }
+          },
+          {
+            "id": 4,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "target_kind": "watch",
+            "target_id": "c532fbf5-d9b4-4587-85ff-55a29a3b66eb",
+            "detail": null
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "target_kind": "watch",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:55:10+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "target_kind": "watch",
+            "target_id": null,
+            "detail": {
+              "turn_id": "f35c6bd1-5f82-4eb4-b3ca-39218846eb70"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:55:09+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "028cdad5-b8d3-4a5b-b0e3-6bfe237a1488",
+            "target_kind": "watch",
+            "target_id": null,
+            "detail": {
+              "summary": "Alert if ORD-002 has not moved by 2026-04-02",
+              "status": "DRAFT",
+              "turn_id": "f35c6bd1-5f82-4eb4-b3ca-39218846eb70"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T11:55:10+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

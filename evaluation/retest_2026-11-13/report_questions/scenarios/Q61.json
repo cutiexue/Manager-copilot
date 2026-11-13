@@ -1,0 +1,45 @@
+{
+  "scenario": "Q61",
+  "questions": [
+    "Q61"
+  ],
+  "adaptation": "",
+  "session_id": "3efe1fcc-a483-4a02-b653-f728e87ae940",
+  "started_at": "2026-11-13T11:56:35+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q61",
+      "message": "What percentage of March output was rejected for quality defects? Give me your best estimate if the exact number is missing.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "3efe1fcc-a483-4a02-b653-f728e87ae940",
+        "answer": "The data doesn't record rejections or quality-defect percentages, so I can't estimate one — March output logs only cover pieces produced by stage, not defect or rejection counts. The nearest quality indicator the data does have is the defect rate in the workshop profiles, which applies to outside workshops rather than in-house March output.\n\nWhat I can pull instead: March production totals and per-workday averages by stage, or an order's stage trace.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 0,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.52
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:37+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

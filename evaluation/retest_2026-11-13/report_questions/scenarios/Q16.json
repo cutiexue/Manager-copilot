@@ -1,0 +1,424 @@
+{
+  "scenario": "Q16",
+  "questions": [
+    "Q16"
+  ],
+  "adaptation": "",
+  "session_id": "b491a3de-f379-49fc-a516-bd79fcaafcb5",
+  "started_at": "2026-11-13T11:53:56+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "What is the status of ORD-001?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "b491a3de-f379-49fc-a516-bd79fcaafcb5",
+        "answer": "ORD-001 (Cotton Club, 1000 beanies) is complete — finished on 2026-02-10, two days after its 2026-02-08 due date, so it was delivered late by 2 days. Source: track1/data/orders.csv, row 20.",
+        "tool_calls": [
+          {
+            "name": "trace_order",
+            "arguments": {
+              "order_id": "ORD-001"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-001",
+                "customer": "Cotton Club",
+                "product": "Beanie",
+                "category": "ACCESSORIES",
+                "pieces": "1000",
+                "order_date": "2026-01-12",
+                "due_date": "2026-02-08",
+                "status": "COMPLETE",
+                "current_stage": "COMPLETE",
+                "last_activity_date": "2026-02-10",
+                "completed_date": "2026-02-10",
+                "days_late": "2"
+              },
+              "facts": {
+                "days_since_last_activity": 50,
+                "risk_reasons": [],
+                "days_late_recorded": 2
+              },
+              "evidence": {
+                "order": [
+                  {
+                    "source": "track1/data/orders.csv",
+                    "row": 20,
+                    "key": "ORD-001"
+                  }
+                ],
+                "recent_stage_output": []
+              },
+              "snapshot_date": "2026-04-01",
+              "source": "track1/data/orders.csv",
+              "message": "All facts above are computed from the cited rows; recent stage output is factory-wide context, not per-order progress."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 20,
+              "key": "ORD-001",
+              "id": "orders.csv:20@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#20@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#20@v0": {
+              "order_id": "ORD-001",
+              "customer": "Cotton Club",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1000",
+              "order_date": "2026-01-12",
+              "due_date": "2026-02-08",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-02-10",
+              "completed_date": "2026-02-10",
+              "days_late": "2"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 5,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.82
+    },
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "What about ORD-002?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "b491a3de-f379-49fc-a516-bd79fcaafcb5",
+        "answer": "ORD-002 (Cotton Club, 1000 crewneck sweaters) is still in progress at the washing stage, and it's overdue — due 2026-03-29, now 3 calendar days late, with no recorded activity since 2026-03-23 (9 days). Source: track1/data/orders.csv, row 86. The washing output logged on 2026-03-30 and 2026-03-31 is factory-wide, not specific to this order.",
+        "tool_calls": [
+          {
+            "name": "trace_order",
+            "arguments": {
+              "order_id": "ORD-002"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-002",
+                "customer": "Cotton Club",
+                "product": "Crewneck sweater",
+                "category": "TOPS",
+                "pieces": "1000",
+                "order_date": "2026-03-06",
+                "due_date": "2026-03-29",
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "facts": {
+                "days_since_last_activity": 9,
+                "risk_reasons": [
+                  "overdue by 3 calendar days",
+                  "no recorded activity for 9 calendar days"
+                ],
+                "days_until_due": -3,
+                "overdue_calendar_days": 3
+              },
+              "evidence": {
+                "order": [
+                  {
+                    "source": "track1/data/orders.csv",
+                    "row": 86,
+                    "key": "ORD-002"
+                  }
+                ],
+                "recent_stage_output": [
+                  {
+                    "date": "2026-03-31",
+                    "stage": "WASHING",
+                    "pieces_completed": 732,
+                    "source_row": 360
+                  },
+                  {
+                    "date": "2026-03-30",
+                    "stage": "WASHING",
+                    "pieces_completed": 605,
+                    "source_row": 356
+                  },
+                  {
+                    "date": "2026-03-28",
+                    "stage": "WASHING",
+                    "pieces_completed": 624,
+                    "source_row": 348
+                  }
+                ]
+              },
+              "snapshot_date": "2026-04-01",
+              "source": "track1/data/orders.csv",
+              "message": "All facts above are computed from the cited rows; recent stage output is factory-wide context, not per-order progress."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 360,
+              "key": "2026-03-31 WASHING",
+              "id": "production_log.csv:360@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#360@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 356,
+              "key": "2026-03-30 WASHING",
+              "id": "production_log.csv:356@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#356@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 348,
+              "key": "2026-03-28 WASHING",
+              "id": "production_log.csv:348@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#348@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/production_log.csv#360@v0": {
+              "date": "2026-03-31",
+              "stage": "WASHING",
+              "pieces_completed": "732"
+            },
+            "track1/data/production_log.csv#356@v0": {
+              "date": "2026-03-30",
+              "stage": "WASHING",
+              "pieces_completed": "605"
+            },
+            "track1/data/production_log.csv#348@v0": {
+              "date": "2026-03-28",
+              "stage": "WASHING",
+              "pieces_completed": "624"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 7,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.13
+    },
+    {
+      "step": "chat",
+      "qid": "Q16",
+      "message": "When was its most recent activity?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "b491a3de-f379-49fc-a516-bd79fcaafcb5",
+        "answer": "ORD-002's most recent recorded activity was 2026-03-23 — 9 calendar days before today's data date (2026-04-01). Source: track1/data/orders.csv, row 86. That's a record date, not proof the order has stopped moving.",
+        "tool_calls": [
+          {
+            "name": "trace_order",
+            "arguments": {
+              "order_id": "ORD-002"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-002",
+                "customer": "Cotton Club",
+                "product": "Crewneck sweater",
+                "category": "TOPS",
+                "pieces": "1000",
+                "order_date": "2026-03-06",
+                "due_date": "2026-03-29",
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "facts": {
+                "days_since_last_activity": 9,
+                "risk_reasons": [
+                  "overdue by 3 calendar days",
+                  "no recorded activity for 9 calendar days"
+                ],
+                "days_until_due": -3,
+                "overdue_calendar_days": 3
+              },
+              "evidence": {
+                "order": [
+                  {
+                    "source": "track1/data/orders.csv",
+                    "row": 86,
+                    "key": "ORD-002"
+                  }
+                ],
+                "recent_stage_output": [
+                  {
+                    "date": "2026-03-31",
+                    "stage": "WASHING",
+                    "pieces_completed": 732,
+                    "source_row": 360
+                  },
+                  {
+                    "date": "2026-03-30",
+                    "stage": "WASHING",
+                    "pieces_completed": 605,
+                    "source_row": 356
+                  },
+                  {
+                    "date": "2026-03-28",
+                    "stage": "WASHING",
+                    "pieces_completed": 624,
+                    "source_row": 348
+                  }
+                ]
+              },
+              "snapshot_date": "2026-04-01",
+              "source": "track1/data/orders.csv",
+              "message": "All facts above are computed from the cited rows; recent stage output is factory-wide context, not per-order progress."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 360,
+              "key": "2026-03-31 WASHING",
+              "id": "production_log.csv:360@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#360@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 356,
+              "key": "2026-03-30 WASHING",
+              "id": "production_log.csv:356@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#356@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 348,
+              "key": "2026-03-28 WASHING",
+              "id": "production_log.csv:348@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#348@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/production_log.csv#360@v0": {
+              "date": "2026-03-31",
+              "stage": "WASHING",
+              "pieces_completed": "732"
+            },
+            "track1/data/production_log.csv#356@v0": {
+              "date": "2026-03-30",
+              "stage": "WASHING",
+              "pieces_completed": "605"
+            },
+            "track1/data/production_log.csv#348@v0": {
+              "date": "2026-03-28",
+              "stage": "WASHING",
+              "pieces_completed": "624"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 4,
+          "unverified": [],
+          "retried": true
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 3.03
+    }
+  ],
+  "finished_at": "2026-11-13T11:54:03+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

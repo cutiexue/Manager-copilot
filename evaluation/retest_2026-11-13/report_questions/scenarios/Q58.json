@@ -1,0 +1,237 @@
+{
+  "scenario": "Q58",
+  "questions": [
+    "Q58"
+  ],
+  "adaptation": "",
+  "session_id": "084295b5-e2fb-4c5a-81b2-b2267a2fe4bb",
+  "started_at": "2026-11-13T11:56:28+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q58",
+      "message": "Show total Washing output for March 23–29, 2026, and its average per operating day. Cite the records used.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "084295b5-e2fb-4c5a-81b2-b2267a2fe4bb",
+        "answer": "Washing output for 23–29 March 2026 totalled 4,517 pieces over 6 operating days (Mon–Sat; Sunday 29 March is the scheduled rest day), averaging 752.83 pieces per operating day. All six workdays have records; no days are missing.\n\nSource: track1/data/production_log.csv rows 328, 332, 336, 340, 344, 348 and 352 (WASHING, 2026-03-23 to 2026-03-29).\n\nNote: this is factory-wide stage output, not order-level progress.",
+        "tool_calls": [
+          {
+            "name": "summarize_stage_output",
+            "arguments": {
+              "date_from": "2026-03-23",
+              "date_to": "2026-03-29",
+              "stage": "WASHING"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "date_from": "2026-03-23",
+              "date_to": "2026-03-29",
+              "stages": [
+                {
+                  "stage": "WASHING",
+                  "date_from": "2026-03-23",
+                  "date_to": "2026-03-29",
+                  "total_pieces": 4517,
+                  "recorded_total_pieces": 4517,
+                  "complete_records": true,
+                  "status": "ok",
+                  "calendar_days": 7,
+                  "scheduled_workdays": 6,
+                  "recorded_workdays": 6,
+                  "missing_workdays": [],
+                  "mean_per_recorded_workday": 752.83,
+                  "source_rows": [
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 328,
+                      "key": "2026-03-23 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 332,
+                      "key": "2026-03-24 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 336,
+                      "key": "2026-03-25 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 340,
+                      "key": "2026-03-26 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 344,
+                      "key": "2026-03-27 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 348,
+                      "key": "2026-03-28 WASHING"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 352,
+                      "key": "2026-03-29 WASHING"
+                    }
+                  ],
+                  "mean_per_scheduled_workday": 752.83
+                }
+              ],
+              "source": "track1/data/production_log.csv",
+              "rules": "Workdays are Monday to Saturday; Sunday rows are recorded as 0 and add nothing. A workday without a record is listed in missing_workdays, never counted as zero.",
+              "warnings": [
+                "Factory-wide stage output, not per-order progress or capacity."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 328,
+              "key": "2026-03-23 WASHING",
+              "id": "production_log.csv:328@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#328@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 332,
+              "key": "2026-03-24 WASHING",
+              "id": "production_log.csv:332@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#332@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 336,
+              "key": "2026-03-25 WASHING",
+              "id": "production_log.csv:336@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#336@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 340,
+              "key": "2026-03-26 WASHING",
+              "id": "production_log.csv:340@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#340@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 344,
+              "key": "2026-03-27 WASHING",
+              "id": "production_log.csv:344@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#344@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 348,
+              "key": "2026-03-28 WASHING",
+              "id": "production_log.csv:348@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#348@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 352,
+              "key": "2026-03-29 WASHING",
+              "id": "production_log.csv:352@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#352@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/production_log.csv#328@v0": {
+              "date": "2026-03-23",
+              "stage": "WASHING",
+              "pieces_completed": "757"
+            },
+            "track1/data/production_log.csv#332@v0": {
+              "date": "2026-03-24",
+              "stage": "WASHING",
+              "pieces_completed": "741"
+            },
+            "track1/data/production_log.csv#336@v0": {
+              "date": "2026-03-25",
+              "stage": "WASHING",
+              "pieces_completed": "801"
+            },
+            "track1/data/production_log.csv#340@v0": {
+              "date": "2026-03-26",
+              "stage": "WASHING",
+              "pieces_completed": "801"
+            },
+            "track1/data/production_log.csv#344@v0": {
+              "date": "2026-03-27",
+              "stage": "WASHING",
+              "pieces_completed": "793"
+            },
+            "track1/data/production_log.csv#348@v0": {
+              "date": "2026-03-28",
+              "stage": "WASHING",
+              "pieces_completed": "624"
+            },
+            "track1/data/production_log.csv#352@v0": {
+              "date": "2026-03-29",
+              "stage": "WASHING",
+              "pieces_completed": "0"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 11,
+          "unverified": [
+            {
+              "kind": "number",
+              "text": "332"
+            },
+            {
+              "kind": "number",
+              "text": "336"
+            },
+            {
+              "kind": "number",
+              "text": "340"
+            },
+            {
+              "kind": "number",
+              "text": "344"
+            },
+            {
+              "kind": "number",
+              "text": "348"
+            },
+            {
+              "kind": "number",
+              "text": "352"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.33
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:30+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

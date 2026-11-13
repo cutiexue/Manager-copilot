@@ -1,0 +1,174 @@
+{
+  "scenario": "Q50",
+  "questions": [
+    "Q50"
+  ],
+  "adaptation": "Clock set to 2026-11-13 15:01 Singapore time, as the prompt states.",
+  "session_id": "b1c82177-7e9a-42d8-bf36-b3f0a93d3474",
+  "started_at": "2026-11-13T12:03:27+08:00",
+  "steps": [
+    {
+      "step": "clock",
+      "clock": "2026-11-13T15:01:00+08:00",
+      "seconds": 0.0
+    },
+    {
+      "step": "chat",
+      "qid": "Q50",
+      "message": "Remind me at 15:00 today. The current Singapore time is already 15:01.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "b1c82177-7e9a-42d8-bf36-b3f0a93d3474",
+        "answer": "15:00 today has already passed (it's 15:01), so I couldn't set that time. The card I just prepared fell back to the default time — tomorrow 09:00 real time (Sat 14 Nov 2026) — and it's tied to ORD-107 because no order was named. Nothing is saved until you press Confirm.\n\nTell me the order (or topic) and a future time, and I'll propose it correctly.",
+        "tool_calls": [
+          {
+            "name": "propose_reminder",
+            "arguments": {
+              "text": "Reminder at 15:00 today",
+              "order_id": "ORD-107"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "6dc3ed50-174d-4245-8d6d-a3c526abf561",
+                "kind": "reminder",
+                "status": "DRAFT",
+                "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-107: Reminder at 15:00 today",
+                "payload": {
+                  "text": "Reminder at 15:00 today",
+                  "remind_at": "2026-11-14T09:00:00+08:00",
+                  "order_id": "ORD-107",
+                  "subject": null,
+                  "customer": "Northwind Apparel"
+                },
+                "expires_at": "2026-11-14T15:01:00+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "6dc3ed50-174d-4245-8d6d-a3c526abf561",
+            "kind": "reminder",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "b1c82177-7e9a-42d8-bf36-b3f0a93d3474",
+            "payload": {
+              "text": "Reminder at 15:00 today",
+              "remind_at": "2026-11-14T09:00:00+08:00",
+              "order_id": "ORD-107",
+              "subject": null,
+              "customer": "Northwind Apparel"
+            },
+            "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-107: Reminder at 15:00 today",
+            "reason": null,
+            "created_at": "2026-11-13T15:01:00+08:00",
+            "expires_at": "2026-11-14T15:01:00+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "f12fc84daec5a82067af87bf7ba821c37494cf1ed9ea53e2c1f32ffd4a65c65b",
+            "turn_id": "d2128ae7-252a-4ee3-ab22-be829f103510"
+          }
+        ],
+        "answer_check": {
+          "checked": 2,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.18
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "6dc3ed50-174d-4245-8d6d-a3c526abf561",
+            "kind": "reminder",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "b1c82177-7e9a-42d8-bf36-b3f0a93d3474",
+            "payload": {
+              "text": "Reminder at 15:00 today",
+              "remind_at": "2026-11-14T09:00:00+08:00",
+              "order_id": "ORD-107",
+              "subject": null,
+              "customer": "Northwind Apparel"
+            },
+            "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-107: Reminder at 15:00 today",
+            "reason": null,
+            "created_at": "2026-11-13T15:01:00+08:00",
+            "expires_at": "2026-11-14T15:01:00+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "f12fc84daec5a82067af87bf7ba821c37494cf1ed9ea53e2c1f32ffd4a65c65b",
+            "turn_id": "d2128ae7-252a-4ee3-ab22-be829f103510"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 2,
+            "at": "2026-11-13T15:01:00+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "6dc3ed50-174d-4245-8d6d-a3c526abf561",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": {
+              "turn_id": "d2128ae7-252a-4ee3-ab22-be829f103510"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T15:01:00+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "6dc3ed50-174d-4245-8d6d-a3c526abf561",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": {
+              "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-107: Reminder at 15:00 today",
+              "status": "DRAFT",
+              "turn_id": "d2128ae7-252a-4ee3-ab22-be829f103510"
+            }
+          }
+        ]
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "clock",
+      "clock": "real",
+      "seconds": 0.0
+    }
+  ],
+  "finished_at": "2026-11-13T12:03:29+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

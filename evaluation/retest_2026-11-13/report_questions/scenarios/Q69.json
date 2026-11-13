@@ -1,0 +1,328 @@
+{
+  "scenario": "Q69",
+  "questions": [
+    "Q69"
+  ],
+  "adaptation": "Real clock; reminders fired at 08:59, 09:00 and 09:01 on the next day.",
+  "session_id": "e93bdaa5-43c0-4346-a3fa-d9129b7ad636",
+  "started_at": "2026-11-13T11:56:58+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q69",
+      "message": "Remind me to check ORD-114 tomorrow at 9 a.m. Singapore time.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "e93bdaa5-43c0-4346-a3fa-d9129b7ad636",
+        "answer": "I've prepared a reminder for ORD-114 (Northwind Apparel) for tomorrow, Thursday 14 Nov 2026 at 09:00 Singapore time — that's real-calendar time, not the 2026-04-01 data date. It's ready on the card in the app and only becomes active when you press Confirm.",
+        "tool_calls": [
+          {
+            "name": "propose_reminder",
+            "arguments": {
+              "text": "Check ORD-114",
+              "order_id": "ORD-114",
+              "when": "tomorrow 09:00"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+                "kind": "reminder",
+                "status": "DRAFT",
+                "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-114: Check ORD-114",
+                "payload": {
+                  "text": "Check ORD-114",
+                  "remind_at": "2026-11-14T09:00:00+08:00",
+                  "order_id": "ORD-114",
+                  "subject": null,
+                  "customer": "Northwind Apparel"
+                },
+                "expires_at": "2026-11-14T11:56:59+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "kind": "reminder",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "e93bdaa5-43c0-4346-a3fa-d9129b7ad636",
+            "payload": {
+              "text": "Check ORD-114",
+              "remind_at": "2026-11-14T09:00:00+08:00",
+              "order_id": "ORD-114",
+              "subject": null,
+              "customer": "Northwind Apparel"
+            },
+            "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-114: Check ORD-114",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:59+08:00",
+            "expires_at": "2026-11-14T11:56:59+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "84fefcd6f8e006b67178da122af8a11e5a836f7715b31d221c92e54f37264e41",
+            "turn_id": "a70fc04b-a478-4143-b971-ffae384d2e5e"
+          }
+        ],
+        "answer_check": {
+          "checked": 3,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.95
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "reminder"
+      },
+      "proposal": {
+        "id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+        "kind": "reminder",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "e93bdaa5-43c0-4346-a3fa-d9129b7ad636",
+        "payload": {
+          "text": "Check ORD-114",
+          "remind_at": "2026-11-14T09:00:00+08:00",
+          "order_id": "ORD-114",
+          "subject": null,
+          "customer": "Northwind Apparel"
+        },
+        "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-114: Check ORD-114",
+        "reason": null,
+        "created_at": "2026-11-13T11:56:59+08:00",
+        "expires_at": "2026-11-14T11:56:59+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "84fefcd6f8e006b67178da122af8a11e5a836f7715b31d221c92e54f37264e41",
+        "turn_id": "a70fc04b-a478-4143-b971-ffae384d2e5e"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+              "kind": "reminder",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "e93bdaa5-43c0-4346-a3fa-d9129b7ad636",
+              "payload": {
+                "text": "Check ORD-114",
+                "remind_at": "2026-11-14T09:00:00+08:00",
+                "order_id": "ORD-114",
+                "subject": null,
+                "customer": "Northwind Apparel"
+              },
+              "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-114: Check ORD-114",
+              "reason": null,
+              "created_at": "2026-11-13T11:56:59+08:00",
+              "expires_at": "2026-11-14T11:56:59+08:00",
+              "decided_at": "2026-11-13T11:57:00+08:00",
+              "result_kind": "reminder",
+              "result_id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "84fefcd6f8e006b67178da122af8a11e5a836f7715b31d221c92e54f37264e41",
+              "turn_id": "a70fc04b-a478-4143-b971-ffae384d2e5e"
+            },
+            "result": {
+              "id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+              "proposal_id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+              "order_id": "ORD-114",
+              "subject": null,
+              "text": "Check ORD-114",
+              "remind_at": "2026-11-14T09:00:00+08:00",
+              "status": "SCHEDULED",
+              "created_at": "2026-11-13T11:57:00+08:00",
+              "due_at": null,
+              "dismissed_at": null
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.01
+    },
+    {
+      "step": "fire_reminders",
+      "at": "2026-11-14T08:59:00+08:00",
+      "result": [],
+      "seconds": 0.0
+    },
+    {
+      "step": "fire_reminders",
+      "at": "2026-11-14T09:00:00+08:00",
+      "result": [
+        "deb0f6a5-380f-4da8-b588-fa20b5023f79"
+      ],
+      "seconds": 0.0
+    },
+    {
+      "step": "fire_reminders",
+      "at": "2026-11-14T09:01:00+08:00",
+      "result": [],
+      "seconds": 0.0
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "kind": "reminder",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "e93bdaa5-43c0-4346-a3fa-d9129b7ad636",
+            "payload": {
+              "text": "Check ORD-114",
+              "remind_at": "2026-11-14T09:00:00+08:00",
+              "order_id": "ORD-114",
+              "subject": null,
+              "customer": "Northwind Apparel"
+            },
+            "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-114: Check ORD-114",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:59+08:00",
+            "expires_at": "2026-11-14T11:56:59+08:00",
+            "decided_at": "2026-11-13T11:57:00+08:00",
+            "result_kind": "reminder",
+            "result_id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "84fefcd6f8e006b67178da122af8a11e5a836f7715b31d221c92e54f37264e41",
+            "turn_id": "a70fc04b-a478-4143-b971-ffae384d2e5e"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [
+          {
+            "id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+            "proposal_id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "order_id": "ORD-114",
+            "subject": null,
+            "text": "Check ORD-114",
+            "remind_at": "2026-11-14T09:00:00+08:00",
+            "status": "DUE",
+            "created_at": "2026-11-13T11:57:00+08:00",
+            "due_at": "2026-11-14T09:00:00+08:00",
+            "dismissed_at": null
+          }
+        ],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [
+          {
+            "id": "6c1c39d5-8d97-4f3b-96e4-672cddeafd9d",
+            "kind": "reminder",
+            "ref_id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+            "title": "Reminder · ORD-114",
+            "body": "Check ORD-114",
+            "dedupe_key": "reminder:deb0f6a5-380f-4da8-b588-fa20b5023f79",
+            "created_at": "2026-11-14T09:00:00+08:00",
+            "read_at": null
+          }
+        ],
+        "/audit": [
+          {
+            "id": 6,
+            "at": "2026-11-14T09:00:00+08:00",
+            "actor": "scheduler",
+            "event": "reminder_due",
+            "proposal_id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "target_kind": "reminder",
+            "target_id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+            "detail": null
+          },
+          {
+            "id": 5,
+            "at": "2026-11-14T09:00:00+08:00",
+            "actor": "system",
+            "event": "alert_raised",
+            "proposal_id": null,
+            "target_kind": "reminder",
+            "target_id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+            "detail": {
+              "title": "Reminder · ORD-114"
+            }
+          },
+          {
+            "id": 4,
+            "at": "2026-11-13T11:57:00+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "target_kind": "reminder",
+            "target_id": "deb0f6a5-380f-4da8-b588-fa20b5023f79",
+            "detail": null
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:57:00+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:57:00+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": {
+              "turn_id": "a70fc04b-a478-4143-b971-ffae384d2e5e"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:56:59+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "02db75fd-0f04-4ece-b63b-c15a82d8cf96",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": {
+              "summary": "Reminder · Sat 14 Nov 2026 09:00 (real time) · ORD-114: Check ORD-114",
+              "status": "DRAFT",
+              "turn_id": "a70fc04b-a478-4143-b971-ffae384d2e5e"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T11:57:00+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

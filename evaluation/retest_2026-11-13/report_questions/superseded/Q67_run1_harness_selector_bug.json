@@ -1,0 +1,359 @@
+{
+  "scenario": "Q67",
+  "questions": [
+    "Q67"
+  ],
+  "adaptation": "",
+  "session_id": "8ac6a455-68be-450a-8350-6176c8a06603",
+  "started_at": "2026-11-13T11:56:50+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q67",
+      "message": "Draft a chase-up message for ORD-114 to its production partner. I haven’t provided a recipient.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "8ac6a455-68be-450a-8350-6176c8a06603",
+        "answer": "The draft for ORD-114 (Northwind Apparel, 2,000 hoodies, due 23 March 2026, 9 calendar days late, last activity 30 March at packing) is ready on the card — it's saved as a draft only when you press Confirm, and it never sends automatically.\n\nThe recipient line is blank (\"Dear [Production Partner]\") since you didn't name them; tell me the name and I can propose a version addressed properly.",
+        "tool_calls": [
+          {
+            "name": "trace_order",
+            "arguments": {
+              "order_id": "ORD-114"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-114",
+                "customer": "Northwind Apparel",
+                "product": "Hoodie",
+                "category": "TOPS",
+                "pieces": "2000",
+                "order_date": "2026-03-03",
+                "due_date": "2026-03-23",
+                "status": "IN_PROGRESS",
+                "current_stage": "PACKING",
+                "last_activity_date": "2026-03-30",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "facts": {
+                "days_since_last_activity": 2,
+                "risk_reasons": [
+                  "overdue by 9 calendar days"
+                ],
+                "days_until_due": -9,
+                "overdue_calendar_days": 9
+              },
+              "evidence": {
+                "order": [
+                  {
+                    "source": "track1/data/orders.csv",
+                    "row": 85,
+                    "key": "ORD-114"
+                  }
+                ],
+                "recent_stage_output": [
+                  {
+                    "date": "2026-03-31",
+                    "stage": "PACKING",
+                    "pieces_completed": 657,
+                    "source_row": 361
+                  },
+                  {
+                    "date": "2026-03-30",
+                    "stage": "PACKING",
+                    "pieces_completed": 625,
+                    "source_row": 357
+                  },
+                  {
+                    "date": "2026-03-28",
+                    "stage": "PACKING",
+                    "pieces_completed": 734,
+                    "source_row": 349
+                  }
+                ]
+              },
+              "snapshot_date": "2026-04-01",
+              "source": "track1/data/orders.csv",
+              "message": "All facts above are computed from the cited rows; recent stage output is factory-wide context, not per-order progress."
+            }
+          },
+          {
+            "name": "draft_chase_message",
+            "arguments": {
+              "order_id": "ORD-114",
+              "text": "Subject: ORD-114 (Northwind Apparel hoodie, 2,000 pcs) – status request\n\nDear [Production Partner],\n\nI'm following up on ORD-114 for Northwind Apparel: 2,000 hoodies, due on 23 March 2026. The order is now 9 calendar days past that date, with the last recorded activity on 30 March, at the packing stage.\n\nCould you please send me a status update on ORD-114 and let us know anything you need from our side to move it forward? We'd also appreciate your best estimate of when the remaining work will be finished, so we can update the customer.\n\nThank you,\n[Your name]"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+                "kind": "chase_message",
+                "status": "DRAFT",
+                "summary": "Chase-up draft for Northwind Apparel (ORD-114); not sent",
+                "payload": {
+                  "order_id": "ORD-114",
+                  "customer": "Northwind Apparel",
+                  "text": "Subject: ORD-114 (Northwind Apparel hoodie, 2,000 pcs) – status request\n\nDear [Production Partner],\n\nI'm following up on ORD-114 for Northwind Apparel: 2,000 hoodies, due on 23 March 2026. The order is now 9 calendar days past that date, with the last recorded activity on 30 March, at the packing stage.\n\nCould you please send me a status update on ORD-114 and let us know anything you need from our side to move it forward? We'd also appreciate your best estimate of when the remaining work will be finished, so we can update the customer.\n\nThank you,\n[Your name]"
+                },
+                "expires_at": "2026-11-14T11:56:53+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 85,
+              "key": "ORD-114",
+              "id": "orders.csv:85@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#85@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 361,
+              "key": "2026-03-31 PACKING",
+              "id": "production_log.csv:361@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#361@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 357,
+              "key": "2026-03-30 PACKING",
+              "id": "production_log.csv:357@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#357@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 349,
+              "key": "2026-03-28 PACKING",
+              "id": "production_log.csv:349@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#349@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#85@v0": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-03",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/production_log.csv#361@v0": {
+              "date": "2026-03-31",
+              "stage": "PACKING",
+              "pieces_completed": "657"
+            },
+            "track1/data/production_log.csv#357@v0": {
+              "date": "2026-03-30",
+              "stage": "PACKING",
+              "pieces_completed": "625"
+            },
+            "track1/data/production_log.csv#349@v0": {
+              "date": "2026-03-28",
+              "stage": "PACKING",
+              "pieces_completed": "734"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+            "kind": "chase_message",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "8ac6a455-68be-450a-8350-6176c8a06603",
+            "payload": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "text": "Subject: ORD-114 (Northwind Apparel hoodie, 2,000 pcs) – status request\n\nDear [Production Partner],\n\nI'm following up on ORD-114 for Northwind Apparel: 2,000 hoodies, due on 23 March 2026. The order is now 9 calendar days past that date, with the last recorded activity on 30 March, at the packing stage.\n\nCould you please send me a status update on ORD-114 and let us know anything you need from our side to move it forward? We'd also appreciate your best estimate of when the remaining work will be finished, so we can update the customer.\n\nThank you,\n[Your name]"
+            },
+            "summary": "Chase-up draft for Northwind Apparel (ORD-114); not sent",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:53+08:00",
+            "expires_at": "2026-11-14T11:56:53+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "aaa03901a02d52b58a32e593b05bc3e641b8d77526cc839aed93233d323c1fe0",
+            "turn_id": "d8a62d68-ec22-495c-a588-373af5b40f47"
+          }
+        ],
+        "answer_check": {
+          "checked": 4,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 4.8
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+            "kind": "chase_message",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "8ac6a455-68be-450a-8350-6176c8a06603",
+            "payload": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "text": "Subject: ORD-114 (Northwind Apparel hoodie, 2,000 pcs) – status request\n\nDear [Production Partner],\n\nI'm following up on ORD-114 for Northwind Apparel: 2,000 hoodies, due on 23 March 2026. The order is now 9 calendar days past that date, with the last recorded activity on 30 March, at the packing stage.\n\nCould you please send me a status update on ORD-114 and let us know anything you need from our side to move it forward? We'd also appreciate your best estimate of when the remaining work will be finished, so we can update the customer.\n\nThank you,\n[Your name]"
+            },
+            "summary": "Chase-up draft for Northwind Apparel (ORD-114); not sent",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:53+08:00",
+            "expires_at": "2026-11-14T11:56:53+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "aaa03901a02d52b58a32e593b05bc3e641b8d77526cc839aed93233d323c1fe0",
+            "turn_id": "d8a62d68-ec22-495c-a588-373af5b40f47"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 2,
+            "at": "2026-11-13T11:56:55+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+            "target_kind": "chase_message",
+            "target_id": null,
+            "detail": {
+              "turn_id": "d8a62d68-ec22-495c-a588-373af5b40f47"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:56:53+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+            "target_kind": "chase_message",
+            "target_id": null,
+            "detail": {
+              "summary": "Chase-up draft for Northwind Apparel (ORD-114); not sent",
+              "status": "DRAFT",
+              "turn_id": "d8a62d68-ec22-495c-a588-373af5b40f47"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "draft",
+        "order_id": "ORD-114"
+      },
+      "proposal": null,
+      "error": "no matching PROPOSED proposal",
+      "seconds": 0.0
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+            "kind": "chase_message",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "8ac6a455-68be-450a-8350-6176c8a06603",
+            "payload": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "text": "Subject: ORD-114 (Northwind Apparel hoodie, 2,000 pcs) – status request\n\nDear [Production Partner],\n\nI'm following up on ORD-114 for Northwind Apparel: 2,000 hoodies, due on 23 March 2026. The order is now 9 calendar days past that date, with the last recorded activity on 30 March, at the packing stage.\n\nCould you please send me a status update on ORD-114 and let us know anything you need from our side to move it forward? We'd also appreciate your best estimate of when the remaining work will be finished, so we can update the customer.\n\nThank you,\n[Your name]"
+            },
+            "summary": "Chase-up draft for Northwind Apparel (ORD-114); not sent",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:53+08:00",
+            "expires_at": "2026-11-14T11:56:53+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "aaa03901a02d52b58a32e593b05bc3e641b8d77526cc839aed93233d323c1fe0",
+            "turn_id": "d8a62d68-ec22-495c-a588-373af5b40f47"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 2,
+            "at": "2026-11-13T11:56:55+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+            "target_kind": "chase_message",
+            "target_id": null,
+            "detail": {
+              "turn_id": "d8a62d68-ec22-495c-a588-373af5b40f47"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:56:53+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "9e9d4947-9e40-4221-9e1b-8bd0091be3db",
+            "target_kind": "chase_message",
+            "target_id": null,
+            "detail": {
+              "summary": "Chase-up draft for Northwind Apparel (ORD-114); not sent",
+              "status": "DRAFT",
+              "turn_id": "d8a62d68-ec22-495c-a588-373af5b40f47"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:55+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

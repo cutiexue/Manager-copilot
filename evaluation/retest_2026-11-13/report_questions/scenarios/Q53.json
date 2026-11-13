@@ -1,0 +1,624 @@
+{
+  "scenario": "Q53",
+  "questions": [
+    "Q53"
+  ],
+  "adaptation": "",
+  "session_id": "02ac5d51-c809-44e7-aed3-1b2a92a6b242",
+  "started_at": "2026-11-13T11:56:04+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q53",
+      "message": "Watch ORD-120 for no update by 2 April 2026; update it before the deadline, then check.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "02ac5d51-c809-44e7-aed3-1b2a92a6b242",
+        "answer": "The watch is on the card and activates only when you press Confirm. It alerts if ORD-120 (TrendCart vest, 1,500 pcs, 15 days overdue, at ASSEMBLY, last activity 2026-03-30) still has no new activity by 2026-04-02.\n\nOne note: I can't update the order — the app can't change orders or the course data. The watch only checks the scripted snapshots, so any alent would demonstrate the mechanism rather than a live factory event.",
+        "tool_calls": [
+          {
+            "name": "get_order_status",
+            "arguments": {
+              "order_id": "ORD-120"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-120",
+                "customer": "TrendCart",
+                "product": "Vest",
+                "category": "TOPS",
+                "pieces": "1500",
+                "order_date": "2026-02-27",
+                "due_date": "2026-03-17",
+                "status": "IN_PROGRESS",
+                "current_stage": "ASSEMBLY",
+                "last_activity_date": "2026-03-30",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 76,
+                  "key": "ORD-120"
+                }
+              ]
+            }
+          },
+          {
+            "name": "trace_order",
+            "arguments": {
+              "order_id": "ORD-120"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-120",
+                "customer": "TrendCart",
+                "product": "Vest",
+                "category": "TOPS",
+                "pieces": "1500",
+                "order_date": "2026-02-27",
+                "due_date": "2026-03-17",
+                "status": "IN_PROGRESS",
+                "current_stage": "ASSEMBLY",
+                "last_activity_date": "2026-03-30",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "facts": {
+                "days_since_last_activity": 2,
+                "risk_reasons": [
+                  "overdue by 15 calendar days"
+                ],
+                "days_until_due": -15,
+                "overdue_calendar_days": 15
+              },
+              "evidence": {
+                "order": [
+                  {
+                    "source": "track1/data/orders.csv",
+                    "row": 76,
+                    "key": "ORD-120"
+                  }
+                ],
+                "recent_stage_output": [
+                  {
+                    "date": "2026-03-31",
+                    "stage": "ASSEMBLY",
+                    "pieces_completed": 455,
+                    "source_row": 359
+                  },
+                  {
+                    "date": "2026-03-30",
+                    "stage": "ASSEMBLY",
+                    "pieces_completed": 396,
+                    "source_row": 355
+                  },
+                  {
+                    "date": "2026-03-28",
+                    "stage": "ASSEMBLY",
+                    "pieces_completed": 445,
+                    "source_row": 347
+                  }
+                ]
+              },
+              "snapshot_date": "2026-04-01",
+              "source": "track1/data/orders.csv",
+              "message": "All facts above are computed from the cited rows; recent stage output is factory-wide context, not per-order progress."
+            }
+          },
+          {
+            "name": "propose_watch",
+            "arguments": {
+              "order_id": "ORD-120",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+                "kind": "watch",
+                "status": "DRAFT",
+                "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+                "payload": {
+                  "order_id": "ORD-120",
+                  "condition": "not_moved_by",
+                  "deadline": "2026-04-02",
+                  "stage": null,
+                  "current": {
+                    "status": "IN_PROGRESS",
+                    "current_stage": "ASSEMBLY",
+                    "last_activity_date": "2026-03-30",
+                    "due_date": "2026-03-17",
+                    "customer": "TrendCart"
+                  },
+                  "data_version": "v0"
+                },
+                "expires_at": "2026-11-14T11:56:06+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 76,
+              "key": "ORD-120",
+              "id": "orders.csv:76@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#76@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 359,
+              "key": "2026-03-31 ASSEMBLY",
+              "id": "production_log.csv:359@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#359@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 355,
+              "key": "2026-03-30 ASSEMBLY",
+              "id": "production_log.csv:355@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#355@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 347,
+              "key": "2026-03-28 ASSEMBLY",
+              "id": "production_log.csv:347@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#347@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#76@v0": {
+              "order_id": "ORD-120",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-02-27",
+              "due_date": "2026-03-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/production_log.csv#359@v0": {
+              "date": "2026-03-31",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "455"
+            },
+            "track1/data/production_log.csv#355@v0": {
+              "date": "2026-03-30",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "396"
+            },
+            "track1/data/production_log.csv#347@v0": {
+              "date": "2026-03-28",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "445"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "kind": "watch",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "02ac5d51-c809-44e7-aed3-1b2a92a6b242",
+            "payload": {
+              "order_id": "ORD-120",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02",
+              "stage": null,
+              "current": {
+                "status": "IN_PROGRESS",
+                "current_stage": "ASSEMBLY",
+                "last_activity_date": "2026-03-30",
+                "due_date": "2026-03-17",
+                "customer": "TrendCart"
+              },
+              "data_version": "v0"
+            },
+            "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:06+08:00",
+            "expires_at": "2026-11-14T11:56:06+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "e2a4ce944c567517a34fd0aaa5b8f43f4b57a9bc83721544bd70edcb51f864a9",
+            "turn_id": "e400cf65-2488-4af0-87d9-9b12ec330e33"
+          }
+        ],
+        "answer_check": {
+          "checked": 5,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 3.91
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "watch",
+        "order_id": "ORD-120"
+      },
+      "proposal": {
+        "id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+        "kind": "watch",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "02ac5d51-c809-44e7-aed3-1b2a92a6b242",
+        "payload": {
+          "order_id": "ORD-120",
+          "condition": "not_moved_by",
+          "deadline": "2026-04-02",
+          "stage": null,
+          "current": {
+            "status": "IN_PROGRESS",
+            "current_stage": "ASSEMBLY",
+            "last_activity_date": "2026-03-30",
+            "due_date": "2026-03-17",
+            "customer": "TrendCart"
+          },
+          "data_version": "v0"
+        },
+        "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+        "reason": null,
+        "created_at": "2026-11-13T11:56:06+08:00",
+        "expires_at": "2026-11-14T11:56:06+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "e2a4ce944c567517a34fd0aaa5b8f43f4b57a9bc83721544bd70edcb51f864a9",
+        "turn_id": "e400cf65-2488-4af0-87d9-9b12ec330e33"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+              "kind": "watch",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "02ac5d51-c809-44e7-aed3-1b2a92a6b242",
+              "payload": {
+                "order_id": "ORD-120",
+                "condition": "not_moved_by",
+                "deadline": "2026-04-02",
+                "stage": null,
+                "current": {
+                  "status": "IN_PROGRESS",
+                  "current_stage": "ASSEMBLY",
+                  "last_activity_date": "2026-03-30",
+                  "due_date": "2026-03-17",
+                  "customer": "TrendCart"
+                },
+                "data_version": "v0"
+              },
+              "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+              "reason": null,
+              "created_at": "2026-11-13T11:56:06+08:00",
+              "expires_at": "2026-11-14T11:56:06+08:00",
+              "decided_at": "2026-11-13T11:56:08+08:00",
+              "result_kind": "watch",
+              "result_id": "74239449-2114-45c9-8ffe-587af2c9f1d6",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "e2a4ce944c567517a34fd0aaa5b8f43f4b57a9bc83721544bd70edcb51f864a9",
+              "turn_id": "e400cf65-2488-4af0-87d9-9b12ec330e33"
+            },
+            "result": {
+              "id": "74239449-2114-45c9-8ffe-587af2c9f1d6",
+              "proposal_id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+              "order_id": "ORD-120",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02",
+              "stage": null,
+              "baseline": {
+                "status": "IN_PROGRESS",
+                "current_stage": "ASSEMBLY",
+                "last_activity_date": "2026-03-30",
+                "due_date": "2026-03-17",
+                "customer": "TrendCart"
+              },
+              "status": "ACTIVE",
+              "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+              "created_at": "2026-11-13T11:56:08+08:00",
+              "updated_at": "2026-11-13T11:56:08+08:00",
+              "last_checked_at": null,
+              "last_result": null,
+              "outcome": null
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.01
+    },
+    {
+      "step": "advance",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "current": {
+            "version": "v1",
+            "date": "2026-04-02",
+            "label": "Scripted update · Thu 2 Apr"
+          },
+          "next": {
+            "version": "v2",
+            "date": "2026-04-03",
+            "label": "Scripted update · Fri 3 Apr"
+          },
+          "versions": [
+            {
+              "version": "v0",
+              "date": "2026-04-01",
+              "label": "Course data"
+            },
+            {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            },
+            {
+              "version": "v2",
+              "date": "2026-04-03",
+              "label": "Scripted update · Fri 3 Apr"
+            }
+          ],
+          "check": {
+            "data_version": {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            },
+            "checked": 1,
+            "outcomes": [
+              {
+                "watch_id": "74239449-2114-45c9-8ffe-587af2c9f1d6",
+                "result": "resolved",
+                "detail": "ORD-120 moved: ASSEMBLY → WASHING, last activity 2026-04-02."
+              }
+            ]
+          },
+          "briefing_run": {
+            "id": "93a37377-d24a-4c80-a36b-4aae696d7ae2",
+            "run_key": "snapshot:2026-04-02:2026-11-13T11:56:08+08:00",
+            "as_of_date": "2026-04-02",
+            "trigger": "snapshot",
+            "generated_at": "2026-11-13T11:56:08+08:00"
+          }
+        }
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "watch_check",
+      "at": "2026-11-13T11:56:08+08:00",
+      "result": {
+        "data_version": {
+          "version": "v1",
+          "date": "2026-04-02",
+          "label": "Scripted update · Thu 2 Apr"
+        },
+        "checked": 0,
+        "outcomes": []
+      },
+      "seconds": 0.0
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "kind": "watch",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "02ac5d51-c809-44e7-aed3-1b2a92a6b242",
+            "payload": {
+              "order_id": "ORD-120",
+              "condition": "not_moved_by",
+              "deadline": "2026-04-02",
+              "stage": null,
+              "current": {
+                "status": "IN_PROGRESS",
+                "current_stage": "ASSEMBLY",
+                "last_activity_date": "2026-03-30",
+                "due_date": "2026-03-17",
+                "customer": "TrendCart"
+              },
+              "data_version": "v0"
+            },
+            "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:06+08:00",
+            "expires_at": "2026-11-14T11:56:06+08:00",
+            "decided_at": "2026-11-13T11:56:08+08:00",
+            "result_kind": "watch",
+            "result_id": "74239449-2114-45c9-8ffe-587af2c9f1d6",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "e2a4ce944c567517a34fd0aaa5b8f43f4b57a9bc83721544bd70edcb51f864a9",
+            "turn_id": "e400cf65-2488-4af0-87d9-9b12ec330e33"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [
+          {
+            "id": "74239449-2114-45c9-8ffe-587af2c9f1d6",
+            "proposal_id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "order_id": "ORD-120",
+            "condition": "not_moved_by",
+            "deadline": "2026-04-02",
+            "stage": null,
+            "baseline": {
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "due_date": "2026-03-17",
+              "customer": "TrendCart"
+            },
+            "status": "RESOLVED",
+            "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+            "created_at": "2026-11-13T11:56:08+08:00",
+            "updated_at": "2026-11-13T11:56:08+08:00",
+            "last_checked_at": "2026-11-13T11:56:08+08:00",
+            "last_result": "resolved",
+            "outcome": "ORD-120 moved: ASSEMBLY → WASHING, last activity 2026-04-02."
+          }
+        ],
+        "/alerts": [
+          {
+            "id": "5c38cb0a-3bd1-4153-906b-015633075e99",
+            "kind": "briefing",
+            "ref_id": "93a37377-d24a-4c80-a36b-4aae696d7ae2",
+            "title": "Morning briefing ready",
+            "body": "Data as of 2026-04-02",
+            "dedupe_key": "snapshot:2026-04-02:2026-11-13T11:56:08+08:00",
+            "created_at": "2026-11-13T11:56:08+08:00",
+            "read_at": null
+          }
+        ],
+        "/audit": [
+          {
+            "id": 8,
+            "at": "2026-11-13T11:56:08+08:00",
+            "actor": "system",
+            "event": "alert_raised",
+            "proposal_id": null,
+            "target_kind": "briefing",
+            "target_id": "93a37377-d24a-4c80-a36b-4aae696d7ae2",
+            "detail": {
+              "title": "Morning briefing ready"
+            }
+          },
+          {
+            "id": 7,
+            "at": "2026-11-13T11:56:08+08:00",
+            "actor": "user",
+            "event": "briefing_generated",
+            "proposal_id": null,
+            "target_kind": "briefing",
+            "target_id": "93a37377-d24a-4c80-a36b-4aae696d7ae2",
+            "detail": {
+              "run_key": "snapshot:2026-04-02:2026-11-13T11:56:08+08:00"
+            }
+          },
+          {
+            "id": 6,
+            "at": "2026-11-13T11:56:08+08:00",
+            "actor": "scheduler",
+            "event": "watch_resolved",
+            "proposal_id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "target_kind": "watch",
+            "target_id": "74239449-2114-45c9-8ffe-587af2c9f1d6",
+            "detail": {
+              "detail": "ORD-120 moved: ASSEMBLY → WASHING, last activity 2026-04-02.",
+              "data_version": "v1"
+            }
+          },
+          {
+            "id": 5,
+            "at": "2026-11-13T11:56:08+08:00",
+            "actor": "user",
+            "event": "data_snapshot_loaded",
+            "proposal_id": null,
+            "target_kind": null,
+            "target_id": null,
+            "detail": {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            }
+          },
+          {
+            "id": 4,
+            "at": "2026-11-13T11:56:08+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "target_kind": "watch",
+            "target_id": "74239449-2114-45c9-8ffe-587af2c9f1d6",
+            "detail": null
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:56:08+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "target_kind": "watch",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:56:08+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "target_kind": "watch",
+            "target_id": null,
+            "detail": {
+              "turn_id": "e400cf65-2488-4af0-87d9-9b12ec330e33"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:56:06+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "75330268-ff0e-4dbf-a99c-1baede7c07d3",
+            "target_kind": "watch",
+            "target_id": null,
+            "detail": {
+              "summary": "Alert if ORD-120 has not moved by 2026-04-02",
+              "status": "DRAFT",
+              "turn_id": "e400cf65-2488-4af0-87d9-9b12ec330e33"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:08+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

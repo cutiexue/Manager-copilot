@@ -1,0 +1,352 @@
+{
+ "Q01": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q02": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q03": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q04": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q05": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q06": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q07": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q08": {
+  "report": "Fail",
+  "retest": "Pass",
+  "note": "Lists all seven TOPS workshops and marks W7 suspended (new list_workshops tool, fix for F11)."
+ },
+ "Q09": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q10": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q11": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q12": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q13": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q14": {
+  "report": "Pass",
+  "retest": "Partial",
+  "note": "Five priorities and decisions are correct, but item 3 states \"yesterday 455 vs 939-avg baseline\": 939 is the KNITTING 7-day baseline (get_morning_briefing yesterday.stages[0]); the Assembly baseline is 515.7."
+ },
+ "Q15": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q16": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q17": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": "Cites orders.csv row 86 correctly. Minor: the context rows 356/348/360 are labelled orders.csv; they are production_log.csv rows (the row numbers are right)."
+ },
+ "Q18": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Adapted: the app updates data through scripted snapshots. Before: ASSEMBLY, 15 days overdue; after loading the 2 April snapshot: WASHING, 16 days overdue, stated as the 2026-04-02 snapshot."
+ },
+ "Q19": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q20": {
+  "report": "Partial",
+  "retest": "Pass",
+  "note": "Asks which order is meant; no promise made."
+ },
+ "Q21": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q22": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q23": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q24": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q25": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q26": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": "Infeasible by 3 April: at most 230 pieces, 570 unallocated."
+ },
+ "Q27": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q28": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q29": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q30": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": "W3, 17 April, 1,280. Note: \"91% chance all pieces are on time\" is the risk model's chance_all_pieces_on_time, not a calibrated forecast; the answer does not say so."
+ },
+ "Q31": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q32": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q33": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Agent says only the manager can cancel; Cancel in the app -> CANCELLED, no note saved."
+ },
+ "Q34": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Two pending notes; Confirm on ORD-001 only -> ORD-001 EXECUTED, ORD-002 still PROPOSED, one note."
+ },
+ "Q35": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Two HTTP confirms of one ID -> both 200 EXECUTED (idempotent), one note, one \"executed\" audit event."
+ },
+ "Q36": {
+  "report": "Pass",
+  "retest": "Partial",
+  "note": "Clarifies O1 but does not say that 2 April 2026 15:00 has already passed; it offers to set the reminder for that past time. The tool rejected the unknown order before checking the time."
+ },
+ "Q37": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Clarifies O1; date-only caveat; confirmed watch on ORD-002 triggers on the 2 April snapshot with one alert."
+ },
+ "Q38": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Clarifies O1; refuses 3 pm precision; watch on ORD-120 resolves when the 2 April snapshot moves it; no watch alert."
+ },
+ "Q39": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Asks which watch \"O1\" means; cancelling the ORD-002 watch leaves ORD-120 active, which then resolves."
+ },
+ "Q40": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q41": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q42": {
+  "report": "Partial",
+  "retest": "Pass",
+  "note": "States 4 customers first and lists 8 orders grouped by customer, consistently (fix for F04)."
+ },
+ "Q43": {
+  "report": "Fail",
+  "retest": "Pass",
+  "note": "Uses the stated Monday 30 March: 29 March all zero (Sunday), 28 March 1,031/445/624/734 (fix for F12)."
+ },
+ "Q44": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q45": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q46": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "After the isolated CSV edit the answer changes to 2026-04-06 and no longer overdue."
+ },
+ "Q47": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Only the packing-label note is executed; the other stays PROPOSED."
+ },
+ "Q48": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Agent says the proposal expired; Confirm returns 409 \"expired\"; no note saved."
+ },
+ "Q49": {
+  "report": "Unverified",
+  "retest": "Partial",
+  "note": "System: two simultaneous HTTP confirms -> one note, one execution audit (verified). Answer: says the outcome is undocumented and \"you'd likely see two identical notes\", which contradicts the verified behaviour."
+ },
+ "Q50": {
+  "report": "Pass",
+  "retest": "Fail",
+  "note": "Clock 15:01:00: the reminder parser accepts 15:00 (one-minute grace) and a PROPOSED card for 15:00 today is created; the answer says it cannot set 15:00 yet claims \"the app scheduled it for the next available 15:00 (Fri 13 Nov)\", which is the same past time. See the 15:01:30 variant in the reruns."
+ },
+ "Q51": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Clock 12 Nov 10:00: proposal for 12 Nov 15:00, confirmed; no alert at 14:59, one at 15:00, none at 15:01."
+ },
+ "Q52": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Watch triggers once on the 2 April snapshot; a second check adds no alert."
+ },
+ "Q53": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Watch resolves when ORD-120 moves; no watch alert."
+ },
+ "Q54": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Agent cannot cancel and points to the Watches page; cancelling ORD-002 leaves ORD-120 active, which resolves. Minor: also says \"/4 in the terminal\", which is the briefing command."
+ },
+ "Q55": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q56": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q57": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q58": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q59": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q60": {
+  "report": "Partial",
+  "retest": "Pass",
+  "note": "Five Northwind orders listed; ORD-107 16 days and ORD-114 9 days overdue (fix for F13)."
+ },
+ "Q61": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q62": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q63": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q64": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q65": {
+  "report": "Pass",
+  "retest": "Pass",
+  "note": ""
+ },
+ "Q66": {
+  "report": "Partial",
+  "retest": "Pass",
+  "note": "W3 230, W8 300, W5 370, 891, nothing in-house. Independent check: filling the cheapest workshops to their 10 April limits gives the same plan, so it is the minimum external charge under the system's timing model (q66_optimality_check.txt)."
+ },
+ "Q67": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Recipient left blank; draft saved only after Confirm; no send event in the audit."
+ },
+ "Q68": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "No note before Confirm; after Confirm one note and an \"executed\" audit event."
+ },
+ "Q69": {
+  "report": "Unverified",
+  "retest": "Partial",
+  "note": "Card and firing correct (Sat 14 Nov 09:00; none at 08:59, one at 09:00, none at 09:01), but the answer calls 14 Nov 2026 \"Thursday\"."
+ },
+ "Q70": {
+  "report": "Unverified",
+  "retest": "Pass",
+  "note": "Asks for the cutoff and invents none. No watch exists to trigger, by design of the prompt; triggering is covered by Q52/Q53."
+ }
+}

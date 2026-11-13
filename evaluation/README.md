@@ -6,31 +6,33 @@ truth taken from the CSVs and the deterministic tools — never from a language 
 
 | File | What it is |
 |---|---|
-| `evaluation_set.jsonl` | 30 cases, 5 per owner A–F; already used for iterative development, not an independent held-out set |
+| `evaluation_set.jsonl` | 30 cases, 5 in each of six areas A–F; already used for iterative development, not an independent held-out set |
 | `development_set.jsonl` | 17 cases for day-to-day prompt and tool tuning |
 | `run_evaluation.py` | Runner and scorer; the scoring functions are importable |
 | `fake_agent.py` | Offline rule-based stand-in for the model, used by `--fake` |
 | `failure_ledger.jsonl` | Failure records, appended by real runs |
 | `reports/<UTC time>/` | One directory per run: `results.jsonl`, `run.json`, `summary.md` |
+| `report/` | The team's evaluation report (`Evaluation.pdf`, 70 graded questions and failure analysis) and its screenshot evidence pack |
+| `retest_2026-11-13/` | Real-model rerun of both sets and all 70 report questions after the fixes, with full evidence for every changed verdict ([summary](./retest_2026-11-13/README.md)) |
 
 Tests: `backend/tests/test_evaluation_runner.py` (offline; checks the case files, the scorer and the runner).
 
 ## Status: every case is a draft
 
 All 47 cases have `"review_status": "draft"` and `"reviewer": "TBD"`. They were drafted from tool outputs
-and every expected fact was cross-checked against the raw CSVs, but no team member has verified them yet.
-Each member owns five cases and another member verifies them, as in the table below.
+and every expected fact was cross-checked against the raw CSVs, but none has been independently verified yet.
+The `owner` field labels each case's area, and `--check` requires five evaluation cases in each area.
 
-| Owner | Focus | Evaluation cases | Development cases | Reviewer |
-|---|---|---|---|---|
-| A | Morning briefing, end-to-end management decisions | T1-EVAL-001–005 | DEV-004, 005, 017 | F |
-| B | Retrieval, aggregation, source-row tracing | T1-EVAL-006–010 | DEV-001, 002, 012 | C |
-| C | Normality, anomaly, risk, feasibility | T1-EVAL-011–015 | DEV-003, 010, 013 | B |
-| D | Ambiguous, unanswerable, multi-turn, hallucination bait | T1-EVAL-016–020 | DEV-007, 008, 009, 014 | E |
-| E | Watches, reminders, notes, confirmations, audit | T1-EVAL-021–025 | DEV-011, 015 | D |
-| F | Concise-first answers, evidence expansion, end-to-end actions | T1-EVAL-026–030 | DEV-006, 016 | A |
+| Area | Focus | Evaluation cases | Development cases |
+|---|---|---|---|
+| A | Morning briefing, end-to-end management decisions | T1-EVAL-001–005 | DEV-004, 005, 017 |
+| B | Retrieval, aggregation, source-row tracing | T1-EVAL-006–010 | DEV-001, 002, 012 |
+| C | Normality, anomaly, risk, feasibility | T1-EVAL-011–015 | DEV-003, 010, 013 |
+| D | Ambiguous, unanswerable, multi-turn, hallucination bait | T1-EVAL-016–020 | DEV-007, 008, 009, 014 |
+| E | Watches, reminders, notes, confirmations, audit | T1-EVAL-021–025 | DEV-011, 015 |
+| F | Concise-first answers, evidence expansion, end-to-end actions | T1-EVAL-026–030 | DEV-006, 016 |
 
-Owners may reword their cases; whoever changes a case re-derives its facts. To verify a case:
+Whoever changes a case re-derives its facts. A team member who did not write a case verifies it:
 
 1. Re-run the tool call in `ground_truth_source` and look at the cited CSV row, for example
    `cd backend && .venv/bin/python -c "from tools import trace_order; print(trace_order('ORD-005')['facts'])"`.
@@ -38,7 +40,7 @@ Owners may reword their cases; whoever changes a case re-derives its facts. To v
    token in *none*, even in a negated sentence.
 3. Check `expected_behavior`, `required_tools` and `forbidden_claims`.
 4. Set `"reviewer": "<name>"` and `"review_status": "verified"`. `--check` rejects a verified case
-   without a named reviewer other than the owner.
+   without a named reviewer.
 
 **Locking and independence.** These 30 cases have already informed prompt/Skill changes. Reviewing
 their labels now does not make them unseen held-out tests. Keep using them as a regression suite;

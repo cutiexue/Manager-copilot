@@ -1,0 +1,296 @@
+{
+  "scenario": "Q18",
+  "questions": [
+    "Q18"
+  ],
+  "adaptation": "The app changes data through its scripted snapshots, which move ORD-120 (not ORD-001) on 2 April; the same question is asked before and after the update.",
+  "session_id": "b028225f-3628-4968-9769-297a9774a5ab",
+  "started_at": "2026-11-13T11:54:08+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "What is the current status of ORD-120?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "b028225f-3628-4968-9769-297a9774a5ab",
+        "answer": "ORD-120 (TrendCart, Vest, 1,500 pcs) is still in progress at the ASSEMBLY stage. It was due 2026-03-17, so it is 15 calendar days past its due date as of today's data date, with last activity recorded 2026-03-30.\n\nSource: track1/data/orders.csv, row 76.",
+        "tool_calls": [
+          {
+            "name": "get_order_status",
+            "arguments": {
+              "order_id": "ORD-120"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-120",
+                "customer": "TrendCart",
+                "product": "Vest",
+                "category": "TOPS",
+                "pieces": "1500",
+                "order_date": "2026-02-27",
+                "due_date": "2026-03-17",
+                "status": "IN_PROGRESS",
+                "current_stage": "ASSEMBLY",
+                "last_activity_date": "2026-03-30",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 76,
+                  "key": "ORD-120"
+                }
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 76,
+              "key": "ORD-120",
+              "id": "orders.csv:76@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#76@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#76@v0": {
+              "order_id": "ORD-120",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-02-27",
+              "due_date": "2026-03-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 6,
+          "unverified": [
+            {
+              "kind": "number",
+              "text": "15"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.63
+    },
+    {
+      "step": "advance",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "current": {
+            "version": "v1",
+            "date": "2026-04-02",
+            "label": "Scripted update · Thu 2 Apr"
+          },
+          "next": {
+            "version": "v2",
+            "date": "2026-04-03",
+            "label": "Scripted update · Fri 3 Apr"
+          },
+          "versions": [
+            {
+              "version": "v0",
+              "date": "2026-04-01",
+              "label": "Course data"
+            },
+            {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            },
+            {
+              "version": "v2",
+              "date": "2026-04-03",
+              "label": "Scripted update · Fri 3 Apr"
+            }
+          ],
+          "check": {
+            "data_version": {
+              "version": "v1",
+              "date": "2026-04-02",
+              "label": "Scripted update · Thu 2 Apr"
+            },
+            "checked": 0,
+            "outcomes": []
+          },
+          "briefing_run": {
+            "id": "12a070cc-2061-478f-8b31-80e7fa84d5ee",
+            "run_key": "snapshot:2026-04-02:2026-11-13T11:54:09+08:00",
+            "as_of_date": "2026-04-02",
+            "trigger": "snapshot",
+            "generated_at": "2026-11-13T11:54:09+08:00"
+          }
+        }
+      },
+      "seconds": 0.05
+    },
+    {
+      "step": "chat",
+      "qid": "Q18",
+      "message": "What is the current status of ORD-120?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "b028225f-3628-4968-9769-297a9774a5ab",
+        "answer": "On the 2026-04-02 snapshot, ORD-120 (TrendCart, Vest, 1,500 pcs) is in progress at WASHING, with activity recorded today. It was due 2026-03-17, so it is 16 calendar days overdue; no completed date is recorded.\n\nSource: track1/data/orders.csv, row 76.",
+        "tool_calls": [
+          {
+            "name": "trace_order",
+            "arguments": {
+              "order_id": "ORD-120"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-120",
+                "customer": "TrendCart",
+                "product": "Vest",
+                "category": "TOPS",
+                "pieces": "1500",
+                "order_date": "2026-02-27",
+                "due_date": "2026-03-17",
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-04-02",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "facts": {
+                "days_since_last_activity": 0,
+                "risk_reasons": [
+                  "overdue by 16 calendar days"
+                ],
+                "days_until_due": -16,
+                "overdue_calendar_days": 16
+              },
+              "evidence": {
+                "order": [
+                  {
+                    "source": "track1/data/orders.csv",
+                    "row": 76,
+                    "key": "ORD-120"
+                  }
+                ],
+                "recent_stage_output": [
+                  {
+                    "date": "2026-03-31",
+                    "stage": "WASHING",
+                    "pieces_completed": 732,
+                    "source_row": 360
+                  },
+                  {
+                    "date": "2026-03-30",
+                    "stage": "WASHING",
+                    "pieces_completed": 605,
+                    "source_row": 356
+                  }
+                ]
+              },
+              "snapshot_date": "2026-04-02",
+              "source": "track1/data/orders.csv",
+              "message": "All facts above are computed from the cited rows; recent stage output is factory-wide context, not per-order progress."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 76,
+              "key": "ORD-120",
+              "id": "orders.csv:76@v1",
+              "data_version": "v1",
+              "row_key": "track1/data/orders.csv#76@v1"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 360,
+              "key": "2026-03-31 WASHING",
+              "id": "production_log.csv:360@v1",
+              "data_version": "v1",
+              "row_key": "track1/data/production_log.csv#360@v1"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 356,
+              "key": "2026-03-30 WASHING",
+              "id": "production_log.csv:356@v1",
+              "data_version": "v1",
+              "row_key": "track1/data/production_log.csv#356@v1"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#76@v1": {
+              "order_id": "ORD-120",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-02-27",
+              "due_date": "2026-03-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-02",
+              "completed_date": "",
+              "days_late": "",
+              "scripted_change": "current_stage, last_activity_date from snapshot v1 (track1/scenarios/watch_snapshots.json)"
+            },
+            "track1/data/production_log.csv#360@v1": {
+              "date": "2026-03-31",
+              "stage": "WASHING",
+              "pieces_completed": "732"
+            },
+            "track1/data/production_log.csv#356@v1": {
+              "date": "2026-03-30",
+              "stage": "WASHING",
+              "pieces_completed": "605"
+            }
+          },
+          "data_version": "v1",
+          "data_date": "2026-04-02",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 6,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.11
+    }
+  ],
+  "finished_at": "2026-11-13T11:54:12+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

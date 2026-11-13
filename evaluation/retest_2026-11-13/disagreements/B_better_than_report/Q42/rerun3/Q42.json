@@ -1,0 +1,445 @@
+{
+  "scenario": "Q42",
+  "questions": [
+    "Q42"
+  ],
+  "adaptation": "",
+  "session_id": "aa5cd4d5-48b8-4117-9c43-19c3e8313491",
+  "started_at": "2026-11-13T12:03:16+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q42",
+      "message": "Which customers have at least two unfinished overdue orders? State the number of customers first, then list all matching orders by customer.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "aa5cd4d5-48b8-4117-9c43-19c3e8313491",
+        "answer": "**Four customers have at least two unfinished overdue orders** (as of 2026-04-01).\n\n| Customer | Order | Product | Pieces | Due date | Days overdue |\n|---|---|---|---|---|---|\n| Cotton Club | ORD-002 | Crewneck sweater | 1,000 | 2026-03-29 | 3 |\n| Cotton Club | ORD-055 | Crewneck sweater | 800 | 2026-03-31 | 1 |\n| Maple & Co | ORD-083 | Hoodie | 1,000 | 2026-03-23 | 9 |\n| Maple & Co | ORD-093 | Beanie | 100 | 2026-03-29 | 3 |\n| Northwind Apparel | ORD-107 | Cardigan | 2,000 | 2026-03-16 | 16 |\n| Northwind Apparel | ORD-114 | Hoodie | 2,000 | 2026-03-23 | 9 |\n| TrendCart | ORD-120 | Vest | 1,500 | 2026-03-17 | 15 |\n| TrendCart | ORD-020 | Vest | 1,200 | 2026-03-31 | 1 |\n\nSource: track1/data/orders.csv (rows 76–100).",
+        "tool_calls": [
+          {
+            "name": "get_overdue_orders",
+            "arguments": {},
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "as_of_date": "2026-04-01",
+              "snapshot_date": "2026-04-01",
+              "count": 8,
+              "original_order_pieces": 9600,
+              "by_customer": [
+                {
+                  "customer": "Cotton Club",
+                  "count": 2,
+                  "order_ids": [
+                    "ORD-002",
+                    "ORD-055"
+                  ]
+                },
+                {
+                  "customer": "Maple & Co",
+                  "count": 2,
+                  "order_ids": [
+                    "ORD-083",
+                    "ORD-093"
+                  ]
+                },
+                {
+                  "customer": "Northwind Apparel",
+                  "count": 2,
+                  "order_ids": [
+                    "ORD-107",
+                    "ORD-114"
+                  ]
+                },
+                {
+                  "customer": "TrendCart",
+                  "count": 2,
+                  "order_ids": [
+                    "ORD-120",
+                    "ORD-020"
+                  ]
+                }
+              ],
+              "customers_with_two_or_more": {
+                "count": 4,
+                "customers": [
+                  "Cotton Club",
+                  "Maple & Co",
+                  "Northwind Apparel",
+                  "TrendCart"
+                ]
+              },
+              "data": [
+                {
+                  "order_id": "ORD-120",
+                  "customer": "TrendCart",
+                  "product": "Vest",
+                  "category": "TOPS",
+                  "pieces": "1500",
+                  "order_date": "2026-02-27",
+                  "due_date": "2026-03-17",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "ASSEMBLY",
+                  "last_activity_date": "2026-03-30",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 15
+                },
+                {
+                  "order_id": "ORD-107",
+                  "customer": "Northwind Apparel",
+                  "product": "Cardigan",
+                  "category": "TOPS",
+                  "pieces": "2000",
+                  "order_date": "2026-03-01",
+                  "due_date": "2026-03-16",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "PACKING",
+                  "last_activity_date": "2026-04-01",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 16
+                },
+                {
+                  "order_id": "ORD-114",
+                  "customer": "Northwind Apparel",
+                  "product": "Hoodie",
+                  "category": "TOPS",
+                  "pieces": "2000",
+                  "order_date": "2026-03-03",
+                  "due_date": "2026-03-23",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "PACKING",
+                  "last_activity_date": "2026-03-30",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 9
+                },
+                {
+                  "order_id": "ORD-002",
+                  "customer": "Cotton Club",
+                  "product": "Crewneck sweater",
+                  "category": "TOPS",
+                  "pieces": "1000",
+                  "order_date": "2026-03-06",
+                  "due_date": "2026-03-29",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-03-23",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 3
+                },
+                {
+                  "order_id": "ORD-083",
+                  "customer": "Maple & Co",
+                  "product": "Hoodie",
+                  "category": "TOPS",
+                  "pieces": "1000",
+                  "order_date": "2026-03-07",
+                  "due_date": "2026-03-23",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-03-30",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 9
+                },
+                {
+                  "order_id": "ORD-020",
+                  "customer": "TrendCart",
+                  "product": "Vest",
+                  "category": "TOPS",
+                  "pieces": "1200",
+                  "order_date": "2026-03-08",
+                  "due_date": "2026-03-31",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-03-30",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 1
+                },
+                {
+                  "order_id": "ORD-093",
+                  "customer": "Maple & Co",
+                  "product": "Beanie",
+                  "category": "ACCESSORIES",
+                  "pieces": "100",
+                  "order_date": "2026-03-14",
+                  "due_date": "2026-03-29",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-04-01",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 3
+                },
+                {
+                  "order_id": "ORD-055",
+                  "customer": "Cotton Club",
+                  "product": "Crewneck sweater",
+                  "category": "TOPS",
+                  "pieces": "800",
+                  "order_date": "2026-03-15",
+                  "due_date": "2026-03-31",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "ASSEMBLY",
+                  "last_activity_date": "2026-04-01",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 1
+                }
+              ],
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 76,
+                  "key": "ORD-120"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 81,
+                  "key": "ORD-107"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 85,
+                  "key": "ORD-114"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 86,
+                  "key": "ORD-002"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 88,
+                  "key": "ORD-083"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 90,
+                  "key": "ORD-020"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 99,
+                  "key": "ORD-093"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 100,
+                  "key": "ORD-055"
+                }
+              ],
+              "warnings": []
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 76,
+              "key": "ORD-120",
+              "id": "orders.csv:76@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#76@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 81,
+              "key": "ORD-107",
+              "id": "orders.csv:81@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#81@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 85,
+              "key": "ORD-114",
+              "id": "orders.csv:85@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#85@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 88,
+              "key": "ORD-083",
+              "id": "orders.csv:88@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#88@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 90,
+              "key": "ORD-020",
+              "id": "orders.csv:90@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#90@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 99,
+              "key": "ORD-093",
+              "id": "orders.csv:99@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#99@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 100,
+              "key": "ORD-055",
+              "id": "orders.csv:100@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#100@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#76@v0": {
+              "order_id": "ORD-120",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-02-27",
+              "due_date": "2026-03-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#81@v0": {
+              "order_id": "ORD-107",
+              "customer": "Northwind Apparel",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-01",
+              "due_date": "2026-03-16",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#85@v0": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-03",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#88@v0": {
+              "order_id": "ORD-083",
+              "customer": "Maple & Co",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-07",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#90@v0": {
+              "order_id": "ORD-020",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1200",
+              "order_date": "2026-03-08",
+              "due_date": "2026-03-31",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#99@v0": {
+              "order_id": "ORD-093",
+              "customer": "Maple & Co",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "100",
+              "order_date": "2026-03-14",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#100@v0": {
+              "order_id": "ORD-055",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-15",
+              "due_date": "2026-03-31",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 23,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.35
+    }
+  ],
+  "finished_at": "2026-11-13T12:03:19+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "scenario": "Q55",
+  "questions": [
+    "Q55"
+  ],
+  "adaptation": "",
+  "session_id": "f60022c5-0634-433d-a2ca-dd0c48f52974",
+  "started_at": "2026-11-13T11:56:14+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q55",
+      "message": "Evaluate three separate allocations: 800 TOPS to W7; 800 TOPS to W4; and 300 versus 301 TOPS in one batch to W8.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "f60022c5-0634-433d-a2ca-dd0c48f52974",
+        "answer": "**Results (start 2026-04-01, course data):**\n\n| Allocation | Outcome |\n|---|---|\n| 800 TOPS → W7 OldMill | Not possible — W7 is not ACTIVE and cannot take new work. |\n| 800 TOPS → W4 Little Loom | Not possible — W4 does not make TOPS. |\n| 300 TOPS → W8 FreshStart | Feasible: 3 workdays + 2 transport days, completion 5 Apr 2026; external charge 300.0 (currency unspecified); rework chance 4% (full-redo scenario arrival 10 Apr); low risk. |\n| 301 TOPS → W8 FreshStart | Not possible in one batch — W8's per-batch cap is 300 pieces. |\n\nSo only the 300-piece W8 batch works as stated; the other three need a different workshop, category or split batch. Source: workshops.csv profiles via the estimate tools.\n\nAssumptions: new batches, quoted from current workshop capacity/queues, transport and rework charges excluded.",
+        "tool_calls": [
+          {
+            "name": "estimate_oldmill",
+            "arguments": {
+              "category": "TOPS",
+              "pieces": 800
+            },
+            "status": "error",
+            "result": {
+              "status": "error",
+              "message": "W7 is not ACTIVE and cannot accept new work."
+            }
+          },
+          {
+            "name": "estimate_little_loom",
+            "arguments": {
+              "category": "TOPS",
+              "pieces": 800
+            },
+            "status": "error",
+            "result": {
+              "status": "error",
+              "message": "W4 cannot make TOPS."
+            }
+          },
+          {
+            "name": "estimate_freshstart",
+            "arguments": {
+              "category": "TOPS",
+              "pieces": 300
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "producer": "W8",
+              "name": "FreshStart",
+              "pieces": 300,
+              "production_workdays_unrounded": 3.0,
+              "workdays_including_queue": 3,
+              "transport_calendar_days": 2,
+              "completion_date": "2026-04-05",
+              "external_processing_cost": 300.0,
+              "currency": null,
+              "profile": {
+                "workshop_id": "W8",
+                "name": "FreshStart",
+                "capacity_pieces_per_day": "100",
+                "pickup_lead_days": "2",
+                "defect_rate": "0.04",
+                "cost_per_piece": "1.0",
+                "makes": "TOPS",
+                "status": "ACTIVE",
+                "max_batch_pieces": "300",
+                "current_queue_days": "0.0",
+                "notes": "new workshop on trial: small batches only"
+              },
+              "risk": {
+                "status": "ok",
+                "batches": 1,
+                "outsourced_pieces": 300,
+                "chance_all_batches_clean": 0.96,
+                "chance_some_batch_needs_rework": 0.04,
+                "expected_pieces_in_reworked_batches": 12.0,
+                "workshops": [
+                  {
+                    "workshop_id": "W8",
+                    "name": "FreshStart",
+                    "defect_rate": 0.04,
+                    "dispatcher_note": "new workshop on trial: small batches only",
+                    "flags": [
+                      "on trial: batches of at most 300 pieces"
+                    ],
+                    "source": {
+                      "source": "track1/data/workshops.csv",
+                      "row": 9,
+                      "key": "W8"
+                    },
+                    "pieces": 300,
+                    "completion_date": "2026-04-05",
+                    "rework_chance": 0.04,
+                    "rework_scenario_arrival": "2026-04-10"
+                  }
+                ],
+                "assumptions": [
+                  "Each workshop's batch needs rework independently, with its defect_rate from workshops.csv.",
+                  "A rework delays only that workshop's pieces; other batches arrive as planned.",
+                  "Actual rework duration is not in the data. The full-redo scenario assumes the whole batch is redone once at the same workshop and capacity with no new queue, then adds the fixed transport overhead again. It is not a guaranteed latest arrival; actual delays may be longer.",
+                  "In-house work has no defect data and is not included."
+                ],
+                "risk_level": "low",
+                "risk_basis": "chance that some outsourced batch needs rework",
+                "strategy_rating": "Low-risk strategy",
+                "summary": "Low-risk strategy. 96% chance every outsourced batch comes back clean. W8 FreshStart (300 pieces): 4% chance of rework; the full-redo scenario puts their arrival on 10 Apr instead of 5 Apr. Actual rework time is unknown. Scenario dates assume one full redo, unchanged capacity, no new queue and fixed transport; actual arrivals may be later."
+              },
+              "snapshot_date": "2026-04-01",
+              "data_as_of": "2026-04-01",
+              "scenario_start_date": "2026-04-01",
+              "start_date": "2026-04-01",
+              "source": "track1/data/workshops.csv",
+              "assumptions": [
+                "New batches only; each branch delivers finished goods and runs in parallel.",
+                "Monday to Saturday are workdays for all producers; no holidays are modeled.",
+                "The start date is inclusive: one workday starting Monday finishes Monday.",
+                "External queue and production are rounded up together to whole workdays; transport is added once as calendar days after production.",
+                "Dates assume every outsourced batch comes back clean; `risk` gives, batch by batch, the chance of rework and its full-redo scenario arrival date under stated assumptions, not a guaranteed latest date.",
+                "Capacity, queues and reference unfinished-order load are from 2026-04-01, even when the scenario starts later.",
+                "Reported cost includes external per-piece processing charges only. In-house cost is excluded by request; transport and rework charges are not supplied.",
+                "Currency is unspecified in the source data.",
+                "Queue and profile values use the 2026-04-01 snapshot even for other scenario dates."
+              ]
+            }
+          },
+          {
+            "name": "estimate_freshstart",
+            "arguments": {
+              "category": "TOPS",
+              "pieces": 301
+            },
+            "status": "error",
+            "result": {
+              "status": "error",
+              "message": "W8 exceeds its per-batch cap of 300."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/workshops.csv",
+              "row": 9,
+              "key": "W8",
+              "id": "workshops.csv:9@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/workshops.csv#9@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/workshops.csv#9@v0": {
+              "workshop_id": "W8",
+              "name": "FreshStart",
+              "capacity_pieces_per_day": "100",
+              "pickup_lead_days": "2",
+              "defect_rate": "0.04",
+              "cost_per_piece": "1.0",
+              "makes": "TOPS",
+              "status": "ACTIVE",
+              "max_batch_pieces": "300",
+              "current_queue_days": "0.0",
+              "notes": "new workshop on trial: small batches only"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 8,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 3.5
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:17+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

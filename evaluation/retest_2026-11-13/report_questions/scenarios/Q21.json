@@ -1,0 +1,45 @@
+{
+  "scenario": "Q21",
+  "questions": [
+    "Q21"
+  ],
+  "adaptation": "",
+  "session_id": "ff5e8f66-ef4f-4988-935e-5be76da4e168",
+  "started_at": "2026-11-13T11:54:16+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q21",
+      "message": "What was our sales revenue in March 2026?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "ff5e8f66-ef4f-4988-935e-5be76da4e168",
+        "answer": "The data doesn't record revenue or prices charged to customers, so I can't give a March sales figure. What it does show is factory-wide stage output for the month — I can pull March totals and per-workday averages for knitting, assembly, washing and packing if that's useful.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 0,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.22
+    }
+  ],
+  "finished_at": "2026-11-13T11:54:17+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

@@ -1,0 +1,338 @@
+{
+  "scenario": "Q51",
+  "questions": [
+    "Q51"
+  ],
+  "adaptation": "Clock set to 2026-11-12 10:00 Singapore time (the report's run day); reminders fired at 14:59, 15:00 and 15:01.",
+  "session_id": "56c1fd6f-92b7-4ad2-b3b5-b32c82385ad2",
+  "started_at": "2026-11-13T11:55:59+08:00",
+  "steps": [
+    {
+      "step": "clock",
+      "clock": "2026-11-12T10:00:00+08:00",
+      "seconds": 0.0
+    },
+    {
+      "step": "chat",
+      "qid": "Q51",
+      "message": "Remind me to follow up on ORD-002 at 15:00 on 12 November 2026.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "56c1fd6f-92b7-4ad2-b3b5-b32c82385ad2",
+        "answer": "A reminder card is ready: follow up on ORD-002 (Cotton Club) on Thursday 12 November 2026 at 15:00 Singapore time — real calendar, not the 2026-04-01 data date. Nothing is saved until you press Confirm in the app.",
+        "tool_calls": [
+          {
+            "name": "propose_reminder",
+            "arguments": {
+              "text": "Follow up on ORD-002",
+              "order_id": "ORD-002",
+              "when": "2026-11-12T15:00"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+                "kind": "reminder",
+                "status": "DRAFT",
+                "summary": "Reminder · Thu 12 Nov 2026 15:00 (real time) · ORD-002: Follow up on ORD-002",
+                "payload": {
+                  "text": "Follow up on ORD-002",
+                  "remind_at": "2026-11-12T15:00:00+08:00",
+                  "order_id": "ORD-002",
+                  "subject": null,
+                  "customer": "Cotton Club"
+                },
+                "expires_at": "2026-11-13T10:00:00+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "kind": "reminder",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "56c1fd6f-92b7-4ad2-b3b5-b32c82385ad2",
+            "payload": {
+              "text": "Follow up on ORD-002",
+              "remind_at": "2026-11-12T15:00:00+08:00",
+              "order_id": "ORD-002",
+              "subject": null,
+              "customer": "Cotton Club"
+            },
+            "summary": "Reminder · Thu 12 Nov 2026 15:00 (real time) · ORD-002: Follow up on ORD-002",
+            "reason": null,
+            "created_at": "2026-11-12T10:00:00+08:00",
+            "expires_at": "2026-11-13T10:00:00+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "f984fe5cd862845de21ea95cfe4345377a827e4e21fe3b0f8fee83e01adc161c",
+            "turn_id": "87f88aa1-a903-4f47-924c-d6be43137363"
+          }
+        ],
+        "answer_check": {
+          "checked": 3,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.34
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "reminder"
+      },
+      "proposal": {
+        "id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+        "kind": "reminder",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "56c1fd6f-92b7-4ad2-b3b5-b32c82385ad2",
+        "payload": {
+          "text": "Follow up on ORD-002",
+          "remind_at": "2026-11-12T15:00:00+08:00",
+          "order_id": "ORD-002",
+          "subject": null,
+          "customer": "Cotton Club"
+        },
+        "summary": "Reminder · Thu 12 Nov 2026 15:00 (real time) · ORD-002: Follow up on ORD-002",
+        "reason": null,
+        "created_at": "2026-11-12T10:00:00+08:00",
+        "expires_at": "2026-11-13T10:00:00+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "f984fe5cd862845de21ea95cfe4345377a827e4e21fe3b0f8fee83e01adc161c",
+        "turn_id": "87f88aa1-a903-4f47-924c-d6be43137363"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+              "kind": "reminder",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "56c1fd6f-92b7-4ad2-b3b5-b32c82385ad2",
+              "payload": {
+                "text": "Follow up on ORD-002",
+                "remind_at": "2026-11-12T15:00:00+08:00",
+                "order_id": "ORD-002",
+                "subject": null,
+                "customer": "Cotton Club"
+              },
+              "summary": "Reminder · Thu 12 Nov 2026 15:00 (real time) · ORD-002: Follow up on ORD-002",
+              "reason": null,
+              "created_at": "2026-11-12T10:00:00+08:00",
+              "expires_at": "2026-11-13T10:00:00+08:00",
+              "decided_at": "2026-11-12T10:00:00+08:00",
+              "result_kind": "reminder",
+              "result_id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "f984fe5cd862845de21ea95cfe4345377a827e4e21fe3b0f8fee83e01adc161c",
+              "turn_id": "87f88aa1-a903-4f47-924c-d6be43137363"
+            },
+            "result": {
+              "id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+              "proposal_id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+              "order_id": "ORD-002",
+              "subject": null,
+              "text": "Follow up on ORD-002",
+              "remind_at": "2026-11-12T15:00:00+08:00",
+              "status": "SCHEDULED",
+              "created_at": "2026-11-12T10:00:00+08:00",
+              "due_at": null,
+              "dismissed_at": null
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.01
+    },
+    {
+      "step": "fire_reminders",
+      "at": "2026-11-12T14:59:00+08:00",
+      "result": [],
+      "seconds": 0.0
+    },
+    {
+      "step": "fire_reminders",
+      "at": "2026-11-12T15:00:00+08:00",
+      "result": [
+        "2d7e8371-84cb-49d9-a193-b10c14528e8e"
+      ],
+      "seconds": 0.0
+    },
+    {
+      "step": "fire_reminders",
+      "at": "2026-11-12T15:01:00+08:00",
+      "result": [],
+      "seconds": 0.0
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "kind": "reminder",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "56c1fd6f-92b7-4ad2-b3b5-b32c82385ad2",
+            "payload": {
+              "text": "Follow up on ORD-002",
+              "remind_at": "2026-11-12T15:00:00+08:00",
+              "order_id": "ORD-002",
+              "subject": null,
+              "customer": "Cotton Club"
+            },
+            "summary": "Reminder · Thu 12 Nov 2026 15:00 (real time) · ORD-002: Follow up on ORD-002",
+            "reason": null,
+            "created_at": "2026-11-12T10:00:00+08:00",
+            "expires_at": "2026-11-13T10:00:00+08:00",
+            "decided_at": "2026-11-12T10:00:00+08:00",
+            "result_kind": "reminder",
+            "result_id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "f984fe5cd862845de21ea95cfe4345377a827e4e21fe3b0f8fee83e01adc161c",
+            "turn_id": "87f88aa1-a903-4f47-924c-d6be43137363"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [
+          {
+            "id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+            "proposal_id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "order_id": "ORD-002",
+            "subject": null,
+            "text": "Follow up on ORD-002",
+            "remind_at": "2026-11-12T15:00:00+08:00",
+            "status": "DUE",
+            "created_at": "2026-11-12T10:00:00+08:00",
+            "due_at": "2026-11-12T15:00:00+08:00",
+            "dismissed_at": null
+          }
+        ],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [
+          {
+            "id": "f1a7f194-8bf3-427b-ab1a-2902c29e087b",
+            "kind": "reminder",
+            "ref_id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+            "title": "Reminder · ORD-002",
+            "body": "Follow up on ORD-002",
+            "dedupe_key": "reminder:2d7e8371-84cb-49d9-a193-b10c14528e8e",
+            "created_at": "2026-11-12T15:00:00+08:00",
+            "read_at": null
+          }
+        ],
+        "/audit": [
+          {
+            "id": 6,
+            "at": "2026-11-12T15:00:00+08:00",
+            "actor": "scheduler",
+            "event": "reminder_due",
+            "proposal_id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "target_kind": "reminder",
+            "target_id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+            "detail": null
+          },
+          {
+            "id": 5,
+            "at": "2026-11-12T15:00:00+08:00",
+            "actor": "system",
+            "event": "alert_raised",
+            "proposal_id": null,
+            "target_kind": "reminder",
+            "target_id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+            "detail": {
+              "title": "Reminder · ORD-002"
+            }
+          },
+          {
+            "id": 4,
+            "at": "2026-11-12T10:00:00+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "target_kind": "reminder",
+            "target_id": "2d7e8371-84cb-49d9-a193-b10c14528e8e",
+            "detail": null
+          },
+          {
+            "id": 3,
+            "at": "2026-11-12T10:00:00+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-12T10:00:00+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": {
+              "turn_id": "87f88aa1-a903-4f47-924c-d6be43137363"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-12T10:00:00+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "763e6c26-55ab-4440-a989-6701ce92ff33",
+            "target_kind": "reminder",
+            "target_id": null,
+            "detail": {
+              "summary": "Reminder · Thu 12 Nov 2026 15:00 (real time) · ORD-002: Follow up on ORD-002",
+              "status": "DRAFT",
+              "turn_id": "87f88aa1-a903-4f47-924c-d6be43137363"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    },
+    {
+      "step": "clock",
+      "clock": "real",
+      "seconds": 0.0
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:02+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

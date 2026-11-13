@@ -1,0 +1,50 @@
+{
+  "scenario": "Q20",
+  "questions": [
+    "Q20"
+  ],
+  "adaptation": "",
+  "session_id": "16b87563-ea69-47b0-add3-ce17ba9e898f",
+  "started_at": "2026-11-13T12:03:12+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q20",
+      "message": "Can that order be delivered by the 25th?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "16b87563-ea69-47b0-add3-ce17ba9e898f",
+        "answer": "I don't have an order in view for this question — which order do you mean? Give me the order ID (or customer plus product) and I'll check feasibility for 25 April 2026.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [
+            {
+              "kind": "date",
+              "text": "2026-04-25"
+            }
+          ],
+          "retried": true
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.27
+    }
+  ],
+  "finished_at": "2026-11-13T12:03:15+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

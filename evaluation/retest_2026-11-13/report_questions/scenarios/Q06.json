@@ -1,0 +1,649 @@
+{
+  "scenario": "Q06",
+  "questions": [
+    "Q06"
+  ],
+  "adaptation": "",
+  "session_id": "0fe97592-66f9-4dd7-8353-d1c3af7429b4",
+  "started_at": "2026-11-13T11:53:28+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q06",
+      "message": "What was the average Assembly output per working day in March 2026?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "0fe97592-66f9-4dd7-8353-d1c3af7429b4",
+        "answer": "Assembly averaged 704.85 pieces per working day in March 2026 — 18,326 pieces over 26 recorded workdays, with no missing workday records (source: track1/data/production_log.csv, rows 239–359). This is factory-wide stage output, not per-order progress.",
+        "tool_calls": [
+          {
+            "name": "summarize_stage_output",
+            "arguments": {
+              "stage": "ASSEMBLY",
+              "date_from": "2026-03-01",
+              "date_to": "2026-03-31"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "date_from": "2026-03-01",
+              "date_to": "2026-03-31",
+              "stages": [
+                {
+                  "stage": "ASSEMBLY",
+                  "date_from": "2026-03-01",
+                  "date_to": "2026-03-31",
+                  "total_pieces": 18326,
+                  "recorded_total_pieces": 18326,
+                  "complete_records": true,
+                  "status": "ok",
+                  "calendar_days": 31,
+                  "scheduled_workdays": 26,
+                  "recorded_workdays": 26,
+                  "missing_workdays": [],
+                  "mean_per_recorded_workday": 704.85,
+                  "source_rows": [
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 239,
+                      "key": "2026-03-01 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 243,
+                      "key": "2026-03-02 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 247,
+                      "key": "2026-03-03 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 251,
+                      "key": "2026-03-04 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 255,
+                      "key": "2026-03-05 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 259,
+                      "key": "2026-03-06 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 263,
+                      "key": "2026-03-07 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 267,
+                      "key": "2026-03-08 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 271,
+                      "key": "2026-03-09 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 275,
+                      "key": "2026-03-10 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 279,
+                      "key": "2026-03-11 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 283,
+                      "key": "2026-03-12 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 287,
+                      "key": "2026-03-13 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 291,
+                      "key": "2026-03-14 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 295,
+                      "key": "2026-03-15 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 299,
+                      "key": "2026-03-16 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 303,
+                      "key": "2026-03-17 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 307,
+                      "key": "2026-03-18 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 311,
+                      "key": "2026-03-19 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 315,
+                      "key": "2026-03-20 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 319,
+                      "key": "2026-03-21 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 323,
+                      "key": "2026-03-22 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 327,
+                      "key": "2026-03-23 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 331,
+                      "key": "2026-03-24 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 335,
+                      "key": "2026-03-25 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 339,
+                      "key": "2026-03-26 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 343,
+                      "key": "2026-03-27 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 347,
+                      "key": "2026-03-28 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 351,
+                      "key": "2026-03-29 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 355,
+                      "key": "2026-03-30 ASSEMBLY"
+                    },
+                    {
+                      "source": "track1/data/production_log.csv",
+                      "row": 359,
+                      "key": "2026-03-31 ASSEMBLY"
+                    }
+                  ],
+                  "mean_per_scheduled_workday": 704.85
+                }
+              ],
+              "source": "track1/data/production_log.csv",
+              "rules": "Workdays are Monday to Saturday; Sunday rows are recorded as 0 and add nothing. A workday without a record is listed in missing_workdays, never counted as zero.",
+              "warnings": [
+                "Factory-wide stage output, not per-order progress or capacity."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 239,
+              "key": "2026-03-01 ASSEMBLY",
+              "id": "production_log.csv:239@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#239@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 243,
+              "key": "2026-03-02 ASSEMBLY",
+              "id": "production_log.csv:243@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#243@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 247,
+              "key": "2026-03-03 ASSEMBLY",
+              "id": "production_log.csv:247@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#247@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 251,
+              "key": "2026-03-04 ASSEMBLY",
+              "id": "production_log.csv:251@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#251@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 255,
+              "key": "2026-03-05 ASSEMBLY",
+              "id": "production_log.csv:255@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#255@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 259,
+              "key": "2026-03-06 ASSEMBLY",
+              "id": "production_log.csv:259@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#259@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 263,
+              "key": "2026-03-07 ASSEMBLY",
+              "id": "production_log.csv:263@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#263@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 267,
+              "key": "2026-03-08 ASSEMBLY",
+              "id": "production_log.csv:267@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#267@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 271,
+              "key": "2026-03-09 ASSEMBLY",
+              "id": "production_log.csv:271@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#271@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 275,
+              "key": "2026-03-10 ASSEMBLY",
+              "id": "production_log.csv:275@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#275@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 279,
+              "key": "2026-03-11 ASSEMBLY",
+              "id": "production_log.csv:279@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#279@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 283,
+              "key": "2026-03-12 ASSEMBLY",
+              "id": "production_log.csv:283@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#283@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 287,
+              "key": "2026-03-13 ASSEMBLY",
+              "id": "production_log.csv:287@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#287@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 291,
+              "key": "2026-03-14 ASSEMBLY",
+              "id": "production_log.csv:291@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#291@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 295,
+              "key": "2026-03-15 ASSEMBLY",
+              "id": "production_log.csv:295@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#295@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 299,
+              "key": "2026-03-16 ASSEMBLY",
+              "id": "production_log.csv:299@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#299@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 303,
+              "key": "2026-03-17 ASSEMBLY",
+              "id": "production_log.csv:303@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#303@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 307,
+              "key": "2026-03-18 ASSEMBLY",
+              "id": "production_log.csv:307@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#307@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 311,
+              "key": "2026-03-19 ASSEMBLY",
+              "id": "production_log.csv:311@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#311@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 315,
+              "key": "2026-03-20 ASSEMBLY",
+              "id": "production_log.csv:315@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#315@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 319,
+              "key": "2026-03-21 ASSEMBLY",
+              "id": "production_log.csv:319@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#319@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 323,
+              "key": "2026-03-22 ASSEMBLY",
+              "id": "production_log.csv:323@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#323@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 327,
+              "key": "2026-03-23 ASSEMBLY",
+              "id": "production_log.csv:327@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#327@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 331,
+              "key": "2026-03-24 ASSEMBLY",
+              "id": "production_log.csv:331@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#331@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 335,
+              "key": "2026-03-25 ASSEMBLY",
+              "id": "production_log.csv:335@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#335@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 339,
+              "key": "2026-03-26 ASSEMBLY",
+              "id": "production_log.csv:339@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#339@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 343,
+              "key": "2026-03-27 ASSEMBLY",
+              "id": "production_log.csv:343@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#343@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 347,
+              "key": "2026-03-28 ASSEMBLY",
+              "id": "production_log.csv:347@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#347@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 351,
+              "key": "2026-03-29 ASSEMBLY",
+              "id": "production_log.csv:351@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#351@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 355,
+              "key": "2026-03-30 ASSEMBLY",
+              "id": "production_log.csv:355@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#355@v0"
+            },
+            {
+              "source": "track1/data/production_log.csv",
+              "row": 359,
+              "key": "2026-03-31 ASSEMBLY",
+              "id": "production_log.csv:359@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/production_log.csv#359@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/production_log.csv#239@v0": {
+              "date": "2026-03-01",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#243@v0": {
+              "date": "2026-03-02",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "782"
+            },
+            "track1/data/production_log.csv#247@v0": {
+              "date": "2026-03-03",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "687"
+            },
+            "track1/data/production_log.csv#251@v0": {
+              "date": "2026-03-04",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "901"
+            },
+            "track1/data/production_log.csv#255@v0": {
+              "date": "2026-03-05",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "762"
+            },
+            "track1/data/production_log.csv#259@v0": {
+              "date": "2026-03-06",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "733"
+            },
+            "track1/data/production_log.csv#263@v0": {
+              "date": "2026-03-07",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "912"
+            },
+            "track1/data/production_log.csv#267@v0": {
+              "date": "2026-03-08",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#271@v0": {
+              "date": "2026-03-09",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "770"
+            },
+            "track1/data/production_log.csv#275@v0": {
+              "date": "2026-03-10",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "761"
+            },
+            "track1/data/production_log.csv#279@v0": {
+              "date": "2026-03-11",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "855"
+            },
+            "track1/data/production_log.csv#283@v0": {
+              "date": "2026-03-12",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "755"
+            },
+            "track1/data/production_log.csv#287@v0": {
+              "date": "2026-03-13",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "799"
+            },
+            "track1/data/production_log.csv#291@v0": {
+              "date": "2026-03-14",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "763"
+            },
+            "track1/data/production_log.csv#295@v0": {
+              "date": "2026-03-15",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#299@v0": {
+              "date": "2026-03-16",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "788"
+            },
+            "track1/data/production_log.csv#303@v0": {
+              "date": "2026-03-17",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "735"
+            },
+            "track1/data/production_log.csv#307@v0": {
+              "date": "2026-03-18",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "882"
+            },
+            "track1/data/production_log.csv#311@v0": {
+              "date": "2026-03-19",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "868"
+            },
+            "track1/data/production_log.csv#315@v0": {
+              "date": "2026-03-20",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "762"
+            },
+            "track1/data/production_log.csv#319@v0": {
+              "date": "2026-03-21",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "746"
+            },
+            "track1/data/production_log.csv#323@v0": {
+              "date": "2026-03-22",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#327@v0": {
+              "date": "2026-03-23",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "733"
+            },
+            "track1/data/production_log.csv#331@v0": {
+              "date": "2026-03-24",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "779"
+            },
+            "track1/data/production_log.csv#335@v0": {
+              "date": "2026-03-25",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "394"
+            },
+            "track1/data/production_log.csv#339@v0": {
+              "date": "2026-03-26",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "464"
+            },
+            "track1/data/production_log.csv#343@v0": {
+              "date": "2026-03-27",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "399"
+            },
+            "track1/data/production_log.csv#347@v0": {
+              "date": "2026-03-28",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "445"
+            },
+            "track1/data/production_log.csv#351@v0": {
+              "date": "2026-03-29",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "0"
+            },
+            "track1/data/production_log.csv#355@v0": {
+              "date": "2026-03-30",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "396"
+            },
+            "track1/data/production_log.csv#359@v0": {
+              "date": "2026-03-31",
+              "stage": "ASSEMBLY",
+              "pieces_completed": "455"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 5,
+          "unverified": [
+            {
+              "kind": "number",
+              "text": "359"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.24
+    }
+  ],
+  "finished_at": "2026-11-13T11:53:30+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

@@ -1,0 +1,311 @@
+{
+  "scenario": "Q03",
+  "questions": [
+    "Q03"
+  ],
+  "adaptation": "",
+  "session_id": "375e7177-006e-402c-8e6e-b28e5e49eb79",
+  "started_at": "2026-11-13T11:53:20+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q03",
+      "message": "Which unfinished orders are due between 1 April and 7 April 2026, inclusive?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "375e7177-006e-402c-8e6e-b28e5e49eb79",
+        "answer": "Five unfinished orders are due 1–7 April 2026, totalling 7,800 original pieces (orders.csv rows 89–101).\n\n| Order | Customer | Category | Pieces | Due |\n|---|---|---|---|---|\n| ORD-029 | Northwind Apparel | ACCESSORIES | 1,500 | 2026-04-01 (today) |\n| ORD-108 | Harbor Knits | ACCESSORIES | 2,000 | 2026-04-03 |\n| ORD-103 | Bright Basics | ACCESSORIES | 2,000 | 2026-04-04 |\n| ORD-099 | Northwind Apparel | TOPS | 1,500 | 2026-04-05 |\n| ORD-061 | Harbor Knits | ACCESSORIES | 800 | 2026-04-05 |\n\nPieces are original order quantities, not remaining work.",
+        "tool_calls": [
+          {
+            "name": "query_orders",
+            "arguments": {
+              "status": "IN_PROGRESS",
+              "due_from": "2026-04-01",
+              "due_to": "2026-04-07"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "snapshot_date": "2026-04-01",
+              "count": 5,
+              "original_order_pieces": 7800,
+              "by_status": {
+                "IN_PROGRESS": {
+                  "order_count": 5,
+                  "original_order_pieces": 7800,
+                  "order_ids": [
+                    "ORD-099",
+                    "ORD-103",
+                    "ORD-029",
+                    "ORD-061",
+                    "ORD-108"
+                  ]
+                }
+              },
+              "by_category": {
+                "TOPS": {
+                  "order_count": 1,
+                  "original_order_pieces": 1500,
+                  "order_ids": [
+                    "ORD-099"
+                  ]
+                },
+                "ACCESSORIES": {
+                  "order_count": 4,
+                  "original_order_pieces": 6300,
+                  "order_ids": [
+                    "ORD-103",
+                    "ORD-029",
+                    "ORD-061",
+                    "ORD-108"
+                  ]
+                }
+              },
+              "order_ids": [
+                "ORD-099",
+                "ORD-103",
+                "ORD-029",
+                "ORD-061",
+                "ORD-108"
+              ],
+              "filters": {
+                "status": "IN_PROGRESS",
+                "due_from": "2026-04-01",
+                "due_to": "2026-04-07"
+              },
+              "scope": "all",
+              "orders": [
+                {
+                  "order_id": "ORD-099",
+                  "category": "TOPS",
+                  "customer": "Northwind Apparel",
+                  "pieces": "1500",
+                  "due_date": "2026-04-05",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-103",
+                  "category": "ACCESSORIES",
+                  "customer": "Bright Basics",
+                  "pieces": "2000",
+                  "due_date": "2026-04-04",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-029",
+                  "category": "ACCESSORIES",
+                  "customer": "Northwind Apparel",
+                  "pieces": "1500",
+                  "due_date": "2026-04-01",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-061",
+                  "category": "ACCESSORIES",
+                  "customer": "Harbor Knits",
+                  "pieces": "800",
+                  "due_date": "2026-04-05",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-108",
+                  "category": "ACCESSORIES",
+                  "customer": "Harbor Knits",
+                  "pieces": "2000",
+                  "due_date": "2026-04-03",
+                  "status": "IN_PROGRESS"
+                }
+              ],
+              "selection": {
+                "order_ids": [
+                  "ORD-099",
+                  "ORD-103",
+                  "ORD-029",
+                  "ORD-061",
+                  "ORD-108"
+                ],
+                "filters": {
+                  "status": "IN_PROGRESS",
+                  "due_from": "2026-04-01",
+                  "due_to": "2026-04-07"
+                },
+                "source_tool": "query_orders"
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 89,
+                  "key": "ORD-099"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 91,
+                  "key": "ORD-103"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 92,
+                  "key": "ORD-029"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 97,
+                  "key": "ORD-061"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 101,
+                  "key": "ORD-108"
+                }
+              ],
+              "warnings": [
+                "Quantities are original ordered pieces, not remaining work. No remaining quantity is supplied."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 89,
+              "key": "ORD-099",
+              "id": "orders.csv:89@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#89@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 91,
+              "key": "ORD-103",
+              "id": "orders.csv:91@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#91@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 92,
+              "key": "ORD-029",
+              "id": "orders.csv:92@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#92@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 97,
+              "key": "ORD-061",
+              "id": "orders.csv:97@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#97@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 101,
+              "key": "ORD-108",
+              "id": "orders.csv:101@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#101@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#89@v0": {
+              "order_id": "ORD-099",
+              "customer": "Northwind Apparel",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-03-07",
+              "due_date": "2026-04-05",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#91@v0": {
+              "order_id": "ORD-103",
+              "customer": "Bright Basics",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "2000",
+              "order_date": "2026-03-09",
+              "due_date": "2026-04-04",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#92@v0": {
+              "order_id": "ORD-029",
+              "customer": "Northwind Apparel",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1500",
+              "order_date": "2026-03-10",
+              "due_date": "2026-04-01",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#97@v0": {
+              "order_id": "ORD-061",
+              "customer": "Harbor Knits",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "800",
+              "order_date": "2026-03-12",
+              "due_date": "2026-04-05",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#101@v0": {
+              "order_id": "ORD-108",
+              "customer": "Harbor Knits",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "2000",
+              "order_date": "2026-03-17",
+              "due_date": "2026-04-03",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 16,
+          "unverified": [
+            {
+              "kind": "number",
+              "text": "101"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.24
+    }
+  ],
+  "finished_at": "2026-11-13T11:53:23+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

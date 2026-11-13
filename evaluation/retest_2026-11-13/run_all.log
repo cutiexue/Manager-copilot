@@ -1,0 +1,116 @@
+30 evaluation cases with deepseek/deepseek-flash -> <local project folder>/Final_Submission_Workspace/Evaluation_Retest_2026-11-13/automated/evaluation_set
+  T1-EVAL-001 pass (3.9s)
+  T1-EVAL-002 pass (2.2s)
+  T1-EVAL-003 pass (3.0s)
+  T1-EVAL-004 pass (7.3s)
+  T1-EVAL-005 pass (3.2s)
+  T1-EVAL-006 pass (2.1s)
+  T1-EVAL-007 pass (1.4s)
+  T1-EVAL-008 pass (3.5s)
+  T1-EVAL-009 pass (2.2s)
+  T1-EVAL-010 pass (4.1s)
+  T1-EVAL-011 pass (2.8s)
+  T1-EVAL-012 pass (2.6s)
+  T1-EVAL-013 pass (2.3s)
+  T1-EVAL-014 pass (2.2s)
+  T1-EVAL-015 pass (5.4s)
+  T1-EVAL-016 pass (5.0s)
+  T1-EVAL-017 pass (2.1s)
+  T1-EVAL-018 pass (1.2s)
+  T1-EVAL-019 pass (8.2s)
+  T1-EVAL-020 pass (1.1s)
+  T1-EVAL-021 pass (2.1s)
+  T1-EVAL-022 pass (1.9s)
+  T1-EVAL-023 pass (2.1s)
+  T1-EVAL-024 pass (5.5s)
+  T1-EVAL-025 pass (4.0s)
+  T1-EVAL-026 pass (1.7s)
+  T1-EVAL-027 pass (7.0s)
+  T1-EVAL-028 pass (2.7s)
+  T1-EVAL-029 pass (4.8s)
+  T1-EVAL-030 pass (4.9s)
+30/30 cases passed; behaviour 100.0%. Summary: <local project folder>/Final_Submission_Workspace/Evaluation_Retest_2026-11-13/automated/evaluation_set/summary.md
+17 development cases with deepseek/deepseek-flash -> <local project folder>/Final_Submission_Workspace/Evaluation_Retest_2026-11-13/automated/development_set
+  T1-DEV-001 FAIL behavior (7.4s)
+  T1-DEV-002 pass (2.3s)
+  T1-DEV-003 pass (2.6s)
+  T1-DEV-004 pass (3.2s)
+  T1-DEV-005 pass (2.1s)
+  T1-DEV-006 pass (2.9s)
+  T1-DEV-007 pass (2.4s)
+  T1-DEV-008 pass (2.5s)
+  T1-DEV-009 pass (1.4s)
+  T1-DEV-010 pass (2.7s)
+  T1-DEV-011 pass (3.0s)
+  T1-DEV-012 pass (9.0s)
+  T1-DEV-013 pass (8.5s)
+  T1-DEV-014 FAIL evidence (2.9s)
+  T1-DEV-015 pass (3.0s)
+  T1-DEV-016 pass (2.1s)
+  T1-DEV-017 pass (2.9s)
+15/17 cases passed; behaviour 95.5%. Summary: <local project folder>/Final_Submission_Workspace/Evaluation_Retest_2026-11-13/automated/development_set/summary.md
+Q01: 1 steps, 0 problem steps
+Q02: 1 steps, 0 problem steps
+Q03: 1 steps, 0 problem steps
+Q04: 1 steps, 0 problem steps
+Q05: 1 steps, 0 problem steps
+Q06: 1 steps, 0 problem steps
+Q07: 1 steps, 0 problem steps
+Q08: 1 steps, 0 problem steps
+Q09: 1 steps, 0 problem steps
+Q10: 1 steps, 0 problem steps
+Q11: 1 steps, 0 problem steps
+Q12: 1 steps, 0 problem steps
+Q13: 1 steps, 0 problem steps
+Q14: 1 steps, 0 problem steps
+Q15: 2 steps, 0 problem steps
+Q16: 3 steps, 0 problem steps
+Q17: 2 steps, 0 problem steps
+Q18: 3 steps, 0 problem steps
+Q19: 1 steps, 0 problem steps
+Q20: 1 steps, 0 problem steps
+Q21: 1 steps, 0 problem steps
+Q22: 1 steps, 0 problem steps
+Q23: 1 steps, 0 problem steps
+Q24: 1 steps, 0 problem steps
+Q25-Q30: 6 steps, 0 problem steps
+Q31-Q32: 6 steps, 0 problem steps
+Q33: 5 steps, 0 problem steps
+Q34: 6 steps, 0 problem steps
+Q35: 5 steps, 0 problem steps
+Q36: 2 steps, 0 problem steps
+Q37: 5 steps, 0 problem steps
+Q38: 5 steps, 0 problem steps
+Q39: 9 steps, 0 problem steps
+Q40: 2 steps, 0 problem steps
+Q41: 1 steps, 0 problem steps
+Q42: 1 steps, 0 problem steps
+Q43: 1 steps, 0 problem steps
+Q44: 1 steps, 0 problem steps
+Q45: 2 steps, 0 problem steps
+Q46: 3 steps, 0 problem steps
+Q47: 6 steps, 0 problem steps
+Q48: 7 steps, 0 problem steps
+Q49: 4 steps, 0 problem steps
+Q50: 4 steps, 0 problem steps
+Q51: 8 steps, 0 problem steps
+Q52: 5 steps, 0 problem steps
+Q53: 5 steps, 0 problem steps
+Q54: 9 steps, 0 problem steps
+Q55: 1 steps, 0 problem steps
+Q56: 2 steps, 0 problem steps
+Q57: 1 steps, 0 problem steps
+Q58: 1 steps, 0 problem steps
+Q59: 1 steps, 0 problem steps
+Q60: 1 steps, 0 problem steps
+Q61: 1 steps, 0 problem steps
+Q62: 1 steps, 0 problem steps
+Q63: 1 steps, 0 problem steps
+Q64: 1 steps, 0 problem steps
+Q65: 1 steps, 0 problem steps
+Q66: 1 steps, 0 problem steps
+Q67: 4 steps, 1 problem steps
+Q68: 4 steps, 0 problem steps
+Q69: 6 steps, 0 problem steps
+Q70: 2 steps, 0 problem steps
+retest finished

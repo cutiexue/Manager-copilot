@@ -1,0 +1,36 @@
+{
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c",
+  "uncommitted_files": [
+    "M README.md",
+    " M backend/README.md",
+    " M backend/answer_check.py",
+    " M backend/order_search.py",
+    " M backend/rules.py",
+    " M backend/service.py",
+    " M backend/skills/base_grounding_policy.md",
+    " M backend/skills/feasibility.md",
+    " M backend/skills/general_qa.md",
+    " M backend/tests/test_agent_tools.py",
+    " M backend/tool_schemas.py",
+    " M backend/tools.py",
+    " M evaluation/README.md",
+    " M frontend/src/components/Chat.tsx",
+    " M frontend/src/types.ts",
+    "?? backend/TOOLS.md",
+    "?? backend/tests/test_report_fixes.py"
+  ],
+  "uncommitted_diff_sha256": "16b617fc913b900fb249273aa3c2220a734c5efa679dec1d50575b2c603b51c4",
+  "prompt_version": "f9348b4de425",
+  "harness_sha256": "4b5e4fa5674f41aab2ca1b196e5ea35bdc1a0d0d22c87335516196355afd999e",
+  "data_sha256": {
+    "orders.csv": "0880af9742fe7cc0923c5009e2de48a0bedb57b78cc294e35a1c9721fe0311f8",
+    "production_log.csv": "f67e505bd460ff62e788f371c7be58b22795a99b76ece5a43350b2d8b7372830",
+    "workshops.csv": "d7e1c97d3d338a2b5aef8e35f167e3582f22c4526e9c736c5b4c8125505ec59e"
+  },
+  "run_started": "2026-11-13T11:53:16+08:00",
+  "run_finished": "2026-11-13T11:57:03+08:00",
+  "note": "Reconstructed after a Q67-only rerun overwrote run.json: provider, model, prompt version and git head are taken from every scenario record (all identical); the code diff hash is unchanged (no code edits between runs); harness_sha256 is the harness before the one-line Q67 selector fix."
+}

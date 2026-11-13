@@ -1,0 +1,68 @@
+{
+  "scenario": "Q50-at-15.01.30",
+  "questions": [
+    "Q50"
+  ],
+  "adaptation": "Variant: clock 15:01:30, half a minute past the reminder code's one-minute grace for the current minute.",
+  "session_id": "c12cfb5a-db5e-4555-8717-88c9f86df9a5",
+  "started_at": "2026-11-13T12:02:56+08:00",
+  "steps": [
+    {
+      "step": "clock",
+      "clock": "2026-11-13T15:01:30+08:00",
+      "seconds": 0.0
+    },
+    {
+      "step": "chat",
+      "qid": "Q50",
+      "message": "Remind me at 15:00 today. The current Singapore time is already 15:01.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "c12cfb5a-db5e-4555-8717-88c9f86df9a5",
+        "answer": "That time has already passed (15:01 Singapore time today), so I can't set a reminder for 15:00 today. What other time would you like — for example \"in 2 hours\" or \"tomorrow 09:00\"?",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 0,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.08
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": []
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "clock",
+      "clock": "real",
+      "seconds": 0.0
+    }
+  ],
+  "finished_at": "2026-11-13T12:02:57+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

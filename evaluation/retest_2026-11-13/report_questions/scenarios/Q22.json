@@ -1,0 +1,50 @@
+{
+  "scenario": "Q22",
+  "questions": [
+    "Q22"
+  ],
+  "adaptation": "",
+  "session_id": "ede4d34d-b7ef-40a3-9bbb-bf17e89e4461",
+  "started_at": "2026-11-13T11:54:17+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q22",
+      "message": "Which worker was the slowest yesterday?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "ede4d34d-b7ef-40a3-9bbb-bf17e89e4461",
+        "answer": "The data doesn't record worker-level output, so I can't identify a slowest worker. It only has factory-wide output per stage — for 2026-03-31 I can show you totals or stage comparisons if that helps.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [
+            {
+              "kind": "date",
+              "text": "2026-03-31"
+            }
+          ],
+          "retried": true
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.86
+    }
+  ],
+  "finished_at": "2026-11-13T11:54:20+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "scenario": "Q36",
+  "questions": [
+    "Q36"
+  ],
+  "adaptation": "",
+  "session_id": "a31e1ef3-37f7-47c0-b81f-bc62a13d6d44",
+  "started_at": "2026-11-13T12:03:15+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q36",
+      "message": "Remind me to follow up on O1 at 3 pm on 2 April 2026.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "a31e1ef3-37f7-47c0-b81f-bc62a13d6d44",
+        "answer": "I couldn't match \"O1\" to any order — the data uses IDs like ORD-107, and a search for \"O1\" returned nothing. Which order ID did you mean? Once you tell me, I'll propose the reminder for 3 pm on 2 April 2026.",
+        "tool_calls": [
+          {
+            "name": "search_orders",
+            "arguments": {
+              "query": "O1"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "query": "O1",
+              "as_of_date": "2026-04-01",
+              "snapshot_date": "2026-04-01",
+              "total": 0,
+              "count": 0,
+              "orders": [],
+              "source": "track1/data/orders.csv",
+              "source_rows": [],
+              "warnings": []
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 2,
+          "unverified": [
+            {
+              "kind": "order",
+              "text": "ORD-107"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.79
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": []
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T12:03:16+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

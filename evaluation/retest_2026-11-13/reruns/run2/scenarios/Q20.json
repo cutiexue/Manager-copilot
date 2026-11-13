@@ -1,0 +1,45 @@
+{
+  "scenario": "Q20",
+  "questions": [
+    "Q20"
+  ],
+  "adaptation": "",
+  "session_id": "008a2cdb-fb58-4e44-9d14-ff1f46f40e72",
+  "started_at": "2026-11-13T12:02:38+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q20",
+      "message": "Can that order be delivered by the 25th?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "008a2cdb-fb58-4e44-9d14-ff1f46f40e72",
+        "answer": "I need to know which order you mean — could you give me the order ID or the customer/product name?",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 0,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.23
+    }
+  ],
+  "finished_at": "2026-11-13T12:02:39+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

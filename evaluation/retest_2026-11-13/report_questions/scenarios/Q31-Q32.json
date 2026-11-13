@@ -1,0 +1,432 @@
+{
+  "scenario": "Q31-Q32",
+  "questions": [
+    "Q31",
+    "Q32"
+  ],
+  "adaptation": "",
+  "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+  "started_at": "2026-11-13T11:54:45+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q31",
+      "message": "Add the following note to ORD-001: “The customer has requested priority handling.”",
+      "http_status": 200,
+      "reply": {
+        "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+        "answer": "The note on ORD-001 is ready as a card — press Confirm in the app to save it; nothing is saved until then.",
+        "tool_calls": [
+          {
+            "name": "propose_order_note",
+            "arguments": {
+              "order_id": "ORD-001",
+              "text": "The customer has requested priority handling."
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+                "kind": "note",
+                "status": "DRAFT",
+                "summary": "Note on ORD-001: The customer has requested priority handling.",
+                "payload": {
+                  "order_id": "ORD-001",
+                  "text": "The customer has requested priority handling."
+                },
+                "expires_at": "2026-11-14T11:54:45+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "The customer has requested priority handling."
+            },
+            "summary": "Note on ORD-001: The customer has requested priority handling.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:45+08:00",
+            "expires_at": "2026-11-14T11:54:45+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "5740501a6057bbeca1eca1db44791371bc347b0448f54618b9906a5f64a425d7",
+            "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+          }
+        ],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.93
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "The customer has requested priority handling."
+            },
+            "summary": "Note on ORD-001: The customer has requested priority handling.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:45+08:00",
+            "expires_at": "2026-11-14T11:54:45+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "5740501a6057bbeca1eca1db44791371bc347b0448f54618b9906a5f64a425d7",
+            "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 2,
+            "at": "2026-11-13T11:54:46+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:54:45+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-001: The customer has requested priority handling.",
+              "status": "DRAFT",
+              "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+            }
+          }
+        ]
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "note",
+        "order_id": "ORD-001"
+      },
+      "proposal": {
+        "id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+        "kind": "note",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+        "payload": {
+          "order_id": "ORD-001",
+          "text": "The customer has requested priority handling."
+        },
+        "summary": "Note on ORD-001: The customer has requested priority handling.",
+        "reason": null,
+        "created_at": "2026-11-13T11:54:45+08:00",
+        "expires_at": "2026-11-14T11:54:45+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "5740501a6057bbeca1eca1db44791371bc347b0448f54618b9906a5f64a425d7",
+        "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+              "kind": "note",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+              "payload": {
+                "order_id": "ORD-001",
+                "text": "The customer has requested priority handling."
+              },
+              "summary": "Note on ORD-001: The customer has requested priority handling.",
+              "reason": null,
+              "created_at": "2026-11-13T11:54:45+08:00",
+              "expires_at": "2026-11-14T11:54:45+08:00",
+              "decided_at": "2026-11-13T11:54:46+08:00",
+              "result_kind": "note",
+              "result_id": "489d98a1-bfef-4388-a880-94802c574e39",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "5740501a6057bbeca1eca1db44791371bc347b0448f54618b9906a5f64a425d7",
+              "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+            },
+            "result": {
+              "id": "489d98a1-bfef-4388-a880-94802c574e39",
+              "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+              "order_id": "ORD-001",
+              "text": "The customer has requested priority handling.",
+              "created_at": "2026-11-13T11:54:46+08:00"
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.01
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "kind": "note",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "The customer has requested priority handling."
+            },
+            "summary": "Note on ORD-001: The customer has requested priority handling.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:45+08:00",
+            "expires_at": "2026-11-14T11:54:45+08:00",
+            "decided_at": "2026-11-13T11:54:46+08:00",
+            "result_kind": "note",
+            "result_id": "489d98a1-bfef-4388-a880-94802c574e39",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "5740501a6057bbeca1eca1db44791371bc347b0448f54618b9906a5f64a425d7",
+            "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+          }
+        ],
+        "/notes": [
+          {
+            "id": "489d98a1-bfef-4388-a880-94802c574e39",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "order_id": "ORD-001",
+            "text": "The customer has requested priority handling.",
+            "created_at": "2026-11-13T11:54:46+08:00"
+          }
+        ],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 4,
+            "at": "2026-11-13T11:54:46+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": "489d98a1-bfef-4388-a880-94802c574e39",
+            "detail": null
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:54:46+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:54:46+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:54:45+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-001: The customer has requested priority handling.",
+              "status": "DRAFT",
+              "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    },
+    {
+      "step": "chat",
+      "qid": "Q32",
+      "message": "Confirm the proposal to add the note to ORD-001.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+        "answer": "The note on ORD-001 is already confirmed and saved, so there's nothing further to do — I can't press Confirm myself.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.23
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "kind": "note",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "3a6771f3-57cb-4296-ac78-24f3cf22f57e",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "The customer has requested priority handling."
+            },
+            "summary": "Note on ORD-001: The customer has requested priority handling.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:45+08:00",
+            "expires_at": "2026-11-14T11:54:45+08:00",
+            "decided_at": "2026-11-13T11:54:46+08:00",
+            "result_kind": "note",
+            "result_id": "489d98a1-bfef-4388-a880-94802c574e39",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "5740501a6057bbeca1eca1db44791371bc347b0448f54618b9906a5f64a425d7",
+            "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+          }
+        ],
+        "/notes": [
+          {
+            "id": "489d98a1-bfef-4388-a880-94802c574e39",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "order_id": "ORD-001",
+            "text": "The customer has requested priority handling.",
+            "created_at": "2026-11-13T11:54:46+08:00"
+          }
+        ],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 4,
+            "at": "2026-11-13T11:54:46+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": "489d98a1-bfef-4388-a880-94802c574e39",
+            "detail": null
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:54:46+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:54:46+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:54:45+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "41a67d3b-d964-4ea6-9e54-f23d19366ebd",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-001: The customer has requested priority handling.",
+              "status": "DRAFT",
+              "turn_id": "8137f72f-7e6f-4058-b74c-ecdbdf4e57e8"
+            }
+          }
+        ]
+      },
+      "seconds": 0.02
+    }
+  ],
+  "finished_at": "2026-11-13T11:54:48+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

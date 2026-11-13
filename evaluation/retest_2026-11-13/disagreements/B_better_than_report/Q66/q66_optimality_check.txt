@@ -1,0 +1,11 @@
+Q66 independent check: cheapest external plan for 900 TOPS, start 2026-04-01, deadline 2026-04-10 inclusive
+  W1 QuickStitch: cost/piece 1.5, max pieces by 10 Apr = 1200
+  W2 SteadyHands: cost/piece 1.3, max pieces by 10 Apr = 765
+  W3 BudgetWorks: cost/piece 0.8, max pieces by 10 Apr = 230
+  W4 excluded: status ACTIVE, makes ACCESSORIES
+  W5 GiantWeave: cost/piece 1.1, max pieces by 10 Apr = 800
+  W6 Nimble Needle: cost/piece 1.2, max pieces by 10 Apr = 910
+  W7 excluded: status SUSPENDED, makes TOPS+ACCESSORIES
+  W8 FreshStart: cost/piece 1.0, max pieces by 10 Apr = 300
+Greedy by unit cost (optimal for linear costs with independent capacity limits): {'W3': 230, 'W8': 300, 'W5': 370} cost 891.0 unallocated 0
+System answer: W3 230, W8 300, W5 370, cost 891.0 -> MATCH

@@ -1,0 +1,498 @@
+{
+  "scenario": "Q66",
+  "questions": [
+    "Q66"
+  ],
+  "adaptation": "",
+  "session_id": "7741fea1-e953-4c82-89a2-27f6f972a575",
+  "started_at": "2026-11-13T11:56:46+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q66",
+      "message": "Estimate a plan for 900 TOPS units due April 10, 2026. Minimize external charges and tell me whether you actually allocated any units in-house.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "7741fea1-e953-4c82-89a2-27f6f972a575",
+        "answer": "**No — all 900 TOPS units go to outside workshops; nothing was allocated in-house.** The cheapest plan within your 10 April deadline (starting 1 April, deadline day counted as day 10) costs **891.0** in external processing charges and finishes by 10 April.\n\n| Workshop | Pieces | Cost/piece | Batch cost | Est. completion |\n|---|---|---|---|---|\n| W3 BudgetWorks | 230 | 0.80 | 184.0 | 2026-04-10 |\n| W8 FreshStart | 300 | 1.00 | 300.0 | 2026-04-05 |\n| W5 GiantWeave | 370 | 1.10 | 407.0 | 2026-04-08 |\n\nIn-house was left out of the comparison because its cost per piece isn't in the data, so there was no basis to allocate to it — give me a rate and I can rerun with it included.\n\nRisk: medium. Two batches worth 600 pieces are late in their full-redo scenario (W3 → 14 Apr, W5 → 13 Apr); overall chance all pieces on time ≈ 86%.\n\nAssumptions: new batch of original 900 pieces, start 1 April, capacity/queues from the 2026-04-01 snapshot; excludes transport and rework, currency unspecified. Source: workshops.csv.",
+        "tool_calls": [
+          {
+            "name": "optimize_cheapest_plan",
+            "arguments": {
+              "category": "TOPS",
+              "total_pieces": 900,
+              "deadline_days": 10
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "start_date": "2026-04-01",
+              "completion_date": "2026-04-10",
+              "elapsed_calendar_days": 9,
+              "external_processing_cost": 891.0,
+              "in_house_cost_excluded": true,
+              "currency": null,
+              "total_pieces": 900,
+              "branches": [
+                {
+                  "status": "ok",
+                  "producer": "W3",
+                  "name": "BudgetWorks",
+                  "pieces": 230,
+                  "production_workdays_unrounded": 1.0,
+                  "workdays_including_queue": 6,
+                  "transport_calendar_days": 3,
+                  "completion_date": "2026-04-10",
+                  "external_processing_cost": 184.0,
+                  "currency": null,
+                  "profile": {
+                    "workshop_id": "W3",
+                    "name": "BudgetWorks",
+                    "capacity_pieces_per_day": "230",
+                    "pickup_lead_days": "3",
+                    "defect_rate": "0.09",
+                    "cost_per_piece": "0.8",
+                    "makes": "TOPS",
+                    "status": "ACTIVE",
+                    "max_batch_pieces": "",
+                    "current_queue_days": "5.0",
+                    "notes": "cheapest by far"
+                  },
+                  "risk": {
+                    "status": "ok",
+                    "batches": 1,
+                    "outsourced_pieces": 230,
+                    "chance_all_batches_clean": 0.91,
+                    "chance_some_batch_needs_rework": 0.09,
+                    "expected_pieces_in_reworked_batches": 20.7,
+                    "workshops": [
+                      {
+                        "workshop_id": "W3",
+                        "name": "BudgetWorks",
+                        "defect_rate": 0.09,
+                        "dispatcher_note": "cheapest by far",
+                        "flags": [
+                          "high defect rate (9% of batches)",
+                          "slow pickup and delivery (3 calendar days of fixed transport overhead per batch)",
+                          "busy: 5.0 days of work already queued"
+                        ],
+                        "source": {
+                          "source": "track1/data/workshops.csv",
+                          "row": 4,
+                          "key": "W3"
+                        },
+                        "pieces": 230,
+                        "completion_date": "2026-04-10",
+                        "rework_chance": 0.09,
+                        "rework_scenario_arrival": "2026-04-14"
+                      }
+                    ],
+                    "assumptions": [
+                      "Each workshop's batch needs rework independently, with its defect_rate from workshops.csv.",
+                      "A rework delays only that workshop's pieces; other batches arrive as planned.",
+                      "Actual rework duration is not in the data. The full-redo scenario assumes the whole batch is redone once at the same workshop and capacity with no new queue, then adds the fixed transport overhead again. It is not a guaranteed latest arrival; actual delays may be longer.",
+                      "In-house work has no defect data and is not included."
+                    ],
+                    "risk_level": "medium",
+                    "risk_basis": "chance that some outsourced batch needs rework",
+                    "strategy_rating": "Medium-risk strategy",
+                    "summary": "Medium-risk strategy. 91% chance every outsourced batch comes back clean. W3 BudgetWorks (230 pieces): 9% chance of rework; the full-redo scenario puts their arrival on 14 Apr instead of 10 Apr. Actual rework time is unknown. Scenario dates assume one full redo, unchanged capacity, no new queue and fixed transport; actual arrivals may be later."
+                  },
+                  "snapshot_date": "2026-04-01",
+                  "data_as_of": "2026-04-01",
+                  "scenario_start_date": "2026-04-01",
+                  "start_date": "2026-04-01",
+                  "source": "track1/data/workshops.csv",
+                  "assumptions": [
+                    "New batches only; each branch delivers finished goods and runs in parallel.",
+                    "Monday to Saturday are workdays for all producers; no holidays are modeled.",
+                    "The start date is inclusive: one workday starting Monday finishes Monday.",
+                    "External queue and production are rounded up together to whole workdays; transport is added once as calendar days after production.",
+                    "Dates assume every outsourced batch comes back clean; `risk` gives, batch by batch, the chance of rework and its full-redo scenario arrival date under stated assumptions, not a guaranteed latest date.",
+                    "Capacity, queues and reference unfinished-order load are from 2026-04-01, even when the scenario starts later.",
+                    "Reported cost includes external per-piece processing charges only. In-house cost is excluded by request; transport and rework charges are not supplied.",
+                    "Currency is unspecified in the source data.",
+                    "Queue and profile values use the 2026-04-01 snapshot even for other scenario dates."
+                  ]
+                },
+                {
+                  "status": "ok",
+                  "producer": "W8",
+                  "name": "FreshStart",
+                  "pieces": 300,
+                  "production_workdays_unrounded": 3.0,
+                  "workdays_including_queue": 3,
+                  "transport_calendar_days": 2,
+                  "completion_date": "2026-04-05",
+                  "external_processing_cost": 300.0,
+                  "currency": null,
+                  "profile": {
+                    "workshop_id": "W8",
+                    "name": "FreshStart",
+                    "capacity_pieces_per_day": "100",
+                    "pickup_lead_days": "2",
+                    "defect_rate": "0.04",
+                    "cost_per_piece": "1.0",
+                    "makes": "TOPS",
+                    "status": "ACTIVE",
+                    "max_batch_pieces": "300",
+                    "current_queue_days": "0.0",
+                    "notes": "new workshop on trial: small batches only"
+                  },
+                  "risk": {
+                    "status": "ok",
+                    "batches": 1,
+                    "outsourced_pieces": 300,
+                    "chance_all_batches_clean": 0.96,
+                    "chance_some_batch_needs_rework": 0.04,
+                    "expected_pieces_in_reworked_batches": 12.0,
+                    "workshops": [
+                      {
+                        "workshop_id": "W8",
+                        "name": "FreshStart",
+                        "defect_rate": 0.04,
+                        "dispatcher_note": "new workshop on trial: small batches only",
+                        "flags": [
+                          "on trial: batches of at most 300 pieces"
+                        ],
+                        "source": {
+                          "source": "track1/data/workshops.csv",
+                          "row": 9,
+                          "key": "W8"
+                        },
+                        "pieces": 300,
+                        "completion_date": "2026-04-05",
+                        "rework_chance": 0.04,
+                        "rework_scenario_arrival": "2026-04-10"
+                      }
+                    ],
+                    "assumptions": [
+                      "Each workshop's batch needs rework independently, with its defect_rate from workshops.csv.",
+                      "A rework delays only that workshop's pieces; other batches arrive as planned.",
+                      "Actual rework duration is not in the data. The full-redo scenario assumes the whole batch is redone once at the same workshop and capacity with no new queue, then adds the fixed transport overhead again. It is not a guaranteed latest arrival; actual delays may be longer.",
+                      "In-house work has no defect data and is not included."
+                    ],
+                    "risk_level": "low",
+                    "risk_basis": "chance that some outsourced batch needs rework",
+                    "strategy_rating": "Low-risk strategy",
+                    "summary": "Low-risk strategy. 96% chance every outsourced batch comes back clean. W8 FreshStart (300 pieces): 4% chance of rework; the full-redo scenario puts their arrival on 10 Apr instead of 5 Apr. Actual rework time is unknown. Scenario dates assume one full redo, unchanged capacity, no new queue and fixed transport; actual arrivals may be later."
+                  },
+                  "snapshot_date": "2026-04-01",
+                  "data_as_of": "2026-04-01",
+                  "scenario_start_date": "2026-04-01",
+                  "start_date": "2026-04-01",
+                  "source": "track1/data/workshops.csv",
+                  "assumptions": [
+                    "New batches only; each branch delivers finished goods and runs in parallel.",
+                    "Monday to Saturday are workdays for all producers; no holidays are modeled.",
+                    "The start date is inclusive: one workday starting Monday finishes Monday.",
+                    "External queue and production are rounded up together to whole workdays; transport is added once as calendar days after production.",
+                    "Dates assume every outsourced batch comes back clean; `risk` gives, batch by batch, the chance of rework and its full-redo scenario arrival date under stated assumptions, not a guaranteed latest date.",
+                    "Capacity, queues and reference unfinished-order load are from 2026-04-01, even when the scenario starts later.",
+                    "Reported cost includes external per-piece processing charges only. In-house cost is excluded by request; transport and rework charges are not supplied.",
+                    "Currency is unspecified in the source data.",
+                    "Queue and profile values use the 2026-04-01 snapshot even for other scenario dates."
+                  ]
+                },
+                {
+                  "status": "ok",
+                  "producer": "W5",
+                  "name": "GiantWeave",
+                  "pieces": 370,
+                  "production_workdays_unrounded": 0.925,
+                  "workdays_including_queue": 4,
+                  "transport_calendar_days": 4,
+                  "completion_date": "2026-04-08",
+                  "external_processing_cost": 407.0,
+                  "currency": null,
+                  "profile": {
+                    "workshop_id": "W5",
+                    "name": "GiantWeave",
+                    "capacity_pieces_per_day": "400",
+                    "pickup_lead_days": "4",
+                    "defect_rate": "0.06",
+                    "cost_per_piece": "1.1",
+                    "makes": "TOPS",
+                    "status": "ACTIVE",
+                    "max_batch_pieces": "",
+                    "current_queue_days": "3.0",
+                    "notes": "huge capacity, slow pickup and delivery"
+                  },
+                  "risk": {
+                    "status": "ok",
+                    "batches": 1,
+                    "outsourced_pieces": 370,
+                    "chance_all_batches_clean": 0.94,
+                    "chance_some_batch_needs_rework": 0.06,
+                    "expected_pieces_in_reworked_batches": 22.2,
+                    "workshops": [
+                      {
+                        "workshop_id": "W5",
+                        "name": "GiantWeave",
+                        "defect_rate": 0.06,
+                        "dispatcher_note": "huge capacity, slow pickup and delivery",
+                        "flags": [
+                          "slow pickup and delivery (4 calendar days of fixed transport overhead per batch)"
+                        ],
+                        "source": {
+                          "source": "track1/data/workshops.csv",
+                          "row": 6,
+                          "key": "W5"
+                        },
+                        "pieces": 370,
+                        "completion_date": "2026-04-08",
+                        "rework_chance": 0.06,
+                        "rework_scenario_arrival": "2026-04-13"
+                      }
+                    ],
+                    "assumptions": [
+                      "Each workshop's batch needs rework independently, with its defect_rate from workshops.csv.",
+                      "A rework delays only that workshop's pieces; other batches arrive as planned.",
+                      "Actual rework duration is not in the data. The full-redo scenario assumes the whole batch is redone once at the same workshop and capacity with no new queue, then adds the fixed transport overhead again. It is not a guaranteed latest arrival; actual delays may be longer.",
+                      "In-house work has no defect data and is not included."
+                    ],
+                    "risk_level": "medium",
+                    "risk_basis": "chance that some outsourced batch needs rework",
+                    "strategy_rating": "Medium-risk strategy",
+                    "summary": "Medium-risk strategy. 94% chance every outsourced batch comes back clean. W5 GiantWeave (370 pieces): 6% chance of rework; the full-redo scenario puts their arrival on 13 Apr instead of 8 Apr. Actual rework time is unknown. Scenario dates assume one full redo, unchanged capacity, no new queue and fixed transport; actual arrivals may be later."
+                  },
+                  "snapshot_date": "2026-04-01",
+                  "data_as_of": "2026-04-01",
+                  "scenario_start_date": "2026-04-01",
+                  "start_date": "2026-04-01",
+                  "source": "track1/data/workshops.csv",
+                  "assumptions": [
+                    "New batches only; each branch delivers finished goods and runs in parallel.",
+                    "Monday to Saturday are workdays for all producers; no holidays are modeled.",
+                    "The start date is inclusive: one workday starting Monday finishes Monday.",
+                    "External queue and production are rounded up together to whole workdays; transport is added once as calendar days after production.",
+                    "Dates assume every outsourced batch comes back clean; `risk` gives, batch by batch, the chance of rework and its full-redo scenario arrival date under stated assumptions, not a guaranteed latest date.",
+                    "Capacity, queues and reference unfinished-order load are from 2026-04-01, even when the scenario starts later.",
+                    "Reported cost includes external per-piece processing charges only. In-house cost is excluded by request; transport and rework charges are not supplied.",
+                    "Currency is unspecified in the source data.",
+                    "Queue and profile values use the 2026-04-01 snapshot even for other scenario dates."
+                  ]
+                }
+              ],
+              "assumptions": [
+                "New batches only; each branch delivers finished goods and runs in parallel.",
+                "Monday to Saturday are workdays for all producers; no holidays are modeled.",
+                "The start date is inclusive: one workday starting Monday finishes Monday.",
+                "External queue and production are rounded up together to whole workdays; transport is added once as calendar days after production.",
+                "Dates assume every outsourced batch comes back clean; `risk` gives, batch by batch, the chance of rework and its full-redo scenario arrival date under stated assumptions, not a guaranteed latest date.",
+                "Capacity, queues and reference unfinished-order load are from 2026-04-01, even when the scenario starts later.",
+                "Reported cost includes external per-piece processing charges only. In-house cost is excluded by request; transport and rework charges are not supplied.",
+                "Currency is unspecified in the source data.",
+                "One batch per producer; arbitrary numbers of eligible workshops may run in parallel.",
+                "In-house production is left out: its cost is not in the data, so only outside workshops are compared. Give an in-house cost per piece to include it.",
+                "No shared-resource contention or split fees are modeled. Quality risk is reported in `risk`, not optimized: the plan is chosen on date and cost.",
+                "Deadline days are inclusive calendar days; the start date is day one.",
+                "This is not an existing-order forecast; the only probabilities are the defect figures in `risk`."
+              ],
+              "risk": {
+                "status": "ok",
+                "batches": 3,
+                "outsourced_pieces": 900,
+                "chance_all_batches_clean": 0.8212,
+                "chance_some_batch_needs_rework": 0.1788,
+                "expected_pieces_in_reworked_batches": 54.9,
+                "workshops": [
+                  {
+                    "workshop_id": "W3",
+                    "name": "BudgetWorks",
+                    "defect_rate": 0.09,
+                    "dispatcher_note": "cheapest by far",
+                    "flags": [
+                      "high defect rate (9% of batches)",
+                      "slow pickup and delivery (3 calendar days of fixed transport overhead per batch)",
+                      "busy: 5.0 days of work already queued"
+                    ],
+                    "source": {
+                      "source": "track1/data/workshops.csv",
+                      "row": 4,
+                      "key": "W3"
+                    },
+                    "pieces": 230,
+                    "completion_date": "2026-04-10",
+                    "rework_chance": 0.09,
+                    "rework_scenario_arrival": "2026-04-14",
+                    "late_if_reworked": true
+                  },
+                  {
+                    "workshop_id": "W8",
+                    "name": "FreshStart",
+                    "defect_rate": 0.04,
+                    "dispatcher_note": "new workshop on trial: small batches only",
+                    "flags": [
+                      "on trial: batches of at most 300 pieces"
+                    ],
+                    "source": {
+                      "source": "track1/data/workshops.csv",
+                      "row": 9,
+                      "key": "W8"
+                    },
+                    "pieces": 300,
+                    "completion_date": "2026-04-05",
+                    "rework_chance": 0.04,
+                    "rework_scenario_arrival": "2026-04-10",
+                    "late_if_reworked": false
+                  },
+                  {
+                    "workshop_id": "W5",
+                    "name": "GiantWeave",
+                    "defect_rate": 0.06,
+                    "dispatcher_note": "huge capacity, slow pickup and delivery",
+                    "flags": [
+                      "slow pickup and delivery (4 calendar days of fixed transport overhead per batch)"
+                    ],
+                    "source": {
+                      "source": "track1/data/workshops.csv",
+                      "row": 6,
+                      "key": "W5"
+                    },
+                    "pieces": 370,
+                    "completion_date": "2026-04-08",
+                    "rework_chance": 0.06,
+                    "rework_scenario_arrival": "2026-04-13",
+                    "late_if_reworked": true
+                  }
+                ],
+                "assumptions": [
+                  "Each workshop's batch needs rework independently, with its defect_rate from workshops.csv.",
+                  "A rework delays only that workshop's pieces; other batches arrive as planned.",
+                  "Actual rework duration is not in the data. The full-redo scenario assumes the whole batch is redone once at the same workshop and capacity with no new queue, then adds the fixed transport overhead again. It is not a guaranteed latest arrival; actual delays may be longer.",
+                  "In-house work has no defect data and is not included."
+                ],
+                "deadline_date": "2026-04-10",
+                "pieces_that_could_be_late": 600,
+                "chance_some_pieces_late": 0.1446,
+                "chance_all_pieces_on_time": 0.8554,
+                "risk_level": "medium",
+                "risk_basis": "chance of rework at a batch whose full-redo scenario exceeds the deadline",
+                "strategy_rating": "Medium-risk strategy",
+                "summary": "Medium-risk strategy. 82% chance every outsourced batch comes back clean. W3 BudgetWorks (230 pieces): 9% chance of rework; their full-redo scenario arrival is 14 Apr, after the 10 Apr deadline; the other 670 pieces are unaffected. W5 GiantWeave (370 pieces): 6% chance of rework; their full-redo scenario arrival is 13 Apr, after the 10 Apr deadline; the other 530 pieces are unaffected. Actual rework time is unknown. Scenario dates assume one full redo, unchanged capacity, no new queue and fixed transport; actual arrivals may be later."
+              },
+              "snapshot_date": "2026-04-01",
+              "data_as_of": "2026-04-01",
+              "scenario_start_date": "2026-04-01",
+              "objective": "minimum_external_processing_cost_by_deadline",
+              "optimality": "Exact for independent producers, integer quantities, linear external costs and the stated deterministic model.",
+              "deadline_date": "2026-04-10",
+              "calendar_days_inclusive": 10,
+              "allocations": [
+                {
+                  "workshop_id": "W3",
+                  "pieces": 230
+                },
+                {
+                  "workshop_id": "W8",
+                  "pieces": 300
+                },
+                {
+                  "workshop_id": "W5",
+                  "pieces": 370
+                }
+              ],
+              "in_house_pieces": 0,
+              "include_in_house": false,
+              "producers_used": [
+                "W3",
+                "W8",
+                "W5"
+              ],
+              "uses_in_house": false
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/workshops.csv",
+              "row": 4,
+              "key": "W3",
+              "id": "workshops.csv:4@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/workshops.csv#4@v0"
+            },
+            {
+              "source": "track1/data/workshops.csv",
+              "row": 9,
+              "key": "W8",
+              "id": "workshops.csv:9@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/workshops.csv#9@v0"
+            },
+            {
+              "source": "track1/data/workshops.csv",
+              "row": 6,
+              "key": "W5",
+              "id": "workshops.csv:6@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/workshops.csv#6@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/workshops.csv#4@v0": {
+              "workshop_id": "W3",
+              "name": "BudgetWorks",
+              "capacity_pieces_per_day": "230",
+              "pickup_lead_days": "3",
+              "defect_rate": "0.09",
+              "cost_per_piece": "0.8",
+              "makes": "TOPS",
+              "status": "ACTIVE",
+              "max_batch_pieces": "",
+              "current_queue_days": "5.0",
+              "notes": "cheapest by far"
+            },
+            "track1/data/workshops.csv#9@v0": {
+              "workshop_id": "W8",
+              "name": "FreshStart",
+              "capacity_pieces_per_day": "100",
+              "pickup_lead_days": "2",
+              "defect_rate": "0.04",
+              "cost_per_piece": "1.0",
+              "makes": "TOPS",
+              "status": "ACTIVE",
+              "max_batch_pieces": "300",
+              "current_queue_days": "0.0",
+              "notes": "new workshop on trial: small batches only"
+            },
+            "track1/data/workshops.csv#6@v0": {
+              "workshop_id": "W5",
+              "name": "GiantWeave",
+              "capacity_pieces_per_day": "400",
+              "pickup_lead_days": "4",
+              "defect_rate": "0.06",
+              "cost_per_piece": "1.1",
+              "makes": "TOPS",
+              "status": "ACTIVE",
+              "max_batch_pieces": "",
+              "current_queue_days": "3.0",
+              "notes": "huge capacity, slow pickup and delivery"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 19,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 3.42
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:50+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

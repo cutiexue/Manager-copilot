@@ -1,0 +1,511 @@
+{
+  "scenario": "Q47",
+  "questions": [
+    "Q47"
+  ],
+  "adaptation": "",
+  "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+  "started_at": "2026-11-13T11:55:45+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "Add the note “priority handling” to ORD-002.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+        "answer": "A note \"priority handling\" on ORD-002 is ready as a card — press Confirm in the app to save it; it isn't stored until then.",
+        "tool_calls": [
+          {
+            "name": "propose_order_note",
+            "arguments": {
+              "order_id": "ORD-002",
+              "text": "priority handling"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+                "kind": "note",
+                "status": "DRAFT",
+                "summary": "Note on ORD-002: priority handling",
+                "payload": {
+                  "order_id": "ORD-002",
+                  "text": "priority handling"
+                },
+                "expires_at": "2026-11-14T11:55:46+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "priority handling"
+            },
+            "summary": "Note on ORD-002: priority handling",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:46+08:00",
+            "expires_at": "2026-11-14T11:55:46+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "67b8afc0a44d9c62091e22e2df79d1dc3d1e476099a65cff1b5c5a8997aea6e7",
+            "turn_id": "0c995f81-ff5b-4ccf-847f-623d9fb432bd"
+          }
+        ],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.27
+    },
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "Add another note to ORD-002: “confirm packing label”.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+        "answer": "A second note on ORD-002, \"confirm packing label\", is ready as a card — press Confirm to save it. The earlier \"priority handling\" note is still waiting for Confirm too.",
+        "tool_calls": [
+          {
+            "name": "propose_order_note",
+            "arguments": {
+              "order_id": "ORD-002",
+              "text": "confirm packing label"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+                "kind": "note",
+                "status": "DRAFT",
+                "summary": "Note on ORD-002: confirm packing label",
+                "payload": {
+                  "order_id": "ORD-002",
+                  "text": "confirm packing label"
+                },
+                "expires_at": "2026-11-14T11:55:48+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "confirm packing label"
+            },
+            "summary": "Note on ORD-002: confirm packing label",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:48+08:00",
+            "expires_at": "2026-11-14T11:55:48+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "f98a19197ebf03bbd4b8ccab9a2d5acb8e8a2cfed79e6f99c9e6cdbe5d3dc222",
+            "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+          }
+        ],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.84
+    },
+    {
+      "step": "chat",
+      "qid": "Q47",
+      "message": "There are two pending notes for ORD-002: “priority handling” and “confirm packing label”. Confirm only the packing-label note.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+        "answer": "I can't confirm it — only you can, by pressing Confirm on the \"confirm packing label\" card in the app (proposal c8414ca7…). Leave the \"priority handling\" card untouched and it stays unsaved; you can also press Cancel on it to clear it.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 0,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.29
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "confirm packing label"
+            },
+            "summary": "Note on ORD-002: confirm packing label",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:48+08:00",
+            "expires_at": "2026-11-14T11:55:48+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "f98a19197ebf03bbd4b8ccab9a2d5acb8e8a2cfed79e6f99c9e6cdbe5d3dc222",
+            "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+          },
+          {
+            "id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "priority handling"
+            },
+            "summary": "Note on ORD-002: priority handling",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:46+08:00",
+            "expires_at": "2026-11-14T11:55:46+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "67b8afc0a44d9c62091e22e2df79d1dc3d1e476099a65cff1b5c5a8997aea6e7",
+            "turn_id": "0c995f81-ff5b-4ccf-847f-623d9fb432bd"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 4,
+            "at": "2026-11-13T11:55:49+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+            }
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:55:48+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-002: confirm packing label",
+              "status": "DRAFT",
+              "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+            }
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:55:47+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "0c995f81-ff5b-4ccf-847f-623d9fb432bd"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:55:46+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-002: priority handling",
+              "status": "DRAFT",
+              "turn_id": "0c995f81-ff5b-4ccf-847f-623d9fb432bd"
+            }
+          }
+        ]
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "note",
+        "order_id": "ORD-002",
+        "text": "packing label"
+      },
+      "proposal": {
+        "id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+        "kind": "note",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+        "payload": {
+          "order_id": "ORD-002",
+          "text": "confirm packing label"
+        },
+        "summary": "Note on ORD-002: confirm packing label",
+        "reason": null,
+        "created_at": "2026-11-13T11:55:48+08:00",
+        "expires_at": "2026-11-14T11:55:48+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "f98a19197ebf03bbd4b8ccab9a2d5acb8e8a2cfed79e6f99c9e6cdbe5d3dc222",
+        "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+              "kind": "note",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+              "payload": {
+                "order_id": "ORD-002",
+                "text": "confirm packing label"
+              },
+              "summary": "Note on ORD-002: confirm packing label",
+              "reason": null,
+              "created_at": "2026-11-13T11:55:48+08:00",
+              "expires_at": "2026-11-14T11:55:48+08:00",
+              "decided_at": "2026-11-13T11:55:50+08:00",
+              "result_kind": "note",
+              "result_id": "509957f4-e037-4e3a-95f3-93924593df3a",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "f98a19197ebf03bbd4b8ccab9a2d5acb8e8a2cfed79e6f99c9e6cdbe5d3dc222",
+              "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+            },
+            "result": {
+              "id": "509957f4-e037-4e3a-95f3-93924593df3a",
+              "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+              "order_id": "ORD-002",
+              "text": "confirm packing label",
+              "created_at": "2026-11-13T11:55:50+08:00"
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.0
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "kind": "note",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "confirm packing label"
+            },
+            "summary": "Note on ORD-002: confirm packing label",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:48+08:00",
+            "expires_at": "2026-11-14T11:55:48+08:00",
+            "decided_at": "2026-11-13T11:55:50+08:00",
+            "result_kind": "note",
+            "result_id": "509957f4-e037-4e3a-95f3-93924593df3a",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "f98a19197ebf03bbd4b8ccab9a2d5acb8e8a2cfed79e6f99c9e6cdbe5d3dc222",
+            "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+          },
+          {
+            "id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "54fc2add-fdc9-4057-aaad-d91f38040fa4",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "priority handling"
+            },
+            "summary": "Note on ORD-002: priority handling",
+            "reason": null,
+            "created_at": "2026-11-13T11:55:46+08:00",
+            "expires_at": "2026-11-14T11:55:46+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "67b8afc0a44d9c62091e22e2df79d1dc3d1e476099a65cff1b5c5a8997aea6e7",
+            "turn_id": "0c995f81-ff5b-4ccf-847f-623d9fb432bd"
+          }
+        ],
+        "/notes": [
+          {
+            "id": "509957f4-e037-4e3a-95f3-93924593df3a",
+            "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "order_id": "ORD-002",
+            "text": "confirm packing label",
+            "created_at": "2026-11-13T11:55:50+08:00"
+          }
+        ],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 6,
+            "at": "2026-11-13T11:55:50+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "target_kind": "note",
+            "target_id": "509957f4-e037-4e3a-95f3-93924593df3a",
+            "detail": null
+          },
+          {
+            "id": 5,
+            "at": "2026-11-13T11:55:50+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 4,
+            "at": "2026-11-13T11:55:49+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+            }
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:55:48+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "c8414ca7-f463-4102-82df-8e2238fe31de",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-002: confirm packing label",
+              "status": "DRAFT",
+              "turn_id": "6cb5c63b-5575-401d-9c4e-0e5afa410155"
+            }
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:55:47+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "0c995f81-ff5b-4ccf-847f-623d9fb432bd"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:55:46+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "8d4f8c6a-9d5c-4c59-95b8-f69eb85ba698",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-002: priority handling",
+              "status": "DRAFT",
+              "turn_id": "0c995f81-ff5b-4ccf-847f-623d9fb432bd"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T11:55:50+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

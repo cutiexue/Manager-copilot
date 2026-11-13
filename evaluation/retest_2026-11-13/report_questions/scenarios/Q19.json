@@ -1,0 +1,403 @@
+{
+  "scenario": "Q19",
+  "questions": [
+    "Q19"
+  ],
+  "adaptation": "",
+  "session_id": "d191f413-14cc-4cad-b91e-736a04f29f73",
+  "started_at": "2026-11-13T11:54:12+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q19",
+      "message": "How is that TrendCart order doing?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "d191f413-14cc-4cad-b91e-736a04f29f73",
+        "answer": "TrendCart has several open orders, so which one do you mean? The unfinished ones:\n\n| Order | Product | Pieces | Due | Stage | Note |\n|---|---|---|---|---|---|\n| ORD-120 | Vest | 1,500 | 2026-03-17 | Assembly | Overdue 15 days |\n| ORD-020 | Vest | 1,200 | 2026-03-31 | Washing | Overdue 1 day |\n| ORD-005 | Scarf | 500 | 2026-04-20 | Knitting | No activity 8 days |\n| ORD-017 | Cardigan | 800 | 2026-04-10 | Knitting | On track |\n| ORD-096 | Beanie | 1,000 | 2026-04-17 | Knitting | On track |\n| ORD-082 | Beanie | 600 | 2026-05-01 | Knitting | On track |\n\nThe most urgent is ORD-120 (the vest, 15 days late). Which order should I trace? (Source: track1/data/orders.csv.)",
+        "tool_calls": [
+          {
+            "name": "search_orders",
+            "arguments": {
+              "query": "TrendCart"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "query": "TrendCart",
+              "as_of_date": "2026-04-01",
+              "snapshot_date": "2026-04-01",
+              "total": 17,
+              "count": 8,
+              "orders": [
+                {
+                  "order_id": "ORD-120",
+                  "customer": "TrendCart",
+                  "product": "Vest",
+                  "category": "TOPS",
+                  "pieces": 1500,
+                  "due_date": "2026-03-17",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "ASSEMBLY",
+                  "last_activity_date": "2026-03-30",
+                  "risk_reasons": [
+                    "overdue by 15 calendar days"
+                  ],
+                  "overdue_calendar_days": 15,
+                  "source_row": 76
+                },
+                {
+                  "order_id": "ORD-020",
+                  "customer": "TrendCart",
+                  "product": "Vest",
+                  "category": "TOPS",
+                  "pieces": 1200,
+                  "due_date": "2026-03-31",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-03-30",
+                  "risk_reasons": [
+                    "overdue by 1 calendar day"
+                  ],
+                  "overdue_calendar_days": 1,
+                  "source_row": 90
+                },
+                {
+                  "order_id": "ORD-005",
+                  "customer": "TrendCart",
+                  "product": "Scarf",
+                  "category": "ACCESSORIES",
+                  "pieces": 500,
+                  "due_date": "2026-04-20",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "KNITTING",
+                  "last_activity_date": "2026-03-24",
+                  "risk_reasons": [
+                    "no recorded activity for 8 calendar days"
+                  ],
+                  "overdue_calendar_days": 0,
+                  "source_row": 105
+                },
+                {
+                  "order_id": "ORD-017",
+                  "customer": "TrendCart",
+                  "product": "Cardigan",
+                  "category": "TOPS",
+                  "pieces": 800,
+                  "due_date": "2026-04-10",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "KNITTING",
+                  "last_activity_date": "2026-04-01",
+                  "risk_reasons": [],
+                  "overdue_calendar_days": 0,
+                  "source_row": 114
+                },
+                {
+                  "order_id": "ORD-096",
+                  "customer": "TrendCart",
+                  "product": "Beanie",
+                  "category": "ACCESSORIES",
+                  "pieces": 1000,
+                  "due_date": "2026-04-17",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "KNITTING",
+                  "last_activity_date": "2026-04-01",
+                  "risk_reasons": [],
+                  "overdue_calendar_days": 0,
+                  "source_row": 104
+                },
+                {
+                  "order_id": "ORD-082",
+                  "customer": "TrendCart",
+                  "product": "Beanie",
+                  "category": "ACCESSORIES",
+                  "pieces": 600,
+                  "due_date": "2026-05-01",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "KNITTING",
+                  "last_activity_date": "2026-03-30",
+                  "risk_reasons": [],
+                  "overdue_calendar_days": 0,
+                  "source_row": 120
+                },
+                {
+                  "order_id": "ORD-087",
+                  "customer": "TrendCart",
+                  "product": "Hoodie",
+                  "category": "TOPS",
+                  "pieces": 1000,
+                  "due_date": "2026-01-19",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-02-18",
+                  "risk_reasons": [],
+                  "overdue_calendar_days": null,
+                  "source_row": 7
+                },
+                {
+                  "order_id": "ORD-028",
+                  "customer": "TrendCart",
+                  "product": "Beanie",
+                  "category": "ACCESSORIES",
+                  "pieces": 150,
+                  "due_date": "2026-01-26",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-02-04",
+                  "risk_reasons": [],
+                  "overdue_calendar_days": null,
+                  "source_row": 16
+                }
+              ],
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 76,
+                  "key": "ORD-120"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 90,
+                  "key": "ORD-020"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 105,
+                  "key": "ORD-005"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 114,
+                  "key": "ORD-017"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 104,
+                  "key": "ORD-096"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 120,
+                  "key": "ORD-082"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 7,
+                  "key": "ORD-087"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 16,
+                  "key": "ORD-028"
+                }
+              ],
+              "warnings": []
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 76,
+              "key": "ORD-120",
+              "id": "orders.csv:76@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#76@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 90,
+              "key": "ORD-020",
+              "id": "orders.csv:90@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#90@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 105,
+              "key": "ORD-005",
+              "id": "orders.csv:105@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#105@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 114,
+              "key": "ORD-017",
+              "id": "orders.csv:114@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#114@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 104,
+              "key": "ORD-096",
+              "id": "orders.csv:104@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#104@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 120,
+              "key": "ORD-082",
+              "id": "orders.csv:120@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#120@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 7,
+              "key": "ORD-087",
+              "id": "orders.csv:7@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#7@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 16,
+              "key": "ORD-028",
+              "id": "orders.csv:16@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#16@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#76@v0": {
+              "order_id": "ORD-120",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-02-27",
+              "due_date": "2026-03-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#90@v0": {
+              "order_id": "ORD-020",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1200",
+              "order_date": "2026-03-08",
+              "due_date": "2026-03-31",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#105@v0": {
+              "order_id": "ORD-005",
+              "customer": "TrendCart",
+              "product": "Scarf",
+              "category": "ACCESSORIES",
+              "pieces": "500",
+              "order_date": "2026-03-21",
+              "due_date": "2026-04-20",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-24",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#114@v0": {
+              "order_id": "ORD-017",
+              "customer": "TrendCart",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-23",
+              "due_date": "2026-04-10",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#104@v0": {
+              "order_id": "ORD-096",
+              "customer": "TrendCart",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1000",
+              "order_date": "2026-03-19",
+              "due_date": "2026-04-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#120@v0": {
+              "order_id": "ORD-082",
+              "customer": "TrendCart",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "600",
+              "order_date": "2026-03-27",
+              "due_date": "2026-05-01",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#7@v0": {
+              "order_id": "ORD-087",
+              "customer": "TrendCart",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-01-03",
+              "due_date": "2026-01-19",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-02-18",
+              "completed_date": "2026-02-18",
+              "days_late": "30"
+            },
+            "track1/data/orders.csv#16@v0": {
+              "order_id": "ORD-028",
+              "customer": "TrendCart",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "150",
+              "order_date": "2026-01-10",
+              "due_date": "2026-01-26",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-02-04",
+              "completed_date": "2026-02-04",
+              "days_late": "9"
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 22,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.63
+    }
+  ],
+  "finished_at": "2026-11-13T11:54:14+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

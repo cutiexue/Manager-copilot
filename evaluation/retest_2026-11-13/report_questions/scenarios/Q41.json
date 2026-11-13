@@ -1,0 +1,489 @@
+{
+  "scenario": "Q41",
+  "questions": [
+    "Q41"
+  ],
+  "adaptation": "",
+  "session_id": "3dbf1770-0a45-4b60-98d1-b04c91293212",
+  "started_at": "2026-11-13T11:55:28+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q41",
+      "message": "List the five unfinished orders with the highest order-risk scores. Give the score and original CSV row for each.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "3dbf1770-0a45-4b60-98d1-b04c91293212",
+        "answer": "Top five unfinished orders by risk score (score = 2 × overdue days + idle days), as of 2026-04-01, from track1/data/orders.csv:\n\n| Rank | Order | Customer | Stage | Due | Score | CSV row |\n|---|---|---|---|---|---|---|\n| 1 | ORD-107 | Northwind Apparel | PACKING | 2026-03-16 | 32 (16 days overdue) | 81 |\n| 2 | ORD-120 | TrendCart | ASSEMBLY | 2026-03-17 | 30 (15 days overdue) | 76 |\n| 3 | ORD-114 | Northwind Apparel | PACKING | 2026-03-23 | 18 (9 days overdue) | 85 |\n| 4 | ORD-083 | Maple & Co | WASHING | 2026-03-23 | 18 (9 days overdue) | 88 |\n| 5 | ORD-002 | Cotton Club | WASHING | 2026-03-29 | 15 (3 days overdue + 9 idle days) | 86 |\n\nThese are signals to investigate, not diagnoses; the data does not record why an order is not moving.",
+        "tool_calls": [
+          {
+            "name": "discover_issues",
+            "arguments": {
+              "finding_type": "order_at_risk",
+              "max_findings": 5
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "as_of_date": "2026-04-01",
+              "snapshot_date": "2026-04-01",
+              "total_findings": 12,
+              "count": 5,
+              "findings": [
+                {
+                  "type": "order_at_risk",
+                  "severity": 32,
+                  "severity_basis": "2 x overdue calendar days + idle calendar days",
+                  "summary": "ORD-107 (Northwind Apparel, 2000 pcs, stage PACKING): overdue by 16 calendar days.",
+                  "details": {
+                    "order_id": "ORD-107",
+                    "risk_reasons": [
+                      "overdue by 16 calendar days"
+                    ],
+                    "customer": "Northwind Apparel",
+                    "current_stage": "PACKING",
+                    "due_date": "2026-03-16",
+                    "last_activity_date": "2026-04-01",
+                    "overdue_calendar_days": 16,
+                    "idle_calendar_days": 0
+                  },
+                  "evidence": {
+                    "source": "track1/data/orders.csv",
+                    "source_rows": [
+                      {
+                        "source": "track1/data/orders.csv",
+                        "row": 81,
+                        "key": "ORD-107"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "order_at_risk",
+                  "severity": 30,
+                  "severity_basis": "2 x overdue calendar days + idle calendar days",
+                  "summary": "ORD-120 (TrendCart, 1500 pcs, stage ASSEMBLY): overdue by 15 calendar days.",
+                  "details": {
+                    "order_id": "ORD-120",
+                    "risk_reasons": [
+                      "overdue by 15 calendar days"
+                    ],
+                    "customer": "TrendCart",
+                    "current_stage": "ASSEMBLY",
+                    "due_date": "2026-03-17",
+                    "last_activity_date": "2026-03-30",
+                    "overdue_calendar_days": 15,
+                    "idle_calendar_days": 0
+                  },
+                  "evidence": {
+                    "source": "track1/data/orders.csv",
+                    "source_rows": [
+                      {
+                        "source": "track1/data/orders.csv",
+                        "row": 76,
+                        "key": "ORD-120"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "order_at_risk",
+                  "severity": 18,
+                  "severity_basis": "2 x overdue calendar days + idle calendar days",
+                  "summary": "ORD-114 (Northwind Apparel, 2000 pcs, stage PACKING): overdue by 9 calendar days.",
+                  "details": {
+                    "order_id": "ORD-114",
+                    "risk_reasons": [
+                      "overdue by 9 calendar days"
+                    ],
+                    "customer": "Northwind Apparel",
+                    "current_stage": "PACKING",
+                    "due_date": "2026-03-23",
+                    "last_activity_date": "2026-03-30",
+                    "overdue_calendar_days": 9,
+                    "idle_calendar_days": 0
+                  },
+                  "evidence": {
+                    "source": "track1/data/orders.csv",
+                    "source_rows": [
+                      {
+                        "source": "track1/data/orders.csv",
+                        "row": 85,
+                        "key": "ORD-114"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "order_at_risk",
+                  "severity": 18,
+                  "severity_basis": "2 x overdue calendar days + idle calendar days",
+                  "summary": "ORD-083 (Maple & Co, 1000 pcs, stage WASHING): overdue by 9 calendar days.",
+                  "details": {
+                    "order_id": "ORD-083",
+                    "risk_reasons": [
+                      "overdue by 9 calendar days"
+                    ],
+                    "customer": "Maple & Co",
+                    "current_stage": "WASHING",
+                    "due_date": "2026-03-23",
+                    "last_activity_date": "2026-03-30",
+                    "overdue_calendar_days": 9,
+                    "idle_calendar_days": 0
+                  },
+                  "evidence": {
+                    "source": "track1/data/orders.csv",
+                    "source_rows": [
+                      {
+                        "source": "track1/data/orders.csv",
+                        "row": 88,
+                        "key": "ORD-083"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "order_at_risk",
+                  "severity": 15,
+                  "severity_basis": "2 x overdue calendar days + idle calendar days",
+                  "summary": "ORD-002 (Cotton Club, 1000 pcs, stage WASHING): overdue by 3 calendar days; no recorded activity for 9 calendar days.",
+                  "details": {
+                    "order_id": "ORD-002",
+                    "risk_reasons": [
+                      "overdue by 3 calendar days",
+                      "no recorded activity for 9 calendar days"
+                    ],
+                    "customer": "Cotton Club",
+                    "current_stage": "WASHING",
+                    "due_date": "2026-03-29",
+                    "last_activity_date": "2026-03-23",
+                    "overdue_calendar_days": 3,
+                    "idle_calendar_days": 9
+                  },
+                  "evidence": {
+                    "source": "track1/data/orders.csv",
+                    "source_rows": [
+                      {
+                        "source": "track1/data/orders.csv",
+                        "row": 86,
+                        "key": "ORD-002"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "groups": {
+                "order_at_risk": [
+                  {
+                    "type": "order_at_risk",
+                    "severity": 32,
+                    "severity_basis": "2 x overdue calendar days + idle calendar days",
+                    "summary": "ORD-107 (Northwind Apparel, 2000 pcs, stage PACKING): overdue by 16 calendar days.",
+                    "details": {
+                      "order_id": "ORD-107",
+                      "risk_reasons": [
+                        "overdue by 16 calendar days"
+                      ],
+                      "customer": "Northwind Apparel",
+                      "current_stage": "PACKING",
+                      "due_date": "2026-03-16",
+                      "last_activity_date": "2026-04-01",
+                      "overdue_calendar_days": 16,
+                      "idle_calendar_days": 0
+                    },
+                    "evidence": {
+                      "source": "track1/data/orders.csv",
+                      "source_rows": [
+                        {
+                          "source": "track1/data/orders.csv",
+                          "row": 81,
+                          "key": "ORD-107"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "order_at_risk",
+                    "severity": 30,
+                    "severity_basis": "2 x overdue calendar days + idle calendar days",
+                    "summary": "ORD-120 (TrendCart, 1500 pcs, stage ASSEMBLY): overdue by 15 calendar days.",
+                    "details": {
+                      "order_id": "ORD-120",
+                      "risk_reasons": [
+                        "overdue by 15 calendar days"
+                      ],
+                      "customer": "TrendCart",
+                      "current_stage": "ASSEMBLY",
+                      "due_date": "2026-03-17",
+                      "last_activity_date": "2026-03-30",
+                      "overdue_calendar_days": 15,
+                      "idle_calendar_days": 0
+                    },
+                    "evidence": {
+                      "source": "track1/data/orders.csv",
+                      "source_rows": [
+                        {
+                          "source": "track1/data/orders.csv",
+                          "row": 76,
+                          "key": "ORD-120"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "order_at_risk",
+                    "severity": 18,
+                    "severity_basis": "2 x overdue calendar days + idle calendar days",
+                    "summary": "ORD-114 (Northwind Apparel, 2000 pcs, stage PACKING): overdue by 9 calendar days.",
+                    "details": {
+                      "order_id": "ORD-114",
+                      "risk_reasons": [
+                        "overdue by 9 calendar days"
+                      ],
+                      "customer": "Northwind Apparel",
+                      "current_stage": "PACKING",
+                      "due_date": "2026-03-23",
+                      "last_activity_date": "2026-03-30",
+                      "overdue_calendar_days": 9,
+                      "idle_calendar_days": 0
+                    },
+                    "evidence": {
+                      "source": "track1/data/orders.csv",
+                      "source_rows": [
+                        {
+                          "source": "track1/data/orders.csv",
+                          "row": 85,
+                          "key": "ORD-114"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "order_at_risk",
+                    "severity": 18,
+                    "severity_basis": "2 x overdue calendar days + idle calendar days",
+                    "summary": "ORD-083 (Maple & Co, 1000 pcs, stage WASHING): overdue by 9 calendar days.",
+                    "details": {
+                      "order_id": "ORD-083",
+                      "risk_reasons": [
+                        "overdue by 9 calendar days"
+                      ],
+                      "customer": "Maple & Co",
+                      "current_stage": "WASHING",
+                      "due_date": "2026-03-23",
+                      "last_activity_date": "2026-03-30",
+                      "overdue_calendar_days": 9,
+                      "idle_calendar_days": 0
+                    },
+                    "evidence": {
+                      "source": "track1/data/orders.csv",
+                      "source_rows": [
+                        {
+                          "source": "track1/data/orders.csv",
+                          "row": 88,
+                          "key": "ORD-083"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "order_at_risk",
+                    "severity": 15,
+                    "severity_basis": "2 x overdue calendar days + idle calendar days",
+                    "summary": "ORD-002 (Cotton Club, 1000 pcs, stage WASHING): overdue by 3 calendar days; no recorded activity for 9 calendar days.",
+                    "details": {
+                      "order_id": "ORD-002",
+                      "risk_reasons": [
+                        "overdue by 3 calendar days",
+                        "no recorded activity for 9 calendar days"
+                      ],
+                      "customer": "Cotton Club",
+                      "current_stage": "WASHING",
+                      "due_date": "2026-03-29",
+                      "last_activity_date": "2026-03-23",
+                      "overdue_calendar_days": 3,
+                      "idle_calendar_days": 9
+                    },
+                    "evidence": {
+                      "source": "track1/data/orders.csv",
+                      "source_rows": [
+                        {
+                          "source": "track1/data/orders.csv",
+                          "row": 86,
+                          "key": "ORD-002"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "data_gaps": [],
+              "coverage_complete": true,
+              "selection_policy": "Only order_at_risk, ranked by severity.",
+              "rules": "Thresholds and severity formulas are defined in rules.py; severity units differ per finding type (see severity_basis).",
+              "warnings": [
+                "Findings are signals to investigate, not diagnoses; the data cannot say why something dropped."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 81,
+              "key": "ORD-107",
+              "id": "orders.csv:81@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#81@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 76,
+              "key": "ORD-120",
+              "id": "orders.csv:76@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#76@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 85,
+              "key": "ORD-114",
+              "id": "orders.csv:85@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#85@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 88,
+              "key": "ORD-083",
+              "id": "orders.csv:88@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#88@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#81@v0": {
+              "order_id": "ORD-107",
+              "customer": "Northwind Apparel",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-01",
+              "due_date": "2026-03-16",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#76@v0": {
+              "order_id": "ORD-120",
+              "customer": "TrendCart",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-02-27",
+              "due_date": "2026-03-17",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#85@v0": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-03",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#88@v0": {
+              "order_id": "ORD-083",
+              "customer": "Maple & Co",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-07",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 25,
+          "unverified": [
+            {
+              "kind": "number",
+              "text": "81"
+            },
+            {
+              "kind": "number",
+              "text": "76"
+            },
+            {
+              "kind": "number",
+              "text": "85"
+            },
+            {
+              "kind": "number",
+              "text": "88"
+            },
+            {
+              "kind": "number",
+              "text": "86"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.7
+    }
+  ],
+  "finished_at": "2026-11-13T11:55:31+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

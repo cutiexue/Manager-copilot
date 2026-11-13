@@ -1,0 +1,137 @@
+== backend/TOOLS.md
+# Tool specification
+
+All 35 tools the agent can call, as registered in `tool_schemas.py`. The eight workshop estimators share one row
+because they run the same function for different workshops. Each failure mode was checked by calling the tool
+with a valid and an invalid input.
+
+**Why narrow tools.** We chose narrow, typed tools over one SQL tool with the full schema. A SQL tool is flexible but
+lets the model write joins and arithmetic that look plausible and are wrong; typed tools are reliable but blind to
+questions we did not anticipate. We accept that failure: a question no tool covers is declined or clarified rather
+than answered with improvised arithmetic.
+
+**Blast radius of the action tools.** They can only create PROPOSED items, and no tool can confirm one. The worst they
+can do is an unwanted in-app reminder or alert, a wrong note in the app, or a misleading chase draft that a person might
+later send by hand. Confirmation in the app, 24-hour expiry, cancellation, single execution of a confirmed proposal and
+the append-only audit log bound this. Nothing is written to the course CSV or sent outside the app.
+
+| Tool | Family | Input | Output | Purpose | Non-goals | Failure mode |
+|---|---|---|---|---|---|---|
+| `get_order_status` | Retrieval | order_id (any spelling, e.g. ORD-005, ord5, 5) | The order row: customer, product, pieces, dates, status, current stage; cited source row | "What is the status of ORD-005?" | No progress within a stage; no forecast | Unknown ID returns not_found with close candidates; never substitutes a similar order |
+| `get_customer_orders` | Retrieval | customer (full name or a unique part of it, any case) | The customer's orders, counts, original and unfinished pieces; each unfinished order's own days overdue and risk reasons; source rows | "How are TrendCart's orders doing?" | Never chooses between several matching customers; pieces are not remaining work | A name matching several customers returns ambiguous with the candidates; an unknown one returns not_found with any close spellings, so the agent asks |
+| `query_orders` | Retrieval | Optional status, customer, category, due-date range, order IDs; scope all or selected | Count, original pieces, status and category breakdowns, order IDs; selects them for follow-ups | "How many TOPS orders are due next week?" | No free-form SQL; no remaining-workload estimate | Filters intersect, so an over-narrow query returns an empty selection rather than an error |
+| `search_orders` | Retrieval | Loose text (ID, customer, product or stage); limit up to 20 | Ranked candidate orders, each with its own risk reasons and days overdue | Resolve "the TrendCart hoodie order" before answering | Never picks one match itself; the agent asks the manager | No match returns an empty list, which the agent reports instead of guessing |
+| `get_stage_output` | Retrieval | stage, production_date | Factory-wide output of that stage on that day; source row | "What did assembly produce on 30 March?" | Not per-order output; not a forecast | A missing record returns not_found and is stated as missing data, not zero output |
+| `summarize_stage_output` | Retrieval | date_from, date_to, optional stage | Totals and per-workday averages; workdays counted and missing | "How much did packing produce in March?" | No order progress; the model never adds daily figures itself | A reversed range is an error; missing workdays are listed, never filled with zero |
+| `list_workshops` | Retrieval | Optional category (TOPS or ACCESSORIES) and status (ACTIVE or SUSPENDED) | Every matching workshop profile: what it makes, status, capacity, batch cap, queue, lead time, charge per piece, defect rate; counts; source rows | "Which workshops can make tops?" | No estimate, booking or ranking; the plan tools do that | An unknown category or status is refused; suspended workshops are listed and marked, never dropped |
+| `compare_stage_output` | Judgement | stage, production_date, baseline workdays (default 7) | The day's output against the previous workdays (Sundays excluded), percentage change, baseline rows | "Is 800 pieces from assembly normal?" | No diagnosis of cause; no forecast | A short or incomplete baseline is flagged in warnings; Sundays never count as zero days |
+| `compare_stage_periods` | Judgement | Two date ranges, or none for the last two full weeks; optional stage | Totals per period, change, largest decline and increase, completeness | "How did this week compare with last week?" | No diagnosis of cause | Compares totals: periods of different length are not normalised to workdays (1-10 vs 11-31 March packing shows +117%) |
+| `get_overdue_orders` | Judgement | Optional scenario date | Unfinished orders due before the data date, each with its own days overdue; orders and counts grouped by customer; source rows | "Which orders are late?" | Does not use the real-world date; no cause of lateness | Another date without scenario=true is refused, so the model cannot treat the real calendar as the data date |
+| `get_orders_at_risk` | Judgement | Optional scenario date, due-soon window | Unfinished orders overdue, due within 3 days or quiet for 7 days, each with its reason and rule | "What needs my attention?" | Thresholds are rules, not probabilities of failure | Same date guard; thresholds live in rules.py, so a borderline case can be checked |
+| `trace_order` | Tracing | order_id | Source row, computed facts (idle days, days overdue), recent output at its stage, evidence references | "Why is ORD-005 at risk?" | Stage output is factory-wide context, not per-order progress | Unknown ID returns not_found with candidates |
+| `discover_issues` | Discovery | Optional scenario date, max findings, finding type | Findings by type (order at risk, stage drop of 20% or more, customer slipping) with evidence; total count; data gaps | "Did anything go wrong?" Finds what nobody asked about | No cause analysis; never alerts by itself | Shows at most five, chosen round-robin across types; the total (e.g. 14) is returned so the cut is visible |
+| `get_morning_briefing` | Discovery | Optional scenario date, max findings | Yesterday's output against baseline, orders at risk, grouped findings with suggested checks, narrative | The 7 a.m. briefing: "What do I need to know today?" | No model call; sends nothing | Built from the tools above, so it inherits their gaps; data gaps are listed in the briefing |
+| `estimate_in_house` | Feasibility | pieces, optional start date, queue workdays, baseline workdays | Stage-by-stage workdays including the queue behind unfinished orders, completion date, assumptions | "Can we make 800 hoodies in-house by the 25th?" | No in-house cost; not guaranteed capacity | Out-of-range input is refused; within-stage progress is unknown, so the queue is a conservative scenario |
+| `estimate_quickstitch`<br>`estimate_steadyhands`<br>`estimate_budgetworks`<br>`estimate_little_loom`<br>`estimate_giantweave`<br>`estimate_nimble_needle`<br>`estimate_oldmill`<br>`estimate_freshstart` | Feasibility | pieces, category, optional start date (one tool per workshop W1-W8) | Workdays including queue, transport days, completion date, external charge (currency unspecified), defect rate | "What if we send it to W1?" | No booking or negotiation; no currency conversion | An inactive workshop (W7) or a batch above its cap (W8: 300) is refused instead of estimated |
+| `estimate_production_plan` | Feasibility | category, total pieces, in-house pieces, explicit workshop allocations | Completion date and charges per branch for that exact split | Check a split the manager proposes | Never fills gaps in the allocation itself | Allocations that do not sum to the total return invalid_allocation with the unallocated pieces |
+| `optimize_fastest_plan` | Feasibility | category, pieces, optional start date and in-house options | Earliest full-delivery allocation, charges, assumptions, defect and deadline risk | "What is the fastest way to deliver 800 tops?" | Not lowest cost; not a delivery guarantee | Always returns a plan, however large the batch; dates assume reference capacity and queues |
+| `optimize_cheapest_plan` | Feasibility | As above plus deadline_days; optional in-house cost per piece | Cheapest allocation within the deadline, charges, defect and deadline risk | "What is the cheapest way to meet a 30-day deadline?" | In-house excluded unless a cost is given; not total business cost | An unreachable deadline returns infeasible with the maximum deliverable pieces |
+| `optimize_orders_outsourced` | Feasibility | quantity basis, scope or order IDs, expected order count | Fastest all-outsourced plan for several orders sharing workshop capacity; risk | "Can we outsource all of these orders?" | Original quantities, not remaining work; cost reported, not minimised | If the order count differs from expected, returns scope_mismatch, so "these orders" cannot silently change |
+| `optimize_orders_cheapest` | Feasibility | As above plus deadline_days | Cheapest all-outsourced plan for several orders within the deadline; risk | "What is the cheapest plan for these orders in 60 days?" | No in-house production; currency unspecified | scope_mismatch as above; infeasible when no complete plan fits |
+| `get_current_plan` | Feasibility | None | The last successful multi-order plan in this conversation | "What was that plan again?" | Not a fresh quote | No saved plan returns needs_clarification |
+| `revise_order_plan` | Feasibility | extra_days, date basis, optional status filter | Revised cheapest plan, compared with the saved charges | "What if we allow three more days?" | Keeps the original start and orders; a failed revision never replaces the saved plan | No saved plan returns needs_clarification |
+| `propose_reminder` | Action | text, when (real Singapore calendar), optional order and subject | A PROPOSED reminder card that expires in 24 hours | "Remind me tomorrow about ORD-005." | Never saves itself; checks no condition (e.g. "if packing is still behind") | Past, unreadable or over-a-year times are refused. Worst case: an unwanted in-app reminder. Stopped by Confirm, expiry and Cancel |
+| `propose_order_note` | Action | order_id, text | A PROPOSED note on the order | Record a decision on an order | Never edits the course CSV | Unknown order or empty text is refused. Worst case: a wrong note in the app. Stopped by Confirm; audit log |
+| `draft_chase_message` | Action | order_id, text | A PROPOSED chase-up draft for the customer | "That order has not moved. Chase it up." | Never sends anything | Worst case: a misleading draft a person might later send by hand. Stopped by Confirm; stored as a draft only |
+| `propose_watch` | Action | order_id, condition (not moved by, becomes overdue, completed, reaches stage), deadline or stage | A PROPOSED standing watch | "Tell me if ORD-005 has not moved by Friday." | Order conditions only; no output-level conditions; scripted snapshots, not live data | Other conditions are refused by the schema. Worst case: an unwanted alert, once per watch. Stopped by Confirm, Pause and Cancel |
+| `list_follow_ups` | Action | Optional kind | Pending proposals, reminders, notes, drafts, watches and unread alerts | "What did I ask you to track?" | Read-only; cannot confirm anything | Outside an app conversation returns unavailable |
+== backend/tests/test_report_fixes.py
+"""Fixes for the failures in the team's evaluation report (Evaluation.pdf, F04 and F11-F13)."""
+
+import json
+
+from langchain_core.messages import AIMessage
+
+import skills
+from answer_check import check
+from llm import execute_tool
+from tests.test_chat_actions import call, make
+from tool_schemas import TOOLS
+
+
+def run(name, **args):
+    return execute_tool(name, json.dumps(args))
+
+
+def test_f11_every_tops_workshop_is_listed_with_its_status_and_row():
+    # Q08 named four workshops; the CSV has seven that make TOPS, six of them active.
+    tops = run("list_workshops", category="TOPS")
+    assert tops["status"] == "ok"
+    assert tops["workshop_ids"] == ["W1", "W2", "W3", "W5", "W6", "W7", "W8"]
+    assert (tops["count"], tops["active_count"]) == (7, 6)
+    assert next(w for w in tops["data"] if w["workshop_id"] == "W7")["status"] == "SUSPENDED"
+    assert [ref["row"] for ref in tops["source_rows"]] == [2, 3, 4, 6, 7, 8, 9]
+    active = run("list_workshops", category="TOPS", status="ACTIVE")
+    assert active["workshop_ids"] == ["W1", "W2", "W3", "W5", "W6", "W8"]
+    assert run("list_workshops")["count"] == 8
+    assert run("list_workshops", category="SHOES")["status"] == "error"
+
+
+def test_f11_catalog_questions_are_routed_to_the_list_tool():
+    feasibility = next(skill for skill in skills.SKILLS if skill["name"] == "feasibility")
+    assert "list_workshops" in feasibility["tools"]
+    assert "which workshops can make what" in feasibility["when"]
+    assert "list_workshops" in feasibility["rules"]
+
+
+def test_f04_customers_with_two_or_more_overdue_orders_are_counted_by_the_tool():
+    overdue = run("get_overdue_orders")
+    several = overdue["customers_with_two_or_more"]
+    assert several == {"count": 4, "customers": ["Cotton Club", "Maple & Co", "Northwind Apparel", "TrendCart"]}
+    groups = {group["customer"]: sorted(group["order_ids"]) for group in overdue["by_customer"]}
+    assert groups["Northwind Apparel"] == ["ORD-107", "ORD-114"]
+    assert sum(group["count"] for group in overdue["by_customer"]) == overdue["count"] == 8
+
+
+def test_f13_each_northwind_order_carries_its_own_overdue_days():
+    customer = run("get_customer_orders", customer="Northwind Apparel")
+    days = {o["order_id"]: o["overdue_calendar_days"] for o in customer["data"] if o["status"] == "IN_PROGRESS"}
+    assert days == {"ORD-107": 16, "ORD-114": 9, "ORD-099": 0, "ORD-029": 0, "ORD-066": 0}
+    found = {o["order_id"]: o["overdue_calendar_days"] for o in run("search_orders", query="Northwind")["orders"]}
+    assert (found["ORD-107"], found["ORD-114"]) == (16, 9)
+
+
+def test_f13_an_overdue_figure_on_the_wrong_order_is_flagged():
+    customer = run("get_customer_orders", customer="Northwind Apparel")
+    wrong = check("Which one? ORD-107 (Cardigan) is 9 days overdue; ORD-114 (Hoodie) is 9 days overdue.", [customer])
+    assert wrong["unverified"] == [{"kind": "attribution", "text": "ORD-107: 9 days overdue"}]
+    right = check("ORD-107 is overdue by 16 calendar days.\nORD-114 is 9 days late.", [customer])
+    assert right["unverified"] == []
+    assert check("ORD-107 逾期9天。", [customer])["unverified"] == [{"kind": "attribution", "text": "ORD-107: 9 days overdue"}]
+    # An order with no overdue figure in the tool results is not judged.
+    assert check("ORD-107 is 9 days overdue.", [{"order_id": "ORD-107", "due_date": "2026-03-16"}])["unverified"] == []
+
+
+def test_f13_a_misattributed_answer_is_answered_again_once(tmp_path):
+    script = [call("get_customer_orders", {"customer": "Northwind Apparel"}, "c1"),
+              AIMessage(content="Which order? ORD-107 is 9 days overdue."),
+              call("get_customer_orders", {"customer": "Northwind Apparel"}, "c2"),
+              AIMessage(content="Which order? ORD-107 is 16 days overdue and ORD-114 is 9 days overdue.")]
+    service, client = make(tmp_path, script)
+    session = client.post("/sessions", json={"title": "t"}).json()["id"]
+    reply = client.post(f"/sessions/{session}/messages", json={"message": "Pull up the Northwind order"}).json()
+    assert reply["answer_check"]["retried"] is True
+    assert reply["answer_check"]["unverified"] == []
+    assert reply["answer"].startswith("Which order? ORD-107 is 16 days")
+    assert "is 9 days overdue." not in str(service.store.get_history(session)).split("ORD-114")[0]
+
+
+def test_f12_a_stated_today_moves_yesterday():
+    policy = next(skill for skill in skills.SKILLS if skill["name"] == "base_grounding_policy")["rules"]
+    assert "states a different today" in policy and "even a Sunday" in policy
+    stage = next(t for t in TOOLS if t["function"]["name"] == "get_stage_output")
+    assert "count back from that day" in stage["function"]["parameters"]["properties"]["production_date"]["description"]
+    # The tools themselves already answer the Q43 dates.
+    sunday = run("get_stage_output", stage="ASSEMBLY", production_date="2026-03-29")
+    saturday = run("get_stage_output", stage="ASSEMBLY", production_date="2026-03-28")
+    assert (sunday["data"]["pieces_completed"], saturday["data"]["pieces_completed"]) == (0, 445)

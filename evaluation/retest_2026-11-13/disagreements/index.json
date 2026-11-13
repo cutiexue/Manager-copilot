@@ -1,0 +1,92 @@
+{
+ "groups": {
+  "A_worse_than_report": [
+   "Q14",
+   "Q36",
+   "Q50"
+  ],
+  "B_better_than_report": [
+   "Q08",
+   "Q20",
+   "Q42",
+   "Q43",
+   "Q60",
+   "Q66"
+  ],
+  "C_unverified_now_checked": [
+   "Q18",
+   "Q33",
+   "Q34",
+   "Q35",
+   "Q37",
+   "Q38",
+   "Q39",
+   "Q46",
+   "Q47",
+   "Q48",
+   "Q49",
+   "Q51",
+   "Q52",
+   "Q53",
+   "Q54",
+   "Q67",
+   "Q68",
+   "Q69",
+   "Q70"
+  ]
+ },
+ "reruns": {
+  "Q08": [
+   "Pass",
+   "Pass"
+  ],
+  "Q14": [
+   "Pass",
+   "Pass"
+  ],
+  "Q20": [
+   "Pass",
+   "Pass"
+  ],
+  "Q36": [
+   "Partial",
+   "Partial"
+  ],
+  "Q42": [
+   "Pass",
+   "Pass"
+  ],
+  "Q43": [
+   "Pass",
+   "Pass"
+  ],
+  "Q49": [
+   "Partial",
+   "Partial"
+  ],
+  "Q50": [
+   "Pass",
+   "Fail"
+  ],
+  "Q60": [
+   "Pass",
+   "Pass"
+  ],
+  "Q69": [
+   "Pass",
+   "Pass"
+  ]
+ },
+ "rerun_notes": {
+  "Q14": "Runs 2 and 3 give correct figures (Assembly 432 vs 611, -29.3%; yesterday 455, -11.8% vs its own 7-workday average). The 939 misattribution appeared in 1 of 3 runs.",
+  "Q36": "Runs 2 and 3 repeat it: both clarify O1 and promise to set the reminder for 2 April 2026 15:00 once the order is known, without noting that time has passed. 3 of 3 runs.",
+  "Q49": "Runs 2 and 3: two simultaneous confirms again give one note and one execution audit; the answers no longer suggest two notes but still say the outcome cannot be guaranteed, instead of stating that a confirmed proposal executes once. Answer incomplete in 3 of 3 runs.",
+  "Q50": "Clock 15:01:00. Run 2: refuses, no card (pass). Run 3: says 15:00 has passed but creates an unrequested card for tomorrow 09:00 on ORD-107, an order the manager never named (fail). Variant at 15:01:30, runs 2 and 3: both refuse with no card (pass). The one-minute grace in actions.parse_when explains run 1 only.",
+  "Q69": "Runs 2 and 3 name the day correctly (Saturday 14 November); firing correct in 3 of 3 runs. The weekday error appeared in 1 of 3 runs.",
+  "Q08": "All 3 runs list the seven TOPS workshops and mark W7 suspended.",
+  "Q20": "All 3 runs ask which order is meant.",
+  "Q42": "All 3 runs state four customers first and list the eight orders consistently.",
+  "Q43": "All 3 runs use 29 March (zero) and 28 March (1,031/445/624/734).",
+  "Q60": "All 3 runs give ORD-107 16 and ORD-114 9 days overdue."
+ }
+}

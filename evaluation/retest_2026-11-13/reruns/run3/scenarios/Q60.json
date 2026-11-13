@@ -1,0 +1,675 @@
+{
+  "scenario": "Q60",
+  "questions": [
+    "Q60"
+  ],
+  "adaptation": "",
+  "session_id": "0bce09ef-0d3a-41e0-b479-dd38e6e52735",
+  "started_at": "2026-11-13T12:03:31+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q60",
+      "message": "Pull up the Northwind Apparel order and tell me whether it needs chasing.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "0bce09ef-0d3a-41e0-b479-dd38e6e52735",
+        "answer": "Northwind Apparel has 14 orders and 5 are still unfinished; two of them need chasing: **ORD-107** (2,000 cardigans, due 16 March, overdue 16 days, last activity 1 April at packing) and **ORD-114** (2,000 hoodies, due 23 March, overdue 9 days, last activity 30 March at packing).\n\nAlso worth a look: ORD-029 (1,500 beanies) is due today and still at washing, and ORD-099 (1,500 polo shirts) is due 5 April at washing. ORD-066 isn't due until 26 April.\n\nSource: orders.csv rows 81, 85, 92, 89, 111.\n\nOne caveat: a recorded last-activity date doesn't prove progress — no stage-level progress is in the data.",
+        "tool_calls": [
+          {
+            "name": "get_customer_orders",
+            "arguments": {
+              "customer": "Northwind Apparel"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "customer": "Northwind Apparel",
+              "count": 14,
+              "original_order_pieces": 13650,
+              "unfinished_count": 5,
+              "unfinished_order_pieces": 8000,
+              "data": [
+                {
+                  "order_id": "ORD-100",
+                  "customer": "Northwind Apparel",
+                  "product": "Crewneck sweater",
+                  "category": "TOPS",
+                  "pieces": "200",
+                  "order_date": "2026-01-10",
+                  "due_date": "2026-01-31",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-02-04",
+                  "completed_date": "2026-02-04",
+                  "days_late": "4"
+                },
+                {
+                  "order_id": "ORD-070",
+                  "customer": "Northwind Apparel",
+                  "product": "Beanie",
+                  "category": "ACCESSORIES",
+                  "pieces": "1200",
+                  "order_date": "2026-01-16",
+                  "due_date": "2026-02-09",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-02-09",
+                  "completed_date": "2026-02-09",
+                  "days_late": "0"
+                },
+                {
+                  "order_id": "ORD-006",
+                  "customer": "Northwind Apparel",
+                  "product": "Vest",
+                  "category": "TOPS",
+                  "pieces": "150",
+                  "order_date": "2026-01-20",
+                  "due_date": "2026-02-20",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-02-04",
+                  "completed_date": "2026-02-04",
+                  "days_late": "-16"
+                },
+                {
+                  "order_id": "ORD-032",
+                  "customer": "Northwind Apparel",
+                  "product": "Beanie",
+                  "category": "ACCESSORIES",
+                  "pieces": "1500",
+                  "order_date": "2026-02-13",
+                  "due_date": "2026-03-14",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-03-17",
+                  "completed_date": "2026-03-17",
+                  "days_late": "3"
+                },
+                {
+                  "order_id": "ORD-050",
+                  "customer": "Northwind Apparel",
+                  "product": "Vest",
+                  "category": "TOPS",
+                  "pieces": "500",
+                  "order_date": "2026-02-13",
+                  "due_date": "2026-03-05",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-02-28",
+                  "completed_date": "2026-02-28",
+                  "days_late": "-5"
+                },
+                {
+                  "order_id": "ORD-013",
+                  "customer": "Northwind Apparel",
+                  "product": "Polo shirt",
+                  "category": "TOPS",
+                  "pieces": "1000",
+                  "order_date": "2026-02-16",
+                  "due_date": "2026-03-03",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-03-17",
+                  "completed_date": "2026-03-17",
+                  "days_late": "14"
+                },
+                {
+                  "order_id": "ORD-048",
+                  "customer": "Northwind Apparel",
+                  "product": "Hoodie",
+                  "category": "TOPS",
+                  "pieces": "200",
+                  "order_date": "2026-02-20",
+                  "due_date": "2026-03-25",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-03-13",
+                  "completed_date": "2026-03-13",
+                  "days_late": "-12"
+                },
+                {
+                  "order_id": "ORD-079",
+                  "customer": "Northwind Apparel",
+                  "product": "Crewneck sweater",
+                  "category": "TOPS",
+                  "pieces": "300",
+                  "order_date": "2026-02-24",
+                  "due_date": "2026-03-30",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-03-23",
+                  "completed_date": "2026-03-23",
+                  "days_late": "-7"
+                },
+                {
+                  "order_id": "ORD-107",
+                  "customer": "Northwind Apparel",
+                  "product": "Cardigan",
+                  "category": "TOPS",
+                  "pieces": "2000",
+                  "order_date": "2026-03-01",
+                  "due_date": "2026-03-16",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "PACKING",
+                  "last_activity_date": "2026-04-01",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 16,
+                  "risk_reasons": [
+                    "overdue by 16 calendar days"
+                  ]
+                },
+                {
+                  "order_id": "ORD-019",
+                  "customer": "Northwind Apparel",
+                  "product": "Vest",
+                  "category": "TOPS",
+                  "pieces": "600",
+                  "order_date": "2026-03-02",
+                  "due_date": "2026-03-29",
+                  "status": "COMPLETE",
+                  "current_stage": "COMPLETE",
+                  "last_activity_date": "2026-03-29",
+                  "completed_date": "2026-03-29",
+                  "days_late": "0"
+                },
+                {
+                  "order_id": "ORD-114",
+                  "customer": "Northwind Apparel",
+                  "product": "Hoodie",
+                  "category": "TOPS",
+                  "pieces": "2000",
+                  "order_date": "2026-03-03",
+                  "due_date": "2026-03-23",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "PACKING",
+                  "last_activity_date": "2026-03-30",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 9,
+                  "risk_reasons": [
+                    "overdue by 9 calendar days"
+                  ]
+                },
+                {
+                  "order_id": "ORD-099",
+                  "customer": "Northwind Apparel",
+                  "product": "Polo shirt",
+                  "category": "TOPS",
+                  "pieces": "1500",
+                  "order_date": "2026-03-07",
+                  "due_date": "2026-04-05",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-03-31",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 0,
+                  "risk_reasons": []
+                },
+                {
+                  "order_id": "ORD-029",
+                  "customer": "Northwind Apparel",
+                  "product": "Beanie",
+                  "category": "ACCESSORIES",
+                  "pieces": "1500",
+                  "order_date": "2026-03-10",
+                  "due_date": "2026-04-01",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "WASHING",
+                  "last_activity_date": "2026-04-01",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 0,
+                  "risk_reasons": [
+                    "due today, still at stage WASHING"
+                  ]
+                },
+                {
+                  "order_id": "ORD-066",
+                  "customer": "Northwind Apparel",
+                  "product": "Polo shirt",
+                  "category": "TOPS",
+                  "pieces": "1000",
+                  "order_date": "2026-03-22",
+                  "due_date": "2026-04-26",
+                  "status": "IN_PROGRESS",
+                  "current_stage": "ASSEMBLY",
+                  "last_activity_date": "2026-03-30",
+                  "completed_date": "",
+                  "days_late": "",
+                  "overdue_calendar_days": 0,
+                  "risk_reasons": []
+                }
+              ],
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 17,
+                  "key": "ORD-100"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 28,
+                  "key": "ORD-070"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 33,
+                  "key": "ORD-006"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 62,
+                  "key": "ORD-032"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 63,
+                  "key": "ORD-050"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 66,
+                  "key": "ORD-013"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 68,
+                  "key": "ORD-048"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 71,
+                  "key": "ORD-079"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 81,
+                  "key": "ORD-107"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 83,
+                  "key": "ORD-019"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 85,
+                  "key": "ORD-114"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 89,
+                  "key": "ORD-099"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 92,
+                  "key": "ORD-029"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 111,
+                  "key": "ORD-066"
+                }
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 17,
+              "key": "ORD-100",
+              "id": "orders.csv:17@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#17@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 28,
+              "key": "ORD-070",
+              "id": "orders.csv:28@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#28@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 33,
+              "key": "ORD-006",
+              "id": "orders.csv:33@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#33@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 62,
+              "key": "ORD-032",
+              "id": "orders.csv:62@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#62@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 63,
+              "key": "ORD-050",
+              "id": "orders.csv:63@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#63@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 66,
+              "key": "ORD-013",
+              "id": "orders.csv:66@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#66@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 68,
+              "key": "ORD-048",
+              "id": "orders.csv:68@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#68@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 71,
+              "key": "ORD-079",
+              "id": "orders.csv:71@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#71@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 81,
+              "key": "ORD-107",
+              "id": "orders.csv:81@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#81@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 83,
+              "key": "ORD-019",
+              "id": "orders.csv:83@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#83@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 85,
+              "key": "ORD-114",
+              "id": "orders.csv:85@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#85@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 89,
+              "key": "ORD-099",
+              "id": "orders.csv:89@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#89@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 92,
+              "key": "ORD-029",
+              "id": "orders.csv:92@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#92@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 111,
+              "key": "ORD-066",
+              "id": "orders.csv:111@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#111@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#17@v0": {
+              "order_id": "ORD-100",
+              "customer": "Northwind Apparel",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "200",
+              "order_date": "2026-01-10",
+              "due_date": "2026-01-31",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-02-04",
+              "completed_date": "2026-02-04",
+              "days_late": "4"
+            },
+            "track1/data/orders.csv#28@v0": {
+              "order_id": "ORD-070",
+              "customer": "Northwind Apparel",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1200",
+              "order_date": "2026-01-16",
+              "due_date": "2026-02-09",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-02-09",
+              "completed_date": "2026-02-09",
+              "days_late": "0"
+            },
+            "track1/data/orders.csv#33@v0": {
+              "order_id": "ORD-006",
+              "customer": "Northwind Apparel",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "150",
+              "order_date": "2026-01-20",
+              "due_date": "2026-02-20",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-02-04",
+              "completed_date": "2026-02-04",
+              "days_late": "-16"
+            },
+            "track1/data/orders.csv#62@v0": {
+              "order_id": "ORD-032",
+              "customer": "Northwind Apparel",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1500",
+              "order_date": "2026-02-13",
+              "due_date": "2026-03-14",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-03-17",
+              "completed_date": "2026-03-17",
+              "days_late": "3"
+            },
+            "track1/data/orders.csv#63@v0": {
+              "order_id": "ORD-050",
+              "customer": "Northwind Apparel",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "500",
+              "order_date": "2026-02-13",
+              "due_date": "2026-03-05",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-02-28",
+              "completed_date": "2026-02-28",
+              "days_late": "-5"
+            },
+            "track1/data/orders.csv#66@v0": {
+              "order_id": "ORD-013",
+              "customer": "Northwind Apparel",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-02-16",
+              "due_date": "2026-03-03",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-03-17",
+              "completed_date": "2026-03-17",
+              "days_late": "14"
+            },
+            "track1/data/orders.csv#68@v0": {
+              "order_id": "ORD-048",
+              "customer": "Northwind Apparel",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "200",
+              "order_date": "2026-02-20",
+              "due_date": "2026-03-25",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-03-13",
+              "completed_date": "2026-03-13",
+              "days_late": "-12"
+            },
+            "track1/data/orders.csv#71@v0": {
+              "order_id": "ORD-079",
+              "customer": "Northwind Apparel",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "300",
+              "order_date": "2026-02-24",
+              "due_date": "2026-03-30",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "2026-03-23",
+              "days_late": "-7"
+            },
+            "track1/data/orders.csv#81@v0": {
+              "order_id": "ORD-107",
+              "customer": "Northwind Apparel",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-01",
+              "due_date": "2026-03-16",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#83@v0": {
+              "order_id": "ORD-019",
+              "customer": "Northwind Apparel",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "600",
+              "order_date": "2026-03-02",
+              "due_date": "2026-03-29",
+              "status": "COMPLETE",
+              "current_stage": "COMPLETE",
+              "last_activity_date": "2026-03-29",
+              "completed_date": "2026-03-29",
+              "days_late": "0"
+            },
+            "track1/data/orders.csv#85@v0": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-03",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#89@v0": {
+              "order_id": "ORD-099",
+              "customer": "Northwind Apparel",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-03-07",
+              "due_date": "2026-04-05",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#92@v0": {
+              "order_id": "ORD-029",
+              "customer": "Northwind Apparel",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1500",
+              "order_date": "2026-03-10",
+              "due_date": "2026-04-01",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#111@v0": {
+              "order_id": "ORD-066",
+              "customer": "Northwind Apparel",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-22",
+              "due_date": "2026-04-26",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 22,
+          "unverified": [
+            {
+              "kind": "number",
+              "text": "85"
+            },
+            {
+              "kind": "number",
+              "text": "92"
+            },
+            {
+              "kind": "number",
+              "text": "89"
+            },
+            {
+              "kind": "number",
+              "text": "111"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.77
+    }
+  ],
+  "finished_at": "2026-11-13T12:03:33+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c",
+  "uncommitted_files": [
+    "M README.md",
+    " M backend/README.md",
+    " M backend/answer_check.py",
+    " M backend/order_search.py",
+    " M backend/rules.py",
+    " M backend/service.py",
+    " M backend/skills/base_grounding_policy.md",
+    " M backend/skills/feasibility.md",
+    " M backend/skills/general_qa.md",
+    " M backend/tests/test_agent_tools.py",
+    " M backend/tool_schemas.py",
+    " M backend/tools.py",
+    " M evaluation/README.md",
+    " M frontend/src/components/Chat.tsx",
+    " M frontend/src/types.ts",
+    "?? backend/TOOLS.md",
+    "?? backend/tests/test_report_fixes.py"
+  ],
+  "uncommitted_diff_sha256": "16b617fc913b900fb249273aa3c2220a734c5efa679dec1d50575b2c603b51c4",
+  "prompt_version": "f9348b4de425",
+  "harness_sha256": "7e3f1f1db58da45e67374b0f7e090fedbb76d280156b564b261698a8a8b7850b",
+  "data_sha256": {
+    "orders.csv": "0880af9742fe7cc0923c5009e2de48a0bedb57b78cc294e35a1c9721fe0311f8",
+    "production_log.csv": "f67e505bd460ff62e788f371c7be58b22795a99b76ece5a43350b2d8b7372830",
+    "workshops.csv": "d7e1c97d3d338a2b5aef8e35f167e3582f22c4526e9c736c5b4c8125505ec59e"
+  },
+  "run_started": "2026-11-13T12:03:03+08:00"
+}

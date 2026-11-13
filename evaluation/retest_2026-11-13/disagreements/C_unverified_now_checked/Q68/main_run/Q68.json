@@ -1,0 +1,369 @@
+{
+  "scenario": "Q68",
+  "questions": [
+    "Q68"
+  ],
+  "adaptation": "",
+  "session_id": "03bde8da-cf11-49c2-a7d9-9f5984cb024a",
+  "started_at": "2026-11-13T11:56:55+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q68",
+      "message": "Add the note “Verify carton labels before dispatch” to ORD-114.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "03bde8da-cf11-49c2-a7d9-9f5984cb024a",
+        "answer": "The note \"Verify carton labels before dispatch\" on ORD-114 (Northwind Apparel, hoodie, currently in packing) is ready as a card — press Confirm in the app to save it; nothing is saved until then.",
+        "tool_calls": [
+          {
+            "name": "get_order_status",
+            "arguments": {
+              "order_id": "ORD-114"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-114",
+                "customer": "Northwind Apparel",
+                "product": "Hoodie",
+                "category": "TOPS",
+                "pieces": "2000",
+                "order_date": "2026-03-03",
+                "due_date": "2026-03-23",
+                "status": "IN_PROGRESS",
+                "current_stage": "PACKING",
+                "last_activity_date": "2026-03-30",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 85,
+                  "key": "ORD-114"
+                }
+              ]
+            }
+          },
+          {
+            "name": "propose_order_note",
+            "arguments": {
+              "order_id": "ORD-114",
+              "text": "Verify carton labels before dispatch"
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+                "kind": "note",
+                "status": "DRAFT",
+                "summary": "Note on ORD-114: Verify carton labels before dispatch",
+                "payload": {
+                  "order_id": "ORD-114",
+                  "text": "Verify carton labels before dispatch"
+                },
+                "expires_at": "2026-11-14T11:56:57+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 85,
+              "key": "ORD-114",
+              "id": "orders.csv:85@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#85@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#85@v0": {
+              "order_id": "ORD-114",
+              "customer": "Northwind Apparel",
+              "product": "Hoodie",
+              "category": "TOPS",
+              "pieces": "2000",
+              "order_date": "2026-03-03",
+              "due_date": "2026-03-23",
+              "status": "IN_PROGRESS",
+              "current_stage": "PACKING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "03bde8da-cf11-49c2-a7d9-9f5984cb024a",
+            "payload": {
+              "order_id": "ORD-114",
+              "text": "Verify carton labels before dispatch"
+            },
+            "summary": "Note on ORD-114: Verify carton labels before dispatch",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:57+08:00",
+            "expires_at": "2026-11-14T11:56:57+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "72dfa35f5e9b63f631dccb947e50ca8ec62b7dcd09af2a1ffc1a1aa4ac41fec1",
+            "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+          }
+        ],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 3.23
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "03bde8da-cf11-49c2-a7d9-9f5984cb024a",
+            "payload": {
+              "order_id": "ORD-114",
+              "text": "Verify carton labels before dispatch"
+            },
+            "summary": "Note on ORD-114: Verify carton labels before dispatch",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:57+08:00",
+            "expires_at": "2026-11-14T11:56:57+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "72dfa35f5e9b63f631dccb947e50ca8ec62b7dcd09af2a1ffc1a1aa4ac41fec1",
+            "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 2,
+            "at": "2026-11-13T11:56:58+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:56:57+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-114: Verify carton labels before dispatch",
+              "status": "DRAFT",
+              "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+            }
+          }
+        ]
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "note",
+        "order_id": "ORD-114"
+      },
+      "proposal": {
+        "id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+        "kind": "note",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "03bde8da-cf11-49c2-a7d9-9f5984cb024a",
+        "payload": {
+          "order_id": "ORD-114",
+          "text": "Verify carton labels before dispatch"
+        },
+        "summary": "Note on ORD-114: Verify carton labels before dispatch",
+        "reason": null,
+        "created_at": "2026-11-13T11:56:57+08:00",
+        "expires_at": "2026-11-14T11:56:57+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "72dfa35f5e9b63f631dccb947e50ca8ec62b7dcd09af2a1ffc1a1aa4ac41fec1",
+        "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+              "kind": "note",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "03bde8da-cf11-49c2-a7d9-9f5984cb024a",
+              "payload": {
+                "order_id": "ORD-114",
+                "text": "Verify carton labels before dispatch"
+              },
+              "summary": "Note on ORD-114: Verify carton labels before dispatch",
+              "reason": null,
+              "created_at": "2026-11-13T11:56:57+08:00",
+              "expires_at": "2026-11-14T11:56:57+08:00",
+              "decided_at": "2026-11-13T11:56:58+08:00",
+              "result_kind": "note",
+              "result_id": "21828eb4-d9ed-4068-b66d-b41d47db319c",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "72dfa35f5e9b63f631dccb947e50ca8ec62b7dcd09af2a1ffc1a1aa4ac41fec1",
+              "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+            },
+            "result": {
+              "id": "21828eb4-d9ed-4068-b66d-b41d47db319c",
+              "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+              "order_id": "ORD-114",
+              "text": "Verify carton labels before dispatch",
+              "created_at": "2026-11-13T11:56:58+08:00"
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.01
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "kind": "note",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "03bde8da-cf11-49c2-a7d9-9f5984cb024a",
+            "payload": {
+              "order_id": "ORD-114",
+              "text": "Verify carton labels before dispatch"
+            },
+            "summary": "Note on ORD-114: Verify carton labels before dispatch",
+            "reason": null,
+            "created_at": "2026-11-13T11:56:57+08:00",
+            "expires_at": "2026-11-14T11:56:57+08:00",
+            "decided_at": "2026-11-13T11:56:58+08:00",
+            "result_kind": "note",
+            "result_id": "21828eb4-d9ed-4068-b66d-b41d47db319c",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "72dfa35f5e9b63f631dccb947e50ca8ec62b7dcd09af2a1ffc1a1aa4ac41fec1",
+            "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+          }
+        ],
+        "/notes": [
+          {
+            "id": "21828eb4-d9ed-4068-b66d-b41d47db319c",
+            "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "order_id": "ORD-114",
+            "text": "Verify carton labels before dispatch",
+            "created_at": "2026-11-13T11:56:58+08:00"
+          }
+        ],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 4,
+            "at": "2026-11-13T11:56:58+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "target_kind": "note",
+            "target_id": "21828eb4-d9ed-4068-b66d-b41d47db319c",
+            "detail": null
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:56:58+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:56:58+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:56:57+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "8ee9b292-6078-4e2b-8f26-bc709594e1fa",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-114: Verify carton labels before dispatch",
+              "status": "DRAFT",
+              "turn_id": "7f03d2f2-8afb-4157-8004-11d50bef5055"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:58+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "scenario": "Q59",
+  "questions": [
+    "Q59"
+  ],
+  "adaptation": "",
+  "session_id": "743a8761-6bc7-4ed4-9d00-df6aca25c84d",
+  "started_at": "2026-11-13T11:56:30+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q59",
+      "message": "Which orders are due on April 1, 2026, but not yet complete? Are they already overdue on that date?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "743a8761-6bc7-4ed4-9d00-df6aca25c84d",
+        "answer": "One: ORD-029 (Northwind Apparel, accessories, 1,500 pieces), due 2026-04-01 and still in progress.\n\nNot overdue yet — overdue means due strictly before the reference date, and it falls due today (2026-04-01), so today is its due date, not a late day.",
+        "tool_calls": [
+          {
+            "name": "query_orders",
+            "arguments": {
+              "due_from": "2026-04-01",
+              "due_to": "2026-04-01",
+              "status": "IN_PROGRESS"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "snapshot_date": "2026-04-01",
+              "count": 1,
+              "original_order_pieces": 1500,
+              "by_status": {
+                "IN_PROGRESS": {
+                  "order_count": 1,
+                  "original_order_pieces": 1500,
+                  "order_ids": [
+                    "ORD-029"
+                  ]
+                }
+              },
+              "by_category": {
+                "ACCESSORIES": {
+                  "order_count": 1,
+                  "original_order_pieces": 1500,
+                  "order_ids": [
+                    "ORD-029"
+                  ]
+                }
+              },
+              "order_ids": [
+                "ORD-029"
+              ],
+              "filters": {
+                "status": "IN_PROGRESS",
+                "due_from": "2026-04-01",
+                "due_to": "2026-04-01"
+              },
+              "scope": "all",
+              "orders": [
+                {
+                  "order_id": "ORD-029",
+                  "category": "ACCESSORIES",
+                  "customer": "Northwind Apparel",
+                  "pieces": "1500",
+                  "due_date": "2026-04-01",
+                  "status": "IN_PROGRESS"
+                }
+              ],
+              "selection": {
+                "order_ids": [
+                  "ORD-029"
+                ],
+                "filters": {
+                  "status": "IN_PROGRESS",
+                  "due_from": "2026-04-01",
+                  "due_to": "2026-04-01"
+                },
+                "source_tool": "query_orders"
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 92,
+                  "key": "ORD-029"
+                }
+              ],
+              "warnings": [
+                "Quantities are original ordered pieces, not remaining work. No remaining quantity is supplied."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 92,
+              "key": "ORD-029",
+              "id": "orders.csv:92@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#92@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#92@v0": {
+              "order_id": "ORD-029",
+              "customer": "Northwind Apparel",
+              "product": "Beanie",
+              "category": "ACCESSORIES",
+              "pieces": "1500",
+              "order_date": "2026-03-10",
+              "due_date": "2026-04-01",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 3,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.44
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:33+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

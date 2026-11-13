@@ -1,0 +1,72 @@
+{
+  "scenario": "Q36",
+  "questions": [
+    "Q36"
+  ],
+  "adaptation": "",
+  "session_id": "a440e71c-6a41-4a91-b748-e8ee73feafa4",
+  "started_at": "2026-11-13T11:55:01+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q36",
+      "message": "Remind me to follow up on O1 at 3 pm on 2 April 2026.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "a440e71c-6a41-4a91-b748-e8ee73feafa4",
+        "answer": "I couldn't set that reminder: \"O1\" isn't a known order ID in the data, so I didn't propose anything.\n\nWhich order did you mean? If you give me the full ID (for example ORD-107) or a customer or product name, I'll propose the reminder for 2 April 2026 at 15:00 (real calendar, Singapore time).",
+        "tool_calls": [
+          {
+            "name": "propose_reminder",
+            "arguments": {
+              "text": "Follow up on order O1",
+              "order_id": "O1",
+              "when": "2026-04-02T15:00"
+            },
+            "status": "error",
+            "result": {
+              "status": "error",
+              "message": "Unknown order 'O1'. Use an ID like ORD-107."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 2,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.21
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": []
+      },
+      "seconds": 0.02
+    }
+  ],
+  "finished_at": "2026-11-13T11:55:04+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

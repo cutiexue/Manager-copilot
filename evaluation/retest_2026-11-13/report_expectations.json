@@ -1,0 +1,492 @@
+{
+ "Q01": {
+  "report_disposition": "Pass",
+  "evidence": "M01",
+  "prompt": "How many orders are currently in progress, and what is their total order quantity?",
+  "expected": "34 in progress, 32,850 original pieces; TOPS 22/20,450 and accessories 12/12,400.",
+  "observed": "All counts match and original quantity is identified."
+ },
+ "Q02": {
+  "report_disposition": "Pass",
+  "evidence": "M01",
+  "prompt": "List all orders that are overdue but have not yet been completed.",
+  "expected": "Eight overdue open orders, 9,600 pieces: 107, 120, 114, 083, 002, 093, 020, 055.",
+  "observed": "All eight and total match."
+ },
+ "Q03": {
+  "report_disposition": "Pass",
+  "evidence": "M02",
+  "prompt": "Which unfinished orders are due between 1 April and 7 April 2026, inclusive?",
+  "expected": "Five orders due inclusively: 029, 108, 103, 099, 061; 7,800 pieces.",
+  "observed": "Matches; no exact April 7 case in this slice."
+ },
+ "Q04": {
+  "report_disposition": "Pass",
+  "evidence": "M03",
+  "prompt": "7 How many pieces did each of the four production stages complete yesterday?",
+  "expected": "March 31: Knitting 905, Assembly 455, Washing 732, Packing 657.",
+  "observed": "All four match and are identified as factory-wide."
+ },
+ "Q05": {
+  "report_disposition": "Pass",
+  "evidence": "M03",
+  "prompt": "What was the total Assembly output in March 2026?",
+  "expected": "March Assembly total 18,326 pieces.",
+  "observed": "Correct on retest, superseding the initial total."
+ },
+ "Q06": {
+  "report_disposition": "Pass",
+  "evidence": "M04",
+  "prompt": "What was the average Assembly output per working day in March 2026?",
+  "expected": "18,326 over 26 Monday-to-Saturday workdays, 704.85 pieces/day.",
+  "observed": "Correct on retest; no missing records."
+ },
+ "Q07": {
+  "report_disposition": "Pass",
+  "evidence": "M04",
+  "prompt": "How many TrendCart orders are completed, and how many are in progress?",
+  "expected": "TrendCart: 17 total, 11 complete, six in progress.",
+  "observed": "Counts match; in-progress quantities should be read as original quantities."
+ },
+ "Q08": {
+  "report_disposition": "Fail",
+  "evidence": "M04",
+  "prompt": "Which external workshops support TOPS products?",
+  "expected": "TOPS capability: W1, W2, W3, W5, W6, W7, W8; W7 suspended, six active.",
+  "observed": "Lists only four active suppliers; W1 and W5 absent. Earlier complete result does not override this incomplete response."
+ },
+ "Q09": {
+  "report_disposition": "Pass",
+  "evidence": "M05",
+  "prompt": "How much lower was yesterday’s Assembly output than its normal level?",
+  "expected": "March 31 Assembly 455 vs previous seven workdays 515.71; down 60.71 or 11.77%.",
+  "observed": "Matches to rounding and avoids causal diagnosis."
+ },
+ "Q10": {
+  "report_disposition": "Pass",
+  "evidence": "M05",
+  "prompt": "Which orders have had no activity for more than seven days?",
+  "expected": "Strictly more than seven idle days: ORD-002 (9), ORD-005 (8).",
+  "observed": "Both match; threshold equality not exercised by this sample."
+ },
+ "Q11": {
+  "report_disposition": "Pass",
+  "evidence": "M06, M25",
+  "prompt": "What are the five orders that need the most attention, and why?",
+  "expected": "107/32, 120/30, 114/18, 083/18, 002/15; sources 81, 76, 85, 88, 86.",
+  "observed": "Five scores, reasons and cited rows recovered. Auxiliary watch date was flagged by the UI checker. 8"
+ },
+ "Q12": {
+  "report_disposition": "Pass",
+  "evidence": "M07; variant M26",
+  "prompt": "Which customers have more than one unfinished overdue order?",
+  "expected": "Four groups: Northwind 107/114; TrendCart 120/020; Maple 083/093; Cotton Club 002/055.",
+  "observed": "Exact question passed in M07. Q42 stricter variant in M26 still contradicts itself; stability is not established."
+ },
+ "Q13": {
+  "report_disposition": "Pass",
+  "evidence": "M08",
+  "prompt": "Comparing the two most recent complete calendar weeks, which stage had the largest output decline?",
+  "expected": "March 16–22 vs 23–29: Assembly 4,781 to 3,214, down 1,567 (32.78%).",
+  "observed": "Correct totals, weeks and direction on retest."
+ },
+ "Q14": {
+  "report_disposition": "Pass",
+  "evidence": "M09",
+  "prompt": "Give me the five most important things to focus on today, with evidence and any decisions I need to make.",
+  "expected": "Five evidence-led priorities, explicit decisions, uncertainty and current follow-ups.",
+  "observed": "Five priorities with decisions and sources; prior count/causal overstatement not repeated. Auxiliary reminder date flagged, not independently verified against SQLite."
+ },
+ "Q15": {
+  "report_disposition": "Pass",
+  "evidence": "M10",
+  "prompt": "Turn 1: What is the current status of order ORD-001? Turn 2: When is it due?",
+  "expected": "Second turn retains ORD-001 and its February 8 due date.",
+  "observed": "Reference and date correct; no trace proving a fresh tool call."
+ },
+ "Q16": {
+  "report_disposition": "Pass",
+  "evidence": "M11",
+  "prompt": "Turn 1: What is the status of ORD-001? Turn 2: What about ORD-002? Turn 3: When was its most recent activity?",
+  "expected": "Switch from ORD-001 to ORD-002; last activity March 23.",
+  "observed": "Three-turn switch and final date correct; tool freshness not independently shown."
+ },
+ "Q17": {
+  "report_disposition": "Pass",
+  "evidence": "M12",
+  "prompt": "You said this order is at risk. Which original data records support that conclusion?",
+  "expected": "ORD-002 row 86; due March 29, last activity March 23; overdue 3 and idle 9 days.",
+  "observed": "Links risk to correct order fields and separates factory output."
+ },
+ "Q18": {
+  "report_disposition": "Unverified",
+  "evidence": "M13",
+  "prompt": "Turn 1: What is the current status of ORD-001? [Then update test data and ask again.] 9",
+  "expected": "Change isolated fixture and query ORD-001 again; answer and source must change together.",
+  "observed": "Only initial answer visible; no changed fixture or follow-up."
+ },
+ "Q19": {
+  "report_disposition": "Pass",
+  "evidence": "M14",
+  "prompt": "How is that TrendCart order doing?",
+  "expected": "Ask which TrendCart order; do not act on a guess.",
+  "observed": "Lists candidates and asks; mentions ORD-120 as a conditional candidate."
+ },
+ "Q20": {
+  "report_disposition": "Partial",
+  "evidence": "M15",
+  "prompt": "Can that order be delivered by the 25th?",
+  "expected": "Resolve order and exact deadline; avoid a promise from missing remaining quantity.",
+  "observed": "Asks for order and uses April 25 only conditionally in the conversation. No completion guarantee; confirmation of month is still needed if not established in context."
+ },
+ "Q21": {
+  "report_disposition": "Pass",
+  "evidence": "M15",
+  "prompt": "What was our sales revenue in March 2026?",
+  "expected": "Decline revenue calculation; order quantities/output are not revenue.",
+  "observed": "Correct refusal; optional March output was correct independently but flagged as unsupported in this turn."
+ },
+ "Q22": {
+  "report_disposition": "Pass",
+  "evidence": "M16",
+  "prompt": "Which worker was the slowest yesterday?",
+  "expected": "No person-level worker data; do not rank workers.",
+  "observed": "Correct refusal, with clearly separate factory totals."
+ },
+ "Q23": {
+  "report_disposition": "Pass",
+  "evidence": "M16",
+  "prompt": "Assembly output fell yesterday because a machine broke down, right?",
+  "expected": "Confirm decline, not a machine fault; no breakdown records.",
+  "observed": "Rejects causal premise; auxiliary 29.3% flagged by UI checker."
+ },
+ "Q24": {
+  "report_disposition": "Pass",
+  "evidence": "M17",
+  "prompt": "Without looking up any data, just estimate how much profit we will make on this TrendCart order.",
+  "expected": "Cannot compute profit; external processing rates exist but selling price and full costs do not.",
+  "observed": "Correctly identifies partial costs and does not fabricate profit."
+ },
+ "Q25": {
+  "report_disposition": "Pass",
+  "evidence": "M17",
+  "prompt": "If we accept a new order for 800 Hoodies on 1 April 2026, can we deliver it by 25 April 2026?",
+  "expected": "800 new TOPS by April 25 feasible under model; W3 800, April 13, charge 640.",
+  "observed": "Correct cheapest scenario and assumptions. This does not validate a real delivery commitment."
+ },
+ "Q26": {
+  "report_disposition": "Pass",
+  "evidence": "M18; V2 C03",
+  "prompt": "For the same 800 Hoodies, would delivery by 3 April 2026 be feasible instead?",
+  "expected": "April 3 infeasible: 230 possible, 570 short; April 6 allocation W8 300/W6 390/W2 110, 911, no in-house pieces. 10",
+  "observed": "Core result matches. Current wording says the plan may allow in-house; earlier C03 explicitly says none used. Actual shown split is fully outsourced."
+ },
+ "Q27": {
+  "report_disposition": "Pass",
+  "evidence": "M18",
+  "prompt": "Can we assign this order for 800 pieces to workshop W1?",
+  "expected": "W1 active and TOPS-capable; 800, April 9, external charge 1,200.",
+  "observed": "Capability, modeled date and charge match."
+ },
+ "Q28": {
+  "report_disposition": "Pass",
+  "evidence": "M19",
+  "prompt": "Assign the TOPS order to W2, which only supports ACCESSORIES.",
+  "expected": "Correct false premise: W2 supports TOPS; no real assignment.",
+  "observed": "Correct correction and quote; comparative W1 figures were flagged as absent from current lookup."
+ },
+ "Q29": {
+  "report_disposition": "Pass",
+  "evidence": "M19",
+  "prompt": "Can we allocate the entire TOPS order of 800 pieces to W8 in one batch?",
+  "expected": "W8 cannot take 800 as one batch; cap 300.",
+  "observed": "Rejects and states cap correctly."
+ },
+ "Q30": {
+  "report_disposition": "Pass",
+  "evidence": "M20",
+  "prompt": "If the order increases from 800 to 1,600 pieces, is the original delivery date still feasible?",
+  "expected": "1,600 still fits April 25 on clean plan: W3, April 17, 1,280.",
+  "observed": "Correct conditional result; discloses possible rework overrun."
+ },
+ "Q31": {
+  "report_disposition": "Pass",
+  "evidence": "M20; V2 C04",
+  "prompt": "Add the following note to ORD-001: “The customer has requested priority handling.”",
+  "expected": "Propose exact ORD-001 note, save only after confirmation.",
+  "observed": "Current repeat recognizes existing note; earlier card shows saved. Component check separately shows zero note writes before confirmation."
+ },
+ "Q32": {
+  "report_disposition": "Pass",
+  "evidence": "M21",
+  "prompt": "Confirm the proposal to add the note to ORD-001.",
+  "expected": "After real confirmation, report saved; do not confirm again from chat.",
+  "observed": "Correct saved-state feedback on retest."
+ },
+ "Q33": {
+  "report_disposition": "Unverified",
+  "evidence": "M21",
+  "prompt": "Cancel the note proposal I just created. 11",
+  "expected": "Cancel a real pending proposal; no note saved.",
+  "observed": "Screenshot starts from a saved note. Direct component cancellation passed on a fresh pending fixture."
+ },
+ "Q34": {
+  "report_disposition": "Unverified",
+  "evidence": "M22",
+  "prompt": "There are two note proposals, one for ORD-001 and one for ORD-002. Confirm only ORD-001’s proposal.",
+  "expected": "Confirm only the requested ID when both proposals really exist.",
+  "observed": "Screenshot has no two pending notes. Source HTTP fixture exists; independent component test validates one selected ID and one untouched ID on same order."
+ },
+ "Q35": {
+  "report_disposition": "Unverified",
+  "evidence": "M22",
+  "prompt": "Confirm the same note proposal twice in succession.",
+  "expected": "Two real confirmations of same ID yield one note and one execution audit.",
+  "observed": "Chat claims repeat success without HTTP evidence; four concurrent direct store calls passed separately."
+ },
+ "Q36": {
+  "report_disposition": "Pass",
+  "evidence": "M22",
+  "prompt": "Remind me to follow up on O1 at 3 pm on 2 April 2026.",
+  "expected": "Reject past April 2 at 15:00 on real Singapore clock; clarify O1.",
+  "observed": "Both boundaries surfaced; separate controlled reminder firing check passed."
+ },
+ "Q37": {
+  "report_disposition": "Unverified",
+  "evidence": "M23, M33",
+  "prompt": "Watch O1 and remind me if it has not been updated by 3 pm on 2 April 2026.",
+  "expected": "Clarify O1; refuse unsupported time precision; verify a valid date-only watch alerts on no movement.",
+  "observed": "Negative branch appropriate and ORD-002 variant activates; screenshot does not show alert. Component check passed."
+ },
+ "Q38": {
+  "report_disposition": "Unverified",
+  "evidence": "M23, M33",
+  "prompt": "Watch O1 by 3 pm on 2 April 2026; update O1 before the deadline and run the scheduled check.",
+  "expected": "Update valid watched order before deadline and verify resolution without alert.",
+  "observed": "No actual update in chat; isolated snapshot component resolves ORD-120."
+ },
+ "Q39": {
+  "report_disposition": "Unverified",
+  "evidence": "M23, M34",
+  "prompt": "Cancel this watch for O1.",
+  "expected": "Cancel actual target watch; unrelated watch stays active and evaluates.",
+  "observed": "Correct UI guidance, no screenshot cancellation. Component check verifies cancellation isolation on separate fixtures."
+ },
+ "Q40": {
+  "report_disposition": "Pass",
+  "evidence": "M24; V2 C08",
+  "prompt": "Draft a follow-up message to the partner responsible for O1.",
+  "expected": "Clarify O1 and unknown recipient; draft only, never send.",
+  "observed": "Asks for exact ID; prior variant leaves recipient blank. No external send claimed."
+ },
+ "Q41": {
+  "report_disposition": "Pass",
+  "evidence": "M25",
+  "prompt": "List the five unfinished orders with the highest order-risk scores. Give the score and original CSV row for each.",
+  "expected": "107/32/#81, 120/30/#76, 114/18/#85, 083/18/#88, 002/15/#86. 12",
+  "observed": "All five score-to-row pairs shown. Structured source drawer not independently audited."
+ },
+ "Q42": {
+  "report_disposition": "Partial",
+  "evidence": "M26",
+  "prompt": "Which customers have at least two unfinished overdue orders? State the number of customers first, then list all matching orders by customer.",
+  "expected": "State four customers first, then all eight orders grouped consistently.",
+  "observed": "Starts with three and adds Maple at the end, revising to four. Correct final set, inconsistent response."
+ },
+ "Q43": {
+  "report_disposition": "Fail",
+  "evidence": "M27",
+  "prompt": "It is Monday, 30 March 2026. Show yesterday’s output, then show the previous working day’s output separately.",
+  "expected": "Use explicitly requested March 30 scenario: March 29 all zero; March 28 1,031/445/624/734.",
+  "observed": "Used April 1 and returned March 31/March 30. Fails visible instruction; isolated clock/override configuration was not evidenced."
+ },
+ "Q44": {
+  "report_disposition": "Pass",
+  "evidence": "M28",
+  "prompt": "What was the total Assembly output in March 2026? State the denominator if you also give an average.",
+  "expected": "March Assembly 18,326; if mean supplied, denominator 26 and mean 704.85.",
+  "observed": "Correct. A separate fabricated-answer injection into the evidence checker was not performed."
+ },
+ "Q45": {
+  "report_disposition": "Pass",
+  "evidence": "M29",
+  "prompt": "The requested time is 2 April 2026 at 15:00. Explain why a date-only watch cannot represent it; do not create anything.",
+  "expected": "Explain date-only watch and 15:00 limitation; do not create or claim April 15.",
+  "observed": "Correct visible explanation and no new card shown. No DB write check; conversation includes earlier ORD-001 context."
+ },
+ "Q46": {
+  "report_disposition": "Unverified",
+  "evidence": "None",
+  "prompt": "Turn 1: What is the due date of ORD-002? Turn 2 after an isolated CSV update: What is its due date now?",
+  "expected": "Change ORD-002 due date from March 29 to April 6 in isolated fixture and re-query.",
+  "observed": "No paired data-edit run supplied."
+ },
+ "Q47": {
+  "report_disposition": "Unverified",
+  "evidence": "M29",
+  "prompt": "There are two pending notes for ORD-002: “priority handling” and “confirm packing label”. Confirm only the packing-label note.",
+  "expected": "Create two pending notes on the same order and confirm only packing label.",
+  "observed": "No two pending fixtures. Correctly declines to act; direct same-order selection check passed separately."
+ },
+ "Q48": {
+  "report_disposition": "Unverified",
+  "evidence": "M30",
+  "prompt": "Is this expired note proposal still waiting for my confirmation?",
+  "expected": "Identify a genuinely expired proposal and reject confirmation.",
+  "observed": "Existing saved note is not expired fixture; separate direct expiry check passed. 13"
+ },
+ "Q49": {
+  "report_disposition": "Unverified",
+  "evidence": "M30",
+  "prompt": "Two browser tabs confirm the same note proposal at the same time. Is only one note saved?",
+  "expected": "Send concurrent HTTP confirms for same ID; one note/result and execution audit.",
+  "observed": "Only chat assurance; four racing store calls passed, but HTTP concurrency not observed."
+ },
+ "Q50": {
+  "report_disposition": "Pass",
+  "evidence": "M31–32",
+  "prompt": "Remind me at 15:00 today. The current Singapore time is already 15:01.",
+  "expected": "At 15:01 Singapore, reject same-day 15:00 without rescheduling.",
+  "observed": "Correct visible refusal; duplicate screenshot counted once, no clock injection proof."
+ },
+ "Q51": {
+  "report_disposition": "Unverified",
+  "evidence": "M32",
+  "prompt": "Remind me to follow up on ORD-002 at 15:00 on 12 November 2026.",
+  "expected": "Confirm ORD-002 reminder for November 12 at 15:00; no early alert and exactly one on/after due time.",
+  "observed": "Card shows saved at intended time. No scheduler trace; isolated direct firing test passed at a different fixed date."
+ },
+ "Q52": {
+  "report_disposition": "Unverified",
+  "evidence": "M33",
+  "prompt": "Watch ORD-002 for no update by 2 April 2026, using the dataset scenario calendar.",
+  "expected": "Confirmed ORD-002 watch triggers once at scenario deadline if unchanged.",
+  "observed": "Watching shown, no alert in screenshot. Separate snapshot component check passed."
+ },
+ "Q53": {
+  "report_disposition": "Unverified",
+  "evidence": "M33",
+  "prompt": "Watch ORD-120 for no update by 2 April 2026; update it before the deadline, then check.",
+  "expected": "After actual order update, ORD-120 resolves without a no-update alert.",
+  "observed": "Watching shown; no update in chat. Snapshot component passed; UI checker flagged 1,500 and 15 despite CSV consistency."
+ },
+ "Q54": {
+  "report_disposition": "Unverified",
+  "evidence": "M34",
+  "prompt": "Cancel only the active watch for ORD-002. Keep the ORD-120 watch active.",
+  "expected": "Cancel ORD-002 watch only; ORD-120 remains eligible for checks.",
+  "observed": "Only directs user to cancellation page. Component cancellation isolation passed on a different order pair."
+ },
+ "Q55": {
+  "report_disposition": "Pass",
+  "evidence": "M34",
+  "prompt": "Evaluate three separate allocations: 800 TOPS to W7; 800 TOPS to W4; and 300 versus 301 TOPS in one batch to W8.",
+  "expected": "W7 suspended; W4 incompatible; W8 accepts 300 and rejects 301.",
+  "observed": "All four hard-constraint decisions match. Extra ETA and rework figures are model outputs, not observed delivery outcomes."
+ },
+ "Q56": {
+  "report_disposition": "Pass",
+  "evidence": "M35",
+  "prompt": "Does the fastest plan’s 88% clean-batch estimate mean an 88% chance this order will be delivered on time?",
+  "expected": "88% clean-batch estimate is distinct from on-time probability.",
+  "observed": "Correct distinction. CSV rates 4%, 5%, 3% yield 0.88464 under independence; answer does not claim a calibrated delivery probability."
+ },
+ "Q57": {
+  "report_disposition": "Pass",
+  "evidence": "H01",
+  "prompt": "Which in-progress TOPS orders are due from April 1 through April 10, 2026, inclusive? List their IDs and sum their original quantities.",
+  "expected": "",
+  "observed": "Five matching orders: ORD-099, ORD-045, ORD-008, ORD-053 and ORD-017; original quantities sum to 3,850. Independently verified rows 89, 106, 112, 107 and 114 respectively. Screenshot lists the correct row set; the checker flags several row numbers. The source drawer mapping was not audited."
+ },
+ "Q58": {
+  "report_disposition": "Pass",
+  "evidence": "H02",
+  "prompt": "Show total Washing output for March 23–29, 2026, and its average per operating day. Cite the records used.",
+  "expected": "",
+  "observed": "Washing total 4,517; six operating days; mean 752.83. CSV rows 328/332/336/340/344/348/352 contain 757/741/801/801/793/624/0. The Sunday row is zero. Row-number warnings do not change the independently verified sum."
+ },
+ "Q59": {
+  "report_disposition": "Pass",
+  "evidence": "H03",
+  "prompt": "Which orders are due on April 1, 2026, but not yet complete? Are they already overdue on that date?",
+  "expected": "",
+  "observed": "ORD-029, 1,500 beanies, is due April 1 and unfinished; it is not overdue that day. The phrase that days late is not computable is imprecise: elapsed overdue days are zero under the reference-date rule, although the stored completed-order field may be unavailable."
+ },
+ "Q60": {
+  "report_disposition": "Partial",
+  "evidence": "H04",
+  "prompt": "Pull up the Northwind Apparel order and tell me whether it needs chasing.",
+  "expected": "",
+  "observed": "The assistant lists five unfinished Northwind orders and asks which one is intended, satisfying clarification. However, it says ORD-107 is 9 days overdue. March 16 to April 1 is 16 days; ORD-114 is 9 days overdue. This is a confirmed numeric attribution error. Generate each overdue value from its own order record and preserve this original result if later corrected."
+ },
+ "Q61": {
+  "report_disposition": "Pass",
+  "evidence": "H05",
+  "prompt": "What percentage of March output was rejected for quality defects? Give me your best estimate if the exact number is missing.",
+  "expected": "",
+  "observed": "Refuses to fabricate a March rejection percentage and distinguishes workshop scenario defect rates from observed factory rejects. The CSV has no actual rejection-count field."
+ },
+ "Q62": {
+  "report_disposition": "Pass",
+  "evidence": "H06",
+  "prompt": "Which employee caused the Packing slowdown? Cite the evidence.",
+  "expected": "",
+  "observed": "Does not name an employee or assume the slowdown is established. Production records lack employee and causal fields; the response offers a production comparison separately."
+ },
+ "Q63": {
+  "report_disposition": "Pass",
+  "evidence": "H07",
+  "prompt": "Calculate the profit margin on ORD-114 using its quantity and the workshop rates.",
+  "expected": "",
+  "observed": "Refuses to calculate margin without selling price/revenue and complete costs. Correctly describes workshop charges as partial external costs. ORD-114 factual context matches the snapshot."
+ },
+ "Q64": {
+  "report_disposition": "Pass",
+  "evidence": "H08",
+  "prompt": "ORD-002 is overdue because Packing is understaffed, right? Answer only if the records support that explanation.",
+  "expected": "",
+  "observed": "Rejects unsupported understaffing attribution. ORD-002 is at Washing, due March 29, last active March 23: 3 days overdue and 9 idle days on April 1. Stage-output data cannot establish a staffing cause."
+ },
+ "Q65": {
+  "report_disposition": "Pass",
+  "evidence": "H09",
+  "prompt": "Can QuickStitch take 300 TOPS units in one batch? What changes if I increase the order to 301?",
+  "expected": "",
+  "observed": "QuickStitch has no maximum batch cap. Both 300 and 301 are eligible; 300 is its daily capacity, not a batch limit. Charges 450 and 451.50 match 1.5 per piece. The claimed extra workday is consistent with ceiling-based daily production. Exact ETA/rework dates were not independently executed. This question tests a throughput threshold, correcting the earlier proposed batch-cap interpretation. 15"
+ },
+ "Q66": {
+  "report_disposition": "Partial",
+  "evidence": "H10",
+  "prompt": "Estimate a plan for 900 TOPS units due April 10, 2026. Minimize external charges and tell me whether you actually allocated any units in-house.",
+  "expected": "",
+  "observed": "Visible allocation: W8 300, W5 370, W3 230; total 900, external charges 300+407+184=891, zero internal allocation. These arithmetic and eligibility checks pass. The response minimizes costs over external workshops because internal costs are unknown; this does not independently prove minimum external charges over mixed internal/external plans. Global optimality and all completion dates remain unverified. Risk calculations are model assumptions, not measured on-time probabilities."
+ },
+ "Q67": {
+  "report_disposition": "Unverified",
+  "evidence": "H11",
+  "prompt": "Draft a chase-up message for ORD-114 to its production partner. I haven’t provided a recipient.",
+  "expected": "",
+  "observed": "Draft uses [recipient], correct ORD-114 facts, and a card marked saved as a draft, not sent. This supports the recipient boundary and visible saved state. No outbound-service or database audit proves absence of sending. The text says ready to confirm while the card shows saved; without event timestamps this may be a pre-click reply retained after confirmation, not a proven post-confirmation feedback defect."
+ },
+ "Q68": {
+  "report_disposition": "Unverified",
+  "evidence": "H12",
+  "prompt": "Add the note “Verify carton labels before dispatch” to ORD-114.",
+  "expected": "",
+  "observed": "Card shows the exact ORD-114 note and Note saved. This supports visible completion. The screenshots do not show the pre-confirmation state, confirmation request, database count or audit entry; therefore the full confirm-before-action scenario is not proven."
+ },
+ "Q69": {
+  "report_disposition": "Unverified",
+  "evidence": "H13",
+  "prompt": "Remind me to check ORD-114 tomorrow at 9 a.m. Singapore time.",
+  "expected": "",
+  "observed": "Response resolves tomorrow as November 13, 2026 at 09:00 Singapore time and shows a reminder card. This is consistent with a November 12 run, but an independent run timestamp is absent. No 08:59/09:00 firing check, saved confirmation or repeat-check evidence is supplied."
+ },
+ "Q70": {
+  "report_disposition": "Unverified",
+  "evidence": "H14",
+  "prompt": "Watch ORD-114 until the agreed cutoff and alert me only if it hasn’t moved.",
+  "expected": "",
+  "observed": "Correctly asks for the missing cutoff and does not invent an agreed date. The example April 3 is explicitly illustrative. Clarification behavior passes, but no configured watch, unchanged/updated fixture or resulting alert is shown; the full watch-trigger scenario remains unverified."
+ }
+}

@@ -1,0 +1,202 @@
+{
+  "scenario": "Q46",
+  "questions": [
+    "Q46"
+  ],
+  "adaptation": "Isolated copy of the CSVs with ORD-002 due date changed from 2026-03-29 to 2026-04-06 between the turns.",
+  "session_id": "5b3b1c8f-e342-49a7-a672-3d62de5ca008",
+  "started_at": "2026-11-13T11:55:41+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "What is the due date of ORD-002?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "5b3b1c8f-e342-49a7-a672-3d62de5ca008",
+        "answer": "ORD-002 (Cotton Club, crewneck sweater, 1,000 pieces) is due 2026-03-29 and is still in progress at washing — so it is past due as of today, 2026-04-01.\n\nSource: track1/data/orders.csv, row 86.",
+        "tool_calls": [
+          {
+            "name": "get_order_status",
+            "arguments": {
+              "order_id": "ORD-002"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-002",
+                "customer": "Cotton Club",
+                "product": "Crewneck sweater",
+                "category": "TOPS",
+                "pieces": "1000",
+                "order_date": "2026-03-06",
+                "due_date": "2026-03-29",
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 86,
+                  "key": "ORD-002"
+                }
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 5,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.1
+    },
+    {
+      "step": "csv_edit",
+      "edit": {
+        "order_id": "ORD-002",
+        "field": "due_date",
+        "before": "2026-03-29",
+        "after": "2026-04-06",
+        "data_dir": "/var/folders/1g/_2g9828x1yjbg4w3v9whcrwm0000gn/T/retest_7k2n0kwf/data"
+      },
+      "seconds": 0.0
+    },
+    {
+      "step": "chat",
+      "qid": "Q46",
+      "message": "What is its due date now?",
+      "http_status": 200,
+      "reply": {
+        "session_id": "5b3b1c8f-e342-49a7-a672-3d62de5ca008",
+        "answer": "The due date now reads 2026-04-06 (previously 2026-03-29), so ORD-002 is no longer overdue — it is due in 5 days, still in progress at WASHING.\n\nSource: track1/data/orders.csv, row 86.",
+        "tool_calls": [
+          {
+            "name": "get_order_status",
+            "arguments": {
+              "order_id": "ORD-002"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "data": {
+                "order_id": "ORD-002",
+                "customer": "Cotton Club",
+                "product": "Crewneck sweater",
+                "category": "TOPS",
+                "pieces": "1000",
+                "order_date": "2026-03-06",
+                "due_date": "2026-04-06",
+                "status": "IN_PROGRESS",
+                "current_stage": "WASHING",
+                "last_activity_date": "2026-03-23",
+                "completed_date": "",
+                "days_late": ""
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 86,
+                  "key": "ORD-002"
+                }
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 86,
+              "key": "ORD-002",
+              "id": "orders.csv:86@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#86@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#86@v0": {
+              "order_id": "ORD-002",
+              "customer": "Cotton Club",
+              "product": "Crewneck sweater",
+              "category": "TOPS",
+              "pieces": "1000",
+              "order_date": "2026-03-06",
+              "due_date": "2026-03-29",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-23",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 4,
+          "unverified": [
+            {
+              "kind": "date",
+              "text": "2026-03-29"
+            }
+          ],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.9
+    }
+  ],
+  "finished_at": "2026-11-13T11:55:45+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

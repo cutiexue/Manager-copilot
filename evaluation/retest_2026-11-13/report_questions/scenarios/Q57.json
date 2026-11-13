@@ -1,0 +1,303 @@
+{
+  "scenario": "Q57",
+  "questions": [
+    "Q57"
+  ],
+  "adaptation": "",
+  "session_id": "413207bd-0de1-4fb1-bc2f-1843e95dda38",
+  "started_at": "2026-11-13T11:56:25+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": "Q57",
+      "message": "Which in-progress TOPS orders are due from April 1 through April 10, 2026, inclusive? List their IDs and sum their original quantities.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "413207bd-0de1-4fb1-bc2f-1843e95dda38",
+        "answer": "Five in-progress TOPS orders are due 1–10 April 2026, totalling 3,850 original pieces.\n\n| Order | Customer | Pieces | Due |\n|---|---|---|---|\n| ORD-099 | Northwind Apparel | 1,500 | 2026-04-05 |\n| ORD-045 | Cotton Club | 150 | 2026-04-09 |\n| ORD-008 | Loom & Leaf | 600 | 2026-04-09 |\n| ORD-053 | UrbanThread | 800 | 2026-04-10 |\n| ORD-017 | TrendCart | 800 | 2026-04-10 |\n\nSource: track1/data/orders.csv. Quantities are original ordered pieces, not remaining work.",
+        "tool_calls": [
+          {
+            "name": "query_orders",
+            "arguments": {
+              "category": "TOPS",
+              "status": "IN_PROGRESS",
+              "due_from": "2026-04-01",
+              "due_to": "2026-04-10"
+            },
+            "status": "ok",
+            "result": {
+              "status": "ok",
+              "snapshot_date": "2026-04-01",
+              "count": 5,
+              "original_order_pieces": 3850,
+              "by_status": {
+                "IN_PROGRESS": {
+                  "order_count": 5,
+                  "original_order_pieces": 3850,
+                  "order_ids": [
+                    "ORD-099",
+                    "ORD-045",
+                    "ORD-053",
+                    "ORD-008",
+                    "ORD-017"
+                  ]
+                }
+              },
+              "by_category": {
+                "TOPS": {
+                  "order_count": 5,
+                  "original_order_pieces": 3850,
+                  "order_ids": [
+                    "ORD-099",
+                    "ORD-045",
+                    "ORD-053",
+                    "ORD-008",
+                    "ORD-017"
+                  ]
+                }
+              },
+              "order_ids": [
+                "ORD-099",
+                "ORD-045",
+                "ORD-053",
+                "ORD-008",
+                "ORD-017"
+              ],
+              "filters": {
+                "status": "IN_PROGRESS",
+                "category": "TOPS",
+                "due_from": "2026-04-01",
+                "due_to": "2026-04-10"
+              },
+              "scope": "all",
+              "orders": [
+                {
+                  "order_id": "ORD-099",
+                  "category": "TOPS",
+                  "customer": "Northwind Apparel",
+                  "pieces": "1500",
+                  "due_date": "2026-04-05",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-045",
+                  "category": "TOPS",
+                  "customer": "Cotton Club",
+                  "pieces": "150",
+                  "due_date": "2026-04-09",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-053",
+                  "category": "TOPS",
+                  "customer": "UrbanThread",
+                  "pieces": "800",
+                  "due_date": "2026-04-10",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-008",
+                  "category": "TOPS",
+                  "customer": "Loom & Leaf",
+                  "pieces": "600",
+                  "due_date": "2026-04-09",
+                  "status": "IN_PROGRESS"
+                },
+                {
+                  "order_id": "ORD-017",
+                  "category": "TOPS",
+                  "customer": "TrendCart",
+                  "pieces": "800",
+                  "due_date": "2026-04-10",
+                  "status": "IN_PROGRESS"
+                }
+              ],
+              "selection": {
+                "order_ids": [
+                  "ORD-099",
+                  "ORD-045",
+                  "ORD-053",
+                  "ORD-008",
+                  "ORD-017"
+                ],
+                "filters": {
+                  "status": "IN_PROGRESS",
+                  "category": "TOPS",
+                  "due_from": "2026-04-01",
+                  "due_to": "2026-04-10"
+                },
+                "source_tool": "query_orders"
+              },
+              "source": "track1/data/orders.csv",
+              "source_rows": [
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 89,
+                  "key": "ORD-099"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 106,
+                  "key": "ORD-045"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 107,
+                  "key": "ORD-053"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 112,
+                  "key": "ORD-008"
+                },
+                {
+                  "source": "track1/data/orders.csv",
+                  "row": 114,
+                  "key": "ORD-017"
+                }
+              ],
+              "warnings": [
+                "Quantities are original ordered pieces, not remaining work. No remaining quantity is supplied."
+              ]
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [
+            {
+              "source": "track1/data/orders.csv",
+              "row": 89,
+              "key": "ORD-099",
+              "id": "orders.csv:89@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#89@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 106,
+              "key": "ORD-045",
+              "id": "orders.csv:106@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#106@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 107,
+              "key": "ORD-053",
+              "id": "orders.csv:107@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#107@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 112,
+              "key": "ORD-008",
+              "id": "orders.csv:112@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#112@v0"
+            },
+            {
+              "source": "track1/data/orders.csv",
+              "row": 114,
+              "key": "ORD-017",
+              "id": "orders.csv:114@v0",
+              "data_version": "v0",
+              "row_key": "track1/data/orders.csv#114@v0"
+            }
+          ],
+          "rows": {
+            "track1/data/orders.csv#89@v0": {
+              "order_id": "ORD-099",
+              "customer": "Northwind Apparel",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "1500",
+              "order_date": "2026-03-07",
+              "due_date": "2026-04-05",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#106@v0": {
+              "order_id": "ORD-045",
+              "customer": "Cotton Club",
+              "product": "Vest",
+              "category": "TOPS",
+              "pieces": "150",
+              "order_date": "2026-03-21",
+              "due_date": "2026-04-09",
+              "status": "IN_PROGRESS",
+              "current_stage": "WASHING",
+              "last_activity_date": "2026-03-30",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#107@v0": {
+              "order_id": "ORD-053",
+              "customer": "UrbanThread",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-21",
+              "due_date": "2026-04-10",
+              "status": "IN_PROGRESS",
+              "current_stage": "ASSEMBLY",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#112@v0": {
+              "order_id": "ORD-008",
+              "customer": "Loom & Leaf",
+              "product": "Polo shirt",
+              "category": "TOPS",
+              "pieces": "600",
+              "order_date": "2026-03-23",
+              "due_date": "2026-04-09",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-03-31",
+              "completed_date": "",
+              "days_late": ""
+            },
+            "track1/data/orders.csv#114@v0": {
+              "order_id": "ORD-017",
+              "customer": "TrendCart",
+              "product": "Cardigan",
+              "category": "TOPS",
+              "pieces": "800",
+              "order_date": "2026-03-23",
+              "due_date": "2026-04-10",
+              "status": "IN_PROGRESS",
+              "current_stage": "KNITTING",
+              "last_activity_date": "2026-04-01",
+              "completed_date": "",
+              "days_late": ""
+            }
+          },
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 14,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.79
+    }
+  ],
+  "finished_at": "2026-11-13T11:56:28+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

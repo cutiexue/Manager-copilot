@@ -1,0 +1,510 @@
+{
+  "scenario": "Q34",
+  "questions": [
+    "Q34"
+  ],
+  "adaptation": "",
+  "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+  "started_at": "2026-11-13T11:54:52+08:00",
+  "steps": [
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "Add a note to ORD-001: “Check trims before packing.”",
+      "http_status": 200,
+      "reply": {
+        "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+        "answer": "A note on ORD-001 (\"Check trims before packing.\") is ready as a card — press Confirm in the app to save it; nothing is recorded until then.",
+        "tool_calls": [
+          {
+            "name": "propose_order_note",
+            "arguments": {
+              "order_id": "ORD-001",
+              "text": "Check trims before packing."
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+                "kind": "note",
+                "status": "DRAFT",
+                "summary": "Note on ORD-001: Check trims before packing.",
+                "payload": {
+                  "order_id": "ORD-001",
+                  "text": "Check trims before packing."
+                },
+                "expires_at": "2026-11-14T11:54:53+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "Check trims before packing."
+            },
+            "summary": "Note on ORD-001: Check trims before packing.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:53+08:00",
+            "expires_at": "2026-11-14T11:54:53+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "263dcdf4ac356a1a8ae355b97ed718565e17c7de0c14de633b4a8bd7b4010bf3",
+            "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+          }
+        ],
+        "answer_check": {
+          "checked": 1,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.25
+    },
+    {
+      "step": "chat",
+      "qid": null,
+      "message": "Add a note to ORD-002: “Check labels before packing.”",
+      "http_status": 200,
+      "reply": {
+        "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+        "answer": "A note on ORD-002 (\"Check labels before packing.\") is ready as a card — press Confirm in the app to save it. The ORD-001 note is still waiting for your Confirm too.",
+        "tool_calls": [
+          {
+            "name": "propose_order_note",
+            "arguments": {
+              "order_id": "ORD-002",
+              "text": "Check labels before packing."
+            },
+            "status": "proposed",
+            "result": {
+              "status": "proposed",
+              "proposal": {
+                "id": "adc1cf16-472c-4d93-89c8-250603538238",
+                "kind": "note",
+                "status": "DRAFT",
+                "summary": "Note on ORD-002: Check labels before packing.",
+                "payload": {
+                  "order_id": "ORD-002",
+                  "text": "Check labels before packing."
+                },
+                "expires_at": "2026-11-14T11:54:55+08:00"
+              },
+              "message": "Not saved yet: the manager must press Confirm on the card in the app. Say so, and never claim it is done."
+            }
+          }
+        ],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [
+          {
+            "id": "adc1cf16-472c-4d93-89c8-250603538238",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "Check labels before packing."
+            },
+            "summary": "Note on ORD-002: Check labels before packing.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:55+08:00",
+            "expires_at": "2026-11-14T11:54:55+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "e0dddd9312904e0a8f183a0b8926ec9c6a97bb742ef270c0844008c9acb2eabd",
+            "turn_id": "1b1f0dbb-9581-4090-af71-5e2f7d80a346"
+          }
+        ],
+        "answer_check": {
+          "checked": 2,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 2.05
+    },
+    {
+      "step": "chat",
+      "qid": "Q34",
+      "message": "There are two note proposals, one for ORD-001 and one for ORD-002. Confirm only ORD-001’s proposal.",
+      "http_status": 200,
+      "reply": {
+        "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+        "answer": "I can't confirm proposals — only you can press Confirm on the card in the app. For ORD-001 (\"Check trims before packing.\"), press Confirm on its card and leave ORD-002's card unconfirmed (or Cancel it); both are still waiting.",
+        "tool_calls": [],
+        "evidence": {
+          "refs": [],
+          "rows": {},
+          "data_version": "v0",
+          "data_date": "2026-04-01",
+          "source_context": "recorded_snapshot",
+          "warnings": []
+        },
+        "proposals": [],
+        "answer_check": {
+          "checked": 2,
+          "unverified": [],
+          "retried": false
+        },
+        "prompt_version": "f9348b4de425"
+      },
+      "seconds": 1.53
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "adc1cf16-472c-4d93-89c8-250603538238",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "Check labels before packing."
+            },
+            "summary": "Note on ORD-002: Check labels before packing.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:55+08:00",
+            "expires_at": "2026-11-14T11:54:55+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "e0dddd9312904e0a8f183a0b8926ec9c6a97bb742ef270c0844008c9acb2eabd",
+            "turn_id": "1b1f0dbb-9581-4090-af71-5e2f7d80a346"
+          },
+          {
+            "id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "Check trims before packing."
+            },
+            "summary": "Note on ORD-001: Check trims before packing.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:53+08:00",
+            "expires_at": "2026-11-14T11:54:53+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "263dcdf4ac356a1a8ae355b97ed718565e17c7de0c14de633b4a8bd7b4010bf3",
+            "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+          }
+        ],
+        "/notes": [],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 4,
+            "at": "2026-11-13T11:54:56+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "adc1cf16-472c-4d93-89c8-250603538238",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "1b1f0dbb-9581-4090-af71-5e2f7d80a346"
+            }
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:54:55+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "adc1cf16-472c-4d93-89c8-250603538238",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-002: Check labels before packing.",
+              "status": "DRAFT",
+              "turn_id": "1b1f0dbb-9581-4090-af71-5e2f7d80a346"
+            }
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:54:54+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:54:53+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-001: Check trims before packing.",
+              "status": "DRAFT",
+              "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+            }
+          }
+        ]
+      },
+      "seconds": 0.02
+    },
+    {
+      "step": "confirm",
+      "selector": {
+        "kind": "note",
+        "order_id": "ORD-001"
+      },
+      "proposal": {
+        "id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+        "kind": "note",
+        "status": "PROPOSED",
+        "source": "chat",
+        "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+        "payload": {
+          "order_id": "ORD-001",
+          "text": "Check trims before packing."
+        },
+        "summary": "Note on ORD-001: Check trims before packing.",
+        "reason": null,
+        "created_at": "2026-11-13T11:54:53+08:00",
+        "expires_at": "2026-11-14T11:54:53+08:00",
+        "decided_at": null,
+        "result_kind": null,
+        "result_id": null,
+        "error": null,
+        "request_id": null,
+        "request_fingerprint": "263dcdf4ac356a1a8ae355b97ed718565e17c7de0c14de633b4a8bd7b4010bf3",
+        "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+      },
+      "responses": [
+        {
+          "http_status": 200,
+          "body": {
+            "proposal": {
+              "id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+              "kind": "note",
+              "status": "EXECUTED",
+              "source": "chat",
+              "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+              "payload": {
+                "order_id": "ORD-001",
+                "text": "Check trims before packing."
+              },
+              "summary": "Note on ORD-001: Check trims before packing.",
+              "reason": null,
+              "created_at": "2026-11-13T11:54:53+08:00",
+              "expires_at": "2026-11-14T11:54:53+08:00",
+              "decided_at": "2026-11-13T11:54:58+08:00",
+              "result_kind": "note",
+              "result_id": "05aaa35f-9c52-45e8-bacf-1434220db18f",
+              "error": null,
+              "request_id": null,
+              "request_fingerprint": "263dcdf4ac356a1a8ae355b97ed718565e17c7de0c14de633b4a8bd7b4010bf3",
+              "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+            },
+            "result": {
+              "id": "05aaa35f-9c52-45e8-bacf-1434220db18f",
+              "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+              "order_id": "ORD-001",
+              "text": "Check trims before packing.",
+              "created_at": "2026-11-13T11:54:58+08:00"
+            },
+            "already_done": false
+          }
+        }
+      ],
+      "seconds": 0.0
+    },
+    {
+      "step": "state",
+      "state": {
+        "/actions": [
+          {
+            "id": "adc1cf16-472c-4d93-89c8-250603538238",
+            "kind": "note",
+            "status": "PROPOSED",
+            "source": "chat",
+            "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+            "payload": {
+              "order_id": "ORD-002",
+              "text": "Check labels before packing."
+            },
+            "summary": "Note on ORD-002: Check labels before packing.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:55+08:00",
+            "expires_at": "2026-11-14T11:54:55+08:00",
+            "decided_at": null,
+            "result_kind": null,
+            "result_id": null,
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "e0dddd9312904e0a8f183a0b8926ec9c6a97bb742ef270c0844008c9acb2eabd",
+            "turn_id": "1b1f0dbb-9581-4090-af71-5e2f7d80a346"
+          },
+          {
+            "id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "kind": "note",
+            "status": "EXECUTED",
+            "source": "chat",
+            "session_id": "55a5da5c-31fc-4684-bb24-3892953446ad",
+            "payload": {
+              "order_id": "ORD-001",
+              "text": "Check trims before packing."
+            },
+            "summary": "Note on ORD-001: Check trims before packing.",
+            "reason": null,
+            "created_at": "2026-11-13T11:54:53+08:00",
+            "expires_at": "2026-11-14T11:54:53+08:00",
+            "decided_at": "2026-11-13T11:54:58+08:00",
+            "result_kind": "note",
+            "result_id": "05aaa35f-9c52-45e8-bacf-1434220db18f",
+            "error": null,
+            "request_id": null,
+            "request_fingerprint": "263dcdf4ac356a1a8ae355b97ed718565e17c7de0c14de633b4a8bd7b4010bf3",
+            "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+          }
+        ],
+        "/notes": [
+          {
+            "id": "05aaa35f-9c52-45e8-bacf-1434220db18f",
+            "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "order_id": "ORD-001",
+            "text": "Check trims before packing.",
+            "created_at": "2026-11-13T11:54:58+08:00"
+          }
+        ],
+        "/reminders": [],
+        "/drafts": [],
+        "/watches": [],
+        "/alerts": [],
+        "/audit": [
+          {
+            "id": 6,
+            "at": "2026-11-13T11:54:58+08:00",
+            "actor": "system",
+            "event": "executed",
+            "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "target_kind": "note",
+            "target_id": "05aaa35f-9c52-45e8-bacf-1434220db18f",
+            "detail": null
+          },
+          {
+            "id": 5,
+            "at": "2026-11-13T11:54:58+08:00",
+            "actor": "user",
+            "event": "confirmed",
+            "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": null
+          },
+          {
+            "id": 4,
+            "at": "2026-11-13T11:54:56+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "adc1cf16-472c-4d93-89c8-250603538238",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "1b1f0dbb-9581-4090-af71-5e2f7d80a346"
+            }
+          },
+          {
+            "id": 3,
+            "at": "2026-11-13T11:54:55+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "adc1cf16-472c-4d93-89c8-250603538238",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-002: Check labels before packing.",
+              "status": "DRAFT",
+              "turn_id": "1b1f0dbb-9581-4090-af71-5e2f7d80a346"
+            }
+          },
+          {
+            "id": 2,
+            "at": "2026-11-13T11:54:54+08:00",
+            "actor": "system",
+            "event": "proposal_ready",
+            "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+            }
+          },
+          {
+            "id": 1,
+            "at": "2026-11-13T11:54:53+08:00",
+            "actor": "agent",
+            "event": "proposal_created",
+            "proposal_id": "ba0eb359-38bd-4e60-a849-8d0090cee11d",
+            "target_kind": "note",
+            "target_id": null,
+            "detail": {
+              "summary": "Note on ORD-001: Check trims before packing.",
+              "status": "DRAFT",
+              "turn_id": "addd01f7-3d98-48ab-a250-7231eb40ffeb"
+            }
+          }
+        ]
+      },
+      "seconds": 0.01
+    }
+  ],
+  "finished_at": "2026-11-13T11:54:58+08:00",
+  "run": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "prompt_version": "f9348b4de425",
+    "git_head": "290e5f7a825b7cb4f04451fe904d4d5d5036861c"
+  }
+}

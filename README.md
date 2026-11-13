@@ -60,13 +60,13 @@ Chat sessions, follow-ups, watches, alerts and the audit log are stored in `back
 |---|---|---|
 | Retrieval, judgement, tracing, discovery tools | Built, read-only, tested; order IDs in any spelling, partial customer names, close candidates when nothing matches | `backend/tools.py`, `rules.py`, `discovery.py`, `order_search.py` |
 | Morning briefing | Built deterministically; `GET /briefings/latest` serves it live and the scheduler saves a dated copy at 07:00 (`GET /briefings`) | `backend/briefing.py`, `scheduler.py` |
-| Multi-turn Q&A | One LangChain agent, 34 tools (including period totals and week-on-week comparisons), SQLite sessions; each answer returns its tool calls, cited source rows and proposals | `backend/llm.py`, `service.py`, `evidence_refs.py` |
+| Multi-turn Q&A | One LangChain agent, 35 tools (including period totals, week-on-week comparisons and a workshop catalogue), SQLite sessions; each answer returns its tool calls, cited source rows and proposals | `backend/llm.py`, `service.py`, `evidence_refs.py` |
 | Feasibility estimates | Single- and multi-order scenarios; new plans start on the current data date, while capacity/queue inputs are identified as the original course snapshot. Revisions preserve the original start unless changed explicitly. In-house load is a conservative scenario, not a guaranteed completion bound. Outsourcing reports batch rework probabilities, fixed transport overhead and conditional full-redo dates under stated assumptions; also `POST /feasibility/estimate` | `backend/production_estimates.py`, `production_optimizer.py`, `outsourcing_risk.py`, `views.py` |
 | Confirmed actions + audit | Built: the agent or the UI proposes, and only Confirm in the app carries it out; 24 h expiry, confirming twice does nothing more, append-only audit log | `backend/actions.py`, `action_tools.py`; UI `FollowUps.tsx`, `ProposalCard.tsx` |
 | Standing watches / alerts | Built: 4 order conditions checked against scripted, versioned data snapshots; one alert per trigger, and only the manager's own watches and reminders alert (see Alerts below). Loading a snapshot moves the whole app to that day (chat, briefing, evidence), with simulated values labelled; reminders keep the real calendar | `backend/watches.py`, `track1/scenarios/watch_snapshots.json`; UI `Watches.tsx` |
 | APScheduler | Built: 07:00 briefing, due reminders, watch checks, proposal expiry; restarts do not repeat a run | `backend/scheduler.py` |
 | Static Skills | Built: 8 Markdown Skills, each with its tools; `prompt_version` is returned with every answer | `backend/skills/`, `skills.py` |
-| Answer check | Heuristic presence check for supported IDs, dates and some numbers, including values in the user's request. It excludes small integers and does not verify entity/value relationships or meaning. Only an answer with unmatched values and no tool call is retried once. The UI explains these limits | `backend/answer_check.py`, `service.py`; UI `Chat.tsx` |
+| Answer check | Heuristic presence check for supported IDs, dates and some numbers, including values in the user's request. It excludes small integers. Of entity/value relationships it checks only that an overdue figure belongs to the order it is stated for; it does not verify meaning. An answer with unmatched values and no tool call, or with an overdue figure on the wrong order, is retried once. The UI explains these limits | `backend/answer_check.py`, `service.py`; UI `Chat.tsx` |
 | Voice | Built in the browser, in any language: dictation into the chat box (85 languages and regions; the manager still presses Send) and read-aloud that uses each answer's own language (see Voice below) | `frontend/src/voice.ts`, `useVoice.ts`; UI `Chat.tsx` |
 | Web interface | Built: chat with past conversations alongside, briefing with modules that open in place, filterable Orders page (totals from `GET /orders`), Actions and Watches pages that refresh themselves, Ctrl+K search | `frontend/` |
 | Evaluation set and runner | 30 evaluation-suite and 17 development cases; four iterative real-model evaluation runs plus one development run on 11 Nov 2026. Historical scores are provisional, not independent held-out results. Reports and failure ledger are retained unchanged | `evaluation/` (see its README) |
@@ -189,16 +189,12 @@ SQLite is used only for application state, including:
 
 ## Team Responsibilities
 
-| Member | Primary Responsibility | Main Deliverables |
+| Member | Role | Main Deliverables |
 |---|---|---|
-| Zhang Shilong (A) | Product, architecture, integration, and evaluation coordination | Project scope, API contract, architecture, sprint coordination, system integration, course requirement checks, and final delivery |
-| Wang Zihao (B) | Data, retrieval, and traceability tools | CSV validation, data access layer, retrieval tools, source-row citations, and tool tests |
-| Wan Jiahe (C) | Judgement, discovery, and feasibility tools | Operational rules, discovery tools, feasibility calculations, assumptions, business logic, and tests |
-| Wang Ru (D) | LLM, LangChain, and static skills | Structured request parsing, agent workflow, clarification and refusal behaviour, faithful explanations, and language evaluation cases |
-| Liu Weiye (E) | State, scheduling, watches, and action safety | SQLite state, APScheduler jobs, standing watches, confirmation workflow, action logging, and audit records |
-| Hua Yuqing (F) | React, UX, demo, and usability | User interface, morning briefing and Q&A views, evidence display, confirmation flow, usability testing, screenshots, and demo video |
-
-The letters are the case-owner labels used in `evaluation/`.
+| Zhang Shilong | Project lead | Project scope, architecture and API contract, team coordination, integration and release, CI, the automated evaluation runner, the submission documents, slides and demo video |
+| Wang Zihao, Wang Ru, Liu Weiye | Backend, developed jointly | Data loading and retrieval tools, source-row citations, business rules, discovery and feasibility, the LangChain agent, tool schemas and Skills, SQLite state, actions, scheduling and watches |
+| Wan Jiahe | Evaluation | Evaluation design, the 70-question evaluation checked against the CSV files, failure analysis and Evaluation.pdf |
+| Hua Yuqing | User interface | React interface: chat, briefing, Orders, Actions and Watches pages, evidence drawer, confirmation dialog, responsive layout |
 
 ## Evaluation
 
@@ -208,9 +204,17 @@ The letters are the case-owner labels used in `evaluation/`.
 - The language evaluation has 30 evaluation-suite and 17 development cases, scored against facts taken
   from the CSVs and the deterministic tools. See [Evaluation](./evaluation/README.md) for the case
   format, running, scoring and its limits.
+- The team's evaluation report grades 70 questions with a failure analysis:
+  [Evaluation.pdf](./evaluation/report/Evaluation.pdf), with its screenshots in
+  [Evaluation_Evidence_Pack.pdf](./evaluation/report/Evaluation_Evidence_Pack.pdf).
+- After fixing the failures it found, all 70 questions and both automated sets were run again on the real
+  model on 13 November 2026, keeping the full evidence for every verdict that changed:
+  [retest summary](./evaluation/retest_2026-11-13/README.md).
 
 ## Documentation
 
 - [Backend module map](./backend/README.md) and [Frontend](./frontend/README.md)
+- [Tool specification](./backend/TOOLS.md) — input, output, purpose, non-goals and failure mode of all 35 tools
 - API documentation — generated by FastAPI at `/docs` while the backend runs
 - [Evaluation](./evaluation/README.md) — case format, running, scoring and its limits; reports go to `evaluation/reports/`
+- [Evaluation report](./evaluation/report/Evaluation.pdf) and the [13 November real-model retest](./evaluation/retest_2026-11-13/README.md)
