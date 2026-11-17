@@ -6,3 +6,6 @@
 # bytes must not change with the platform's line-ending settings.
 *.csv -text
 *.jsonl -text
+
+# Keep submitted PDFs byte-identical and avoid treating compressed streams as text.
+*.pdf binary

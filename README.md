@@ -4,7 +4,22 @@ DSS5105 Capstone Project — **Track 1: The General Manager's Co-Pilot**
 
 Manager Co-Pilot is an AI-assisted decision-support system for factory general managers. It helps users understand current operations, identify risks, estimate feasibility, and take controlled actions based on traceable production data.
 
-> All six workflows are built. Historical real-model runs passed all automated checks in 29/30 evaluation-suite and 15/17 development cases. These are provisional development results: labels await independent review, and the current code/Skills have not yet been rerun with a real model. See [Evaluation](./evaluation/README.md).
+All six workflows are built. The 13 November DeepSeek `deepseek-flash` retest passed 30/30 automated evaluation cases and 15/17 development cases. These are development results; Claude ran and graded the retest, and the team has not performed a human re-grading. The GPT-6 Ultra demonstration used a different model and has no accuracy claim based on these DeepSeek scores. See [Evaluation](./evaluation/README.md).
+
+## Download the final version
+
+Use **Code > Download ZIP** on this repository's home page, or clone it:
+
+```bash
+git clone https://github.com/cutiexue/Manager-copilot.git
+cd Manager-copilot
+```
+
+The default `main` branch and `sprint3-ui-and-evaluation` point to the same final version. The Sprint 3 branch is retained so the link in the submitted presentation keeps working; it is not a separate edition. Earlier development branches have been merged and removed.
+
+The application code is the evaluated submission revision `50c1f8b765bec4f3a615957765aa7ad94098ad09`. Later repository organization changes update the documentation and combined evaluation PDF only. No older source folder or release package is needed to run the app.
+
+The [final evaluation report](./evaluation/report/Evaluation.pdf) includes its screenshot evidence as Appendix D. Historical evaluation logs and the [13 November retest records](./evaluation/retest_2026-11-13/README.md) are retained because they support the submitted results; they are not alternative application versions.
 
 ## Quick Start
 
@@ -204,9 +219,7 @@ SQLite is used only for application state, including:
 - The language evaluation has 30 evaluation-suite and 17 development cases, scored against facts taken
   from the CSVs and the deterministic tools. See [Evaluation](./evaluation/README.md) for the case
   format, running, scoring and its limits.
-- The team's evaluation report grades 70 questions with a failure analysis:
-  [Evaluation.pdf](./evaluation/report/Evaluation.pdf), with its screenshots in
-  [Evaluation_Evidence_Pack.pdf](./evaluation/report/Evaluation_Evidence_Pack.pdf).
+- The team's [final evaluation report](./evaluation/report/Evaluation.pdf) preserves the original 70-question ledger and 13 failure analyses, reports the subsequent retest separately, and includes all screenshot evidence in Appendix D. It replaces the separate report and evidence-pack PDFs.
 - After fixing the failures it found, all 70 questions and both automated sets were run again on the real
   model on 13 November 2026, keeping the full evidence for every verdict that changed:
   [retest summary](./evaluation/retest_2026-11-13/README.md).

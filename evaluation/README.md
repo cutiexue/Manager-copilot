@@ -12,7 +12,7 @@ truth taken from the CSVs and the deterministic tools — never from a language 
 | `fake_agent.py` | Offline rule-based stand-in for the model, used by `--fake` |
 | `failure_ledger.jsonl` | Failure records, appended by real runs |
 | `reports/<UTC time>/` | One directory per run: `results.jsonl`, `run.json`, `summary.md` |
-| `report/` | The team's evaluation report (`Evaluation.pdf`, 70 graded questions and failure analysis) and its screenshot evidence pack |
+| `report/` | One final `Evaluation.pdf`: the original 70-question ledger and 13 failure analyses, separate retest results, and all screenshot evidence in Appendix D |
 | `retest_2026-11-13/` | Real-model rerun of both sets and all 70 report questions after the fixes, with full evidence for every changed verdict ([summary](./retest_2026-11-13/README.md)) |
 
 Tests: `backend/tests/test_evaluation_runner.py` (offline; checks the case files, the scorer and the runner).
