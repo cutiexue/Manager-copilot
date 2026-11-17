@@ -4,7 +4,7 @@ DSS5105 Capstone Project — **Track 1: The General Manager's Co-Pilot**
 
 Manager Co-Pilot is an AI-assisted decision-support system for factory general managers. It helps users understand current operations, identify risks, estimate feasibility, and take controlled actions based on traceable production data.
 
-All six workflows are built. The 13 November DeepSeek `deepseek-flash` retest passed 30/30 automated evaluation cases and 15/17 development cases. These are development results; Claude ran and graded the retest, and the team has not performed a human re-grading. The GPT-6 Ultra demonstration used a different model and has no accuracy claim based on these DeepSeek scores. See [Evaluation](./evaluation/README.md).
+All six workflows are built. The 13 November DeepSeek `deepseek-flash` retest passed 30/30 automated evaluation cases and 15/17 development cases. These are development results; Claude ran and graded the retest, and the team has not performed a human re-grading. The GPT-6 astra demonstration used a different model and has no accuracy claim based on these DeepSeek scores. See [Evaluation](./evaluation/README.md).
 
 ## Download the final version
 
